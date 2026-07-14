@@ -14,6 +14,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      exchange_rates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          effective_date: string
+          id: string
+          rate: number
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          id?: string
+          rate: number
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          id?: string
+          rate?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fiscal_settings: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          invoice_footer: string | null
+          ir_enabled: boolean
+          ir_rate: number
+          iva_enabled: boolean
+          iva_rate: number
+          legal_name: string | null
+          phone: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          invoice_footer?: string | null
+          ir_enabled?: boolean
+          ir_rate?: number
+          iva_enabled?: boolean
+          iva_rate?: number
+          legal_name?: string | null
+          phone?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          invoice_footer?: string | null
+          ir_enabled?: boolean
+          ir_rate?: number
+          iva_enabled?: boolean
+          iva_rate?: number
+          legal_name?: string | null
+          phone?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           created_at: string
