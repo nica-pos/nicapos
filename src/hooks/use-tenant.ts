@@ -55,6 +55,7 @@ export function useActiveTenant() {
 export function useIsSuperadmin() {
   return useQuery({
     queryKey: ["is-superadmin"],
+    staleTime: 5 * 60_000,
     queryFn: async (): Promise<boolean> => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
