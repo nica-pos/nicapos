@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -253,7 +254,7 @@ function PosPage() {
       setPayOpen(false);
     } catch (e) {
       toast.error("No se pudo completar la venta", {
-        description: String((e as Error).message),
+        description: getFriendlyErrorMessage(e),
       });
     }
   }

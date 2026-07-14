@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -59,7 +60,7 @@ function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
       toast.success("Estado actualizado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   if (checking) {

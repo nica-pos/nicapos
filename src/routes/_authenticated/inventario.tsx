@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -284,7 +285,7 @@ function LookupCard({
       await create.mutateAsync({ name: name.trim() });
       setName("");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -363,7 +364,7 @@ function PurchaseDialog({
       toast.success("Entrada registrada (CPP actualizado)");
       onClose();
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -561,7 +562,7 @@ function ComboEditor({
       setComponentId("");
       setQty("1");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 

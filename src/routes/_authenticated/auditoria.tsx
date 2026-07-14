@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -51,7 +52,7 @@ function AuditPage() {
       setActiveId(a.id);
       toast.success("Auditoría iniciada");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -168,7 +169,7 @@ function AuditDetail({
       toast.success("Auditoría completada y stock ajustado");
       onBack();
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
