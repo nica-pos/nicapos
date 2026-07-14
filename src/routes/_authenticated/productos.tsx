@@ -116,7 +116,10 @@ function ProductsPage() {
         model: form.model.trim() || null,
         price_usd: Number(form.price_usd) || 0,
         stock: Number(form.stock) || 0,
+        min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
+        is_combo: form.is_combo,
+
       });
       toast.success("Producto guardado");
       setOpen(false);
