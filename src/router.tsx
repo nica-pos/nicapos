@@ -1,4 +1,4 @@
-import { QueryClient, QueryCache, MutationCache } from "@tanstack/react-query";
+import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { routeTree } from "./routeTree.gen";
@@ -17,12 +17,9 @@ export const getRouter = () => {
         },
       },
     },
+    // Los errores de lectura de datos muestran un aviso amigable global.
+    // Las mutaciones manejan sus propios errores en cada pantalla.
     queryCache: new QueryCache({
-      onError: (error) => {
-        toast.error(getFriendlyErrorMessage(error));
-      },
-    }),
-    mutationCache: new MutationCache({
       onError: (error) => {
         toast.error(getFriendlyErrorMessage(error));
       },
