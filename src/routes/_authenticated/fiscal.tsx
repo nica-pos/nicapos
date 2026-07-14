@@ -54,6 +54,11 @@ function FiscalPage() {
   const [ivaEnabled, setIvaEnabled] = useState(true);
   const [irRate, setIrRate] = useState("2");
   const [irEnabled, setIrEnabled] = useState(false);
+  const [legalName, setLegalName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [invoiceFooter, setInvoiceFooter] = useState("");
 
   useEffect(() => {
     if (settings) {
@@ -61,6 +66,11 @@ function FiscalPage() {
       setIvaEnabled(settings.iva_enabled);
       setIrRate((Number(settings.ir_rate) * 100).toString());
       setIrEnabled(settings.ir_enabled);
+      setLegalName(settings.legal_name ?? "");
+      setAddress(settings.address ?? "");
+      setPhone(settings.phone ?? "");
+      setEmail(settings.email ?? "");
+      setInvoiceFooter(settings.invoice_footer ?? "");
     }
   }, [settings]);
 
@@ -82,6 +92,31 @@ function FiscalPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant?.id] });
       toast.success("Impuestos actualizados");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveInvoiceData = useMutation({
+    mutationFn: async () => {
+      if (!tenant) throw new Error("Sin tienda activa");
+      const { error } = await supabase
+        .from("fiscal_settings")
+        .upsert(
+          {
+            tenant_id: tenant.id,
+            legal_name: legalName.trim() || null,
+            address: address.trim() || null,
+            phone: phone.trim() || null,
+            email: email.trim() || null,
+            invoice_footer: invoiceFooter.trim() || null,
+          },
+          { onConflict: "tenant_id" },
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant?.id] });
+      toast.success("Datos de facturación guardados");
     },
     onError: (e: Error) => toast.error(e.message),
   });
