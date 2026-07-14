@@ -288,7 +288,46 @@ function FiscalPage() {
         </Card>
       </div>
 
-      {/* Exchange rate history */}
+      {/* Invoice legal data */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Datos legales para documentos</CardTitle>
+          <CardDescription>
+            Aparecen en tickets, facturas y proformas (razón social, RUC de la tienda en Configuración).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="legal">Razón social</Label>
+            <Input id="legal" value={legalName} disabled={!canEdit} onChange={(e) => setLegalName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Teléfono</Label>
+            <Input id="phone" value={phone} disabled={!canEdit} onChange={(e) => setPhone(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="addr">Dirección</Label>
+            <Input id="addr" value={address} disabled={!canEdit} onChange={(e) => setAddress(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="mail">Correo</Label>
+            <Input id="mail" type="email" value={email} disabled={!canEdit} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="footer">Nota de pie de página (políticas de devolución, etc.)</Label>
+            <Textarea id="footer" value={invoiceFooter} disabled={!canEdit} onChange={(e) => setInvoiceFooter(e.target.value)} />
+          </div>
+          {canEdit && (
+            <div className="sm:col-span-2">
+              <Button onClick={() => saveInvoiceData.mutate()} disabled={saveInvoiceData.isPending}>
+                {saveInvoiceData.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Guardar datos
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
