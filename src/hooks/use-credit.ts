@@ -199,7 +199,7 @@ export function useRecordReceivablePayment() {
         _receivable_id: v.receivable_id,
         _amount: v.amount,
         _method: v.method ?? "cash",
-        _note: v.note ?? null,
+        _note: v.note ?? undefined,
       });
       if (error) throw error;
       return data;
@@ -311,7 +311,7 @@ export function useRecordLayawayPayment() {
         _layaway_id: v.layaway_id,
         _amount: v.amount,
         _method: v.method ?? "cash",
-        _note: null,
+        _note: undefined,
       });
       if (error) throw error;
       return data;
@@ -434,7 +434,7 @@ export function useRecordPayablePayment() {
         _po_id: v.po_id,
         _amount: v.amount,
         _method: v.method ?? "cash",
-        _note: null,
+        _note: undefined,
       });
       if (error) throw error;
       return data;
