@@ -306,6 +306,17 @@ function ProductsPage() {
                   onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 />
               </div>
+              <div className="grid gap-2">
+                <Label>Existencia mínima (alerta)</Label>
+                <Input
+                  type="number"
+                  step="1"
+                  value={form.min_stock}
+                  onChange={(e) =>
+                    setForm({ ...form, min_stock: e.target.value })
+                  }
+                />
+              </div>
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
@@ -319,6 +330,19 @@ function ProductsPage() {
                 onCheckedChange={(v) => setForm({ ...form, is_tax_exempt: v })}
               />
             </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <Label>Es combo / paquete</Label>
+                <p className="text-sm text-muted-foreground">
+                  Al venderlo se descuentan sus componentes del inventario.
+                </p>
+              </div>
+              <Switch
+                checked={form.is_combo}
+                onCheckedChange={(v) => setForm({ ...form, is_combo: v })}
+              />
+            </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
