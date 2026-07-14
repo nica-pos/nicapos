@@ -10,6 +10,9 @@ import {
   ShieldCheck,
   Coins,
   FileText,
+  ShoppingCart,
+  Package,
+  Wallet,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -29,11 +32,15 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
+  { to: "/pos", label: "Punto de Venta", icon: ShoppingCart },
+  { to: "/productos", label: "Productos", icon: Package },
+  { to: "/caja", label: "Caja", icon: Wallet },
   { to: "/fiscal", label: "Moneda e impuestos", icon: Coins },
   { to: "/documentos", label: "Documentos", icon: FileText },
   { to: "/equipo", label: "Equipo", icon: Users },
   { to: "/configuracion", label: "Configuración", icon: Settings },
 ] as const;
+
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
