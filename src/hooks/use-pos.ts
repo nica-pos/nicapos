@@ -284,22 +284,37 @@ export function useCreateSale() {
       );
       if (payErr) throw payErr;
 
-      // decrement stock
+      // record inventory movements (Kardex). Combos auto-decrement components.
       for (const l of v.lines) {
-        if (l.product_id) {
-          const { data: prod } = await supabase
-            .from("products")
-            .select("stock")
-            .eq("id", l.product_id)
-            .single();
-          if (prod) {
-            await supabase
-              .from("products")
-              .update({ stock: Number(prod.stock) - l.quantity })
-              .eq("id", l.product_id);
+        if (!l.product_id) continue;
+
+        const { data: components } = await supabase
+          .from("combo_components")
+          .select("component_id, quantity")
+          .eq("combo_id", l.product_id);
+
+        if (components && components.length > 0) {
+          // Combo: decrement each component, not the combo itself
+          for (const c of components) {
+            await supabase.rpc("record_inventory_movement", {
+              _product_id: c.component_id,
+              _movement_type: "sale",
+              _quantity: Number(c.quantity) * l.quantity,
+              _unit_cost: 0,
+              _reference: `Venta #${saleNumber} (combo)`,
+            });
           }
+        } else {
+          await supabase.rpc("record_inventory_movement", {
+            _product_id: l.product_id,
+            _movement_type: "sale",
+            _quantity: l.quantity,
+            _unit_cost: 0,
+            _reference: `Venta #${saleNumber}`,
+          });
         }
       }
+
 
       return { sale, saleNumber, total };
     },
