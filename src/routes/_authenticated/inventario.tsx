@@ -45,6 +45,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useProducts, type Product } from "@/hooks/use-pos";
 import {
