@@ -24,6 +24,7 @@ export type MembershipWithTenant = TenantMember & { tenant: Tenant };
 export function useMyMemberships() {
   return useQuery({
     queryKey: ["my-memberships"],
+    staleTime: 5 * 60_000,
     queryFn: async (): Promise<MembershipWithTenant[]> => {
       const { data, error } = await supabase
         .from("tenant_members")
@@ -54,6 +55,7 @@ export function useActiveTenant() {
 export function useIsSuperadmin() {
   return useQuery({
     queryKey: ["is-superadmin"],
+    staleTime: 5 * 60_000,
     queryFn: async (): Promise<boolean> => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
@@ -73,6 +75,7 @@ export function useIsSuperadmin() {
 export function usePlans(includeInactive = false) {
   return useQuery({
     queryKey: ["plans", includeInactive],
+    staleTime: 10 * 60_000,
     queryFn: async (): Promise<Plan[]> => {
       let query = supabase.from("plans").select("*").order("sort_order");
       if (!includeInactive) query = query.eq("is_active", true);
