@@ -115,13 +115,18 @@ function PosPage() {
         next[idx] = { ...next[idx], quantity: next[idx].quantity + 1 };
         return next;
       }
+      const { price, promo } = applyPromotions(
+        Number(p.price_usd),
+        { id: p.id, category_id: p.category_id },
+        promotions ?? [],
+      );
       return [
         ...prev,
         {
           product_id: p.id,
-          name: p.name,
+          name: promo ? `${p.name} (${promo.name})` : p.name,
           quantity: 1,
-          unit_price_usd: Number(p.price_usd),
+          unit_price_usd: price,
           is_tax_exempt: p.is_tax_exempt,
         },
       ];
