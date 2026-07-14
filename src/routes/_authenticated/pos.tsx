@@ -58,6 +58,7 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
 function PosPage() {
   const navigate = useNavigate();
   const { data: products } = useProducts();
+  const { data: promotions } = usePromotions();
   const { data: session } = useOpenCashSession();
   const { data: fiscal } = useFiscalSettings();
   const rate = useLatestRate() ?? 0;
