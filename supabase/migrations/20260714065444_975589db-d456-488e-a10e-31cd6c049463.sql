@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_sale_items_tenant_created ON public.sale_items (tenant_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_cash_movements_tenant_created ON public.cash_movements (tenant_id, created_at);
