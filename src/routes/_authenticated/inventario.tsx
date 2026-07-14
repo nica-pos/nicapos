@@ -483,3 +483,170 @@ function KardexDialog({
     </Dialog>
   );
 }
+
+function CombosManager({ products }: { products: Product[] }) {
+  const combos = products.filter((p) => p.is_combo);
+  const [selectedId, setSelectedId] = useState<string>("");
+  const selected = combos.find((c) => c.id === selectedId) ?? null;
+
+  return (
+    <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Combos / paquetes</CardTitle>
+          <CardDescription>
+            Marca un producto como combo en Productos.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          {combos.length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              No hay combos.
+            </p>
+          ) : (
+            combos.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedId(c.id)}
+                className={`w-full rounded-md border px-3 py-2 text-left text-sm ${
+                  selectedId === c.id ? "border-primary bg-accent" : ""
+                }`}
+              >
+                {c.name}
+              </button>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      {selected ? (
+        <ComboEditor combo={selected} products={products} />
+      ) : (
+        <Card>
+          <CardContent className="flex h-40 items-center justify-center text-muted-foreground">
+            Selecciona un combo para configurar sus componentes.
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function ComboEditor({
+  combo,
+  products,
+}: {
+  combo: Product;
+  products: Product[];
+}) {
+  const { data: components, isLoading } = useComboComponents(combo.id);
+  const add = useAddComboComponent();
+  const remove = useRemoveComboComponent();
+  const [componentId, setComponentId] = useState("");
+  const [qty, setQty] = useState("1");
+
+  const options = products.filter((p) => !p.is_combo && p.id !== combo.id);
+
+  async function handleAdd() {
+    if (!componentId) {
+      toast.error("Selecciona un producto");
+      return;
+    }
+    try {
+      await add.mutateAsync({
+        combo_id: combo.id,
+        component_id: componentId,
+        quantity: Number(qty) || 1,
+      });
+      setComponentId("");
+      setQty("1");
+    } catch (e) {
+      toast.error("Error", { description: String((e as Error).message) });
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Componentes de {combo.name}</CardTitle>
+        <CardDescription>
+          Al vender el combo se descuentan estas cantidades del inventario.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="min-w-[200px] flex-1">
+            <Label className="mb-1 block text-xs">Producto</Label>
+            <Select value={componentId} onValueChange={setComponentId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona..." />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-24">
+            <Label className="mb-1 block text-xs">Cantidad</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={qty}
+              onChange={(e) => setQty(e.target.value)}
+            />
+          </div>
+          <Button onClick={handleAdd} disabled={add.isPending}>
+            <Plus className="mr-1 h-4 w-4" /> Agregar
+          </Button>
+        </div>
+
+        {isLoading ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (components?.length ?? 0) === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Sin componentes.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Componente</TableHead>
+                <TableHead className="text-right">Cantidad</TableHead>
+                <TableHead className="text-right"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(components ?? []).map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell>
+                    {(c as { component?: { name?: string } }).component?.name ??
+                      "—"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {Number(c.quantity)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => remove.mutate(c.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
