@@ -116,7 +116,7 @@ export function useRecordMovement() {
         _movement_type: v.movement_type,
         _quantity: v.quantity,
         _unit_cost: v.unit_cost ?? 0,
-        _reference: v.reference ?? null,
+        _reference: v.reference ?? undefined,
       });
       if (error) throw error;
       return data;
