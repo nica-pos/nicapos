@@ -106,10 +106,10 @@ function AuthPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="mb-8 flex items-center justify-center gap-2 text-2xl font-bold">
+          <Link to="/" className="mb-8 flex items-center justify-center gap-2 text-2xl font-bold">
             <Store className="h-7 w-7 text-primary" />
             <span className="text-gradient">Nica-POS</span>
-          </div>
+          </Link>
 
           <Card>
             <CardHeader className="text-center">
