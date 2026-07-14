@@ -261,21 +261,47 @@ export function useCreateSale() {
       const total = subtotal + tax;
 
 
-      const { data: sale, error: saleErr } = await supabase
-        .from("sales")
-        .insert({
-          tenant_id: tenant!.id,
-          session_id: v.sessionId,
-          sale_number: saleNumber,
-          subtotal_usd: Number(subtotal.toFixed(2)),
-          tax_usd: Number(tax.toFixed(2)),
-          total_usd: Number(total.toFixed(2)),
-          exchange_rate: v.exchangeRate,
-          sold_by: uid,
-        })
-        .select()
-        .single();
-      if (saleErr) throw saleErr;
+      // Assign the sale number and insert, retrying on unique-key collision.
+      let sale: Sale | null = null;
+      let saleNumber = 0;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const { data: last } = await supabase
+          .from("sales")
+          .select("sale_number")
+          .eq("tenant_id", tenant!.id)
+          .order("sale_number", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        saleNumber = (last?.sale_number ?? 0) + 1;
+
+        const { data, error: saleErr } = await supabase
+          .from("sales")
+          .insert({
+            tenant_id: tenant!.id,
+            session_id: v.sessionId,
+            sale_number: saleNumber,
+            subtotal_usd: Number(subtotal.toFixed(2)),
+            tax_usd: Number(tax.toFixed(2)),
+            total_usd: Number(total.toFixed(2)),
+            exchange_rate: v.exchangeRate,
+            sold_by: uid,
+          })
+          .select()
+          .single();
+
+        if (!saleErr && data) {
+          sale = data;
+          break;
+        }
+        // 23505 = unique_violation: another cashier took this number, retry.
+        if (saleErr && saleErr.code !== "23505") throw saleErr;
+      }
+      if (!sale) {
+        throw new Error(
+          "No se pudo asignar el número de venta, intenta de nuevo.",
+        );
+      }
+
 
       const { error: itemsErr } = await supabase.from("sale_items").insert(
         itemsPayload.map((i) => ({ ...i, sale_id: sale.id })),
