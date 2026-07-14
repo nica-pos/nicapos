@@ -329,12 +329,32 @@ function PosPage() {
                         {[p.barcode, p.category, p.brand].filter(Boolean).join(" · ")}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{formatUSD(Number(p.price_usd))}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Stock: {Number(p.stock)}
-                      </p>
-                    </div>
+                    {(() => {
+                      const { price, promo } = applyPromotions(
+                        Number(p.price_usd),
+                        { id: p.id, category_id: p.category_id },
+                        promotions ?? [],
+                      );
+                      return (
+                        <div className="text-right">
+                          {promo ? (
+                            <p className="font-semibold text-primary">
+                              {formatUSD(price)}{" "}
+                              <span className="text-xs text-muted-foreground line-through">
+                                {formatUSD(Number(p.price_usd))}
+                              </span>
+                            </p>
+                          ) : (
+                            <p className="font-semibold">
+                              {formatUSD(Number(p.price_usd))}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">
+                            Stock: {Number(p.stock)}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </button>
                 ))}
               </div>
