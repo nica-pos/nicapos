@@ -58,6 +58,39 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const { tenant, memberships } = useActiveTenant();
   const { data: isSuperadmin } = useIsSuperadmin();
 
+  // Aplica el color de marca de la tienda en tiempo real (white-labeling).
+  const primaryColor = tenant?.primary_color ?? null;
+  useEffect(() => {
+    const root = document.documentElement;
+    if (primaryColor) {
+      root.style.setProperty("--primary", primaryColor);
+      root.style.setProperty("--ring", primaryColor);
+      root.style.setProperty("--sidebar-primary", primaryColor);
+    } else {
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--ring");
+      root.style.removeProperty("--sidebar-primary");
+    }
+  }, [primaryColor]);
+
+  // Aplica el favicon de la tienda si está configurado.
+  const faviconUrl = tenant?.favicon_url ?? null;
+  useEffect(() => {
+    if (!faviconUrl) return;
+    let link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    const prev = link.href;
+    link.href = faviconUrl;
+    return () => {
+      if (link) link.href = prev;
+    };
+  }, [faviconUrl]);
+
+
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
