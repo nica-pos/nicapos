@@ -75,6 +75,7 @@ export function useIsSuperadmin() {
 export function usePlans(includeInactive = false) {
   return useQuery({
     queryKey: ["plans", includeInactive],
+    staleTime: 10 * 60_000,
     queryFn: async (): Promise<Plan[]> => {
       let query = supabase.from("plans").select("*").order("sort_order");
       if (!includeInactive) query = query.eq("is_active", true);
