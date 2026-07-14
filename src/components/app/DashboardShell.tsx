@@ -43,6 +43,7 @@ const navItems = [
   { to: "/proveedores", label: "Proveedores", icon: Truck },
   { to: "/fiscal", label: "Moneda e impuestos", icon: Coins },
   { to: "/documentos", label: "Documentos", icon: FileText },
+  { to: "/bitacora", label: "Bitácora", icon: ShieldCheck },
   { to: "/equipo", label: "Equipo", icon: Users },
   { to: "/configuracion", label: "Configuración", icon: Settings },
 ] as const;
