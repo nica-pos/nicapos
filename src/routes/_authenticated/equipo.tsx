@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -80,7 +81,7 @@ function TeamPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
       toast.success("Miembro agregado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   const updateRole = useMutation({
@@ -95,7 +96,7 @@ function TeamPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
       toast.success("Rol actualizado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   const removeMember = useMutation({
@@ -107,7 +108,7 @@ function TeamPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
       toast.success("Miembro eliminado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   return (

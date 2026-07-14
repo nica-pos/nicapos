@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -137,7 +138,7 @@ function SuppliersTab() {
       toast.success(edit ? "Proveedor actualizado" : "Proveedor creado");
       setOpen(false);
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -316,7 +317,7 @@ function OrdersTab() {
       setExpected("");
       setLines([{ product_id: "", name: "", quantity: "1", unit_cost_usd: "" }]);
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -326,7 +327,7 @@ function OrdersTab() {
       await receive.mutateAsync(id);
       toast.success("Pedido recibido, inventario actualizado");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -339,7 +340,7 @@ function OrdersTab() {
       await pay.mutateAsync({ po_id: id, amount });
       toast.success("Pago registrado");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 

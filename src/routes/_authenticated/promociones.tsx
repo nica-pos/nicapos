@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -132,7 +133,7 @@ function PromocionesPage() {
       toast.success("Promoción guardada");
       setOpen(false);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(getFriendlyErrorMessage(e));
     }
   }
 

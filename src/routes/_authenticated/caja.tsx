@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ function CajaPage() {
       setOpenNio("");
       setOpenUsd("");
     } catch (e) {
-      toast.error("No se pudo abrir", { description: String((e as Error).message) });
+      toast.error("No se pudo abrir", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -102,7 +103,7 @@ function CajaPage() {
       setMovAmount("");
       setMovReason("");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -120,7 +121,7 @@ function CajaPage() {
       setCountedUsd("");
       setCloseNotes("");
     } catch (e) {
-      toast.error("No se pudo cerrar", { description: String((e as Error).message) });
+      toast.error("No se pudo cerrar", { description: getFriendlyErrorMessage(e) });
     }
   }
 

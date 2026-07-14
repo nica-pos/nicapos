@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -94,7 +95,7 @@ function FiscalPage() {
       queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant?.id] });
       toast.success("Impuestos actualizados");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   const saveInvoiceData = useMutation({
@@ -119,7 +120,7 @@ function FiscalPage() {
       queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant?.id] });
       toast.success("Datos de facturación guardados");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   // New exchange rate
@@ -146,7 +147,7 @@ function FiscalPage() {
       queryClient.invalidateQueries({ queryKey: ["exchange-rates", tenant?.id] });
       toast.success("Tasa de cambio registrada");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   const deleteRate = useMutation({
@@ -158,7 +159,7 @@ function FiscalPage() {
       queryClient.invalidateQueries({ queryKey: ["exchange-rates", tenant?.id] });
       toast.success("Tasa eliminada");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   // Live converter

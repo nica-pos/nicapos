@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -124,7 +125,7 @@ function ProductsPage() {
       toast.success("Producto guardado");
       setOpen(false);
     } catch (e) {
-      toast.error("No se pudo guardar", { description: String((e as Error).message) });
+      toast.error("No se pudo guardar", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -133,7 +134,7 @@ function ProductsPage() {
       await deleteProduct.mutateAsync(id);
       toast.success("Producto eliminado");
     } catch (e) {
-      toast.error("No se pudo eliminar", { description: String((e as Error).message) });
+      toast.error("No se pudo eliminar", { description: getFriendlyErrorMessage(e) });
     }
   }
 

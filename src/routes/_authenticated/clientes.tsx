@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -137,7 +138,7 @@ function CustomersTab() {
       toast.success(edit ? "Cliente actualizado" : "Cliente creado");
       setOpen(false);
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -279,7 +280,7 @@ function ReceivablesTab() {
       setOpen(false);
       setForm({ customer_id: "", total_usd: "", description: "", due_date: "" });
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -292,7 +293,7 @@ function ReceivablesTab() {
       await pay.mutateAsync({ receivable_id: id, amount });
       toast.success("Abono registrado");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -482,7 +483,7 @@ function LayawaysTab() {
       setDeposit("");
       setItems([{ name: "", quantity: "1", unit_price_usd: "" }]);
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 
@@ -495,7 +496,7 @@ function LayawaysTab() {
       await pay.mutateAsync({ layaway_id: id, amount });
       toast.success("Abono registrado");
     } catch (e) {
-      toast.error("Error", { description: String((e as Error).message) });
+      toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
   }
 

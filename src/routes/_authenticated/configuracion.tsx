@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -61,7 +62,7 @@ function ConfigPage() {
       queryClient.invalidateQueries();
       toast.success("Configuración guardada");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
   if (isLoading || !tenant) {
