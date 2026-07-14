@@ -1,24 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { LandingLayout } from "@/components/landing/LandingLayout";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { Pricing } from "@/components/landing/Pricing";
+import { CTA } from "@/components/landing/CTA";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Home,
+  head: () => ({
+    meta: [
+      { title: "Nica-POS — Punto de Venta y Contabilidad para Nicaragua" },
+      {
+        name: "description",
+        content:
+          "Sistema POS y contable SaaS multi-tenant para Nicaragua. Facturación, inventario, Córdobas y Dólares, IVA e IR, cajas e informes financieros.",
+      },
+      {
+        property: "og:title",
+        content: "Nica-POS — Punto de Venta y Contabilidad para Nicaragua",
+      },
+      {
+        property: "og:description",
+        content:
+          "Sistema POS y contable SaaS multi-tenant para Nicaragua. Facturación, inventario, Córdobas y Dólares, IVA e IR, cajas e informes financieros.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Home() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <LandingLayout>
+      <Hero />
+      <Features />
+      <Pricing />
+      <CTA />
+    </LandingLayout>
   );
 }
