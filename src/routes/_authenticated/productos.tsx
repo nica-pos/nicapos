@@ -53,7 +53,10 @@ const emptyForm = {
   model: "",
   price_usd: "",
   stock: "",
+  min_stock: "",
   is_tax_exempt: false,
+  is_combo: false,
+
 };
 
 function ProductsPage() {
