@@ -221,16 +221,10 @@ export function useCreateSale() {
     }) => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user!.id;
+      // Sale number is assigned inside a retry loop below to avoid
+      // duplicate-key collisions when several cashiers sell at once
+      // (there is a UNIQUE index on tenant_id + sale_number).
 
-      // next sale number
-      const { data: last } = await supabase
-        .from("sales")
-        .select("sale_number")
-        .eq("tenant_id", tenant!.id)
-        .order("sale_number", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      const saleNumber = (last?.sale_number ?? 0) + 1;
 
       // fetch current costs for COGS capture
       const productIds = v.lines
