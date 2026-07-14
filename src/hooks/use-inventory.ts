@@ -306,3 +306,97 @@ function useMutation_completeAudit(
     },
   });
 }
+
+// ---------- Promotions ----------
+export function usePromotions() {
+  const { tenant } = useActiveTenant();
+  return useQuery({
+    queryKey: ["promotions", tenant?.id],
+    enabled: !!tenant,
+    queryFn: async (): Promise<Promotion[]> => {
+      const { data, error } = await supabase
+        .from("promotions")
+        .select("*")
+        .eq("tenant_id", tenant!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useSavePromotion() {
+  const { tenant } = useActiveTenant();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      p: Partial<Promotion> & { name: string },
+    ): Promise<Promotion> => {
+      const payload = { ...p, tenant_id: tenant!.id };
+      if (p.id) {
+        const { data, error } = await supabase
+          .from("promotions")
+          .update(payload)
+          .eq("id", p.id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
+      const { data, error } = await supabase
+        .from("promotions")
+        .insert(payload)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["promotions"] }),
+  });
+}
+
+export function useDeletePromotion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("promotions").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["promotions"] }),
+  });
+}
+
+// Compute the effective unit price for a product given active promotions.
+export function applyPromotions(
+  basePrice: number,
+  product: { id: string; category_id: string | null },
+  promotions: Promotion[],
+): { price: number; promo: Promotion | null } {
+  const today = new Date().toISOString().slice(0, 10);
+  const applicable = promotions.filter((pr) => {
+    if (!pr.is_active) return false;
+    if (pr.starts_at && pr.starts_at > today) return false;
+    if (pr.ends_at && pr.ends_at < today) return false;
+    if (pr.product_id && pr.product_id !== product.id) return false;
+    if (pr.category_id && pr.category_id !== product.category_id) return false;
+    if (!pr.product_id && !pr.category_id) return false;
+    return true;
+  });
+  if (applicable.length === 0) return { price: basePrice, promo: null };
+
+  let best = basePrice;
+  let bestPromo: Promotion | null = null;
+  for (const pr of applicable) {
+    const val = Number(pr.discount_value);
+    const discounted =
+      pr.discount_type === "percent"
+        ? basePrice * (1 - val / 100)
+        : basePrice - val;
+    const finalPrice = Math.max(0, Number(discounted.toFixed(2)));
+    if (finalPrice < best) {
+      best = finalPrice;
+      bestPromo = pr;
+    }
+  }
+  return { price: best, promo: bestPromo };
+}
