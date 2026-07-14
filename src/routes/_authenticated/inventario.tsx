@@ -55,6 +55,10 @@ import {
   useDeleteLookup,
   useKardex,
   useRecordMovement,
+  useComboComponents,
+  useAddComboComponent,
+  useRemoveComboComponent,
+
 } from "@/hooks/use-inventory";
 import { formatUSD } from "@/hooks/use-fiscal";
 
