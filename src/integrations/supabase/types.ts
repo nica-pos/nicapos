@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      cash_movements: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          currency: string
+          id: string
+          reason: string
+          session_id: string
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by: string
+          currency?: string
+          id?: string
+          reason: string
+          session_id: string
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          currency?: string
+          id?: string
+          reason?: string
+          session_id?: string
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_movements_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "cash_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_movements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_sessions: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          counted_nio: number | null
+          counted_usd: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          opened_at: string
+          opened_by: string
+          opening_nio: number
+          opening_usd: number
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          counted_nio?: number | null
+          counted_usd?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by: string
+          opening_nio?: number
+          opening_usd?: number
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          counted_nio?: number | null
+          counted_usd?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string
+          opening_nio?: number
+          opening_usd?: number
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -147,6 +257,65 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          barcode: string | null
+          brand: string | null
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_tax_exempt: boolean
+          model: string | null
+          name: string
+          price_usd: number
+          sku: string | null
+          stock: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_tax_exempt?: boolean
+          model?: string | null
+          name: string
+          price_usd?: number
+          sku?: string | null
+          stock?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_tax_exempt?: boolean
+          model?: string | null
+          name?: string
+          price_usd?: number
+          sku?: string | null
+          stock?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -173,6 +342,166 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sale_items: {
+        Row: {
+          created_at: string
+          id: string
+          line_total_usd: number
+          name: string
+          product_id: string | null
+          quantity: number
+          sale_id: string
+          tax_usd: number
+          tenant_id: string
+          unit_price_usd: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          line_total_usd?: number
+          name: string
+          product_id?: string | null
+          quantity?: number
+          sale_id: string
+          tax_usd?: number
+          tenant_id: string
+          unit_price_usd?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          line_total_usd?: number
+          name?: string
+          product_id?: string | null
+          quantity?: number
+          sale_id?: string
+          tax_usd?: number
+          tenant_id?: string
+          unit_price_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          method: string
+          sale_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          method: string
+          sale_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          method?: string
+          sale_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_payments_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          created_at: string
+          exchange_rate: number
+          id: string
+          sale_number: number
+          session_id: string | null
+          sold_by: string
+          subtotal_usd: number
+          tax_usd: number
+          tenant_id: string
+          total_usd: number
+        }
+        Insert: {
+          created_at?: string
+          exchange_rate?: number
+          id?: string
+          sale_number: number
+          session_id?: string | null
+          sold_by: string
+          subtotal_usd?: number
+          tax_usd?: number
+          tenant_id: string
+          total_usd?: number
+        }
+        Update: {
+          created_at?: string
+          exchange_rate?: number
+          id?: string
+          sale_number?: number
+          session_id?: string | null
+          sold_by?: string
+          subtotal_usd?: number
+          tax_usd?: number
+          tenant_id?: string
+          total_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "cash_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenant_members: {
         Row: {
