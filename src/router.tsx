@@ -8,6 +8,11 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
+        // Los datos se consideran frescos 30s: evita recargas en cada montaje
+        // y reduce solicitudes de red y re-renders al navegar entre pantallas.
+        staleTime: 30_000,
+        gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
           // No reintentar errores de permisos/autenticación.
           const code = (error as { code?: string; status?: number })?.code;
