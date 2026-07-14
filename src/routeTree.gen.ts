@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedFiscalRouteImport } from './routes/_authenticated/fiscal'
 import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
@@ -49,6 +50,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFiscalRoute = AuthenticatedFiscalRouteImport.update({
+  id: '/fiscal',
+  path: '/fiscal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
   id: '/equipo',
   path: '/equipo',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/fiscal': typeof AuthenticatedFiscalRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
 }
 export interface FileRoutesByTo {
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/fiscal': typeof AuthenticatedFiscalRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
 }
 export interface FileRoutesById {
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
+  '/_authenticated/fiscal': typeof AuthenticatedFiscalRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
 }
 export interface FileRouteTypes {
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/configuracion'
     | '/dashboard'
     | '/equipo'
+    | '/fiscal'
     | '/onboarding'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/configuracion'
     | '/dashboard'
     | '/equipo'
+    | '/fiscal'
     | '/onboarding'
   id:
     | '__root__'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracion'
     | '/_authenticated/dashboard'
     | '/_authenticated/equipo'
+    | '/_authenticated/fiscal'
     | '/_authenticated/onboarding'
   fileRoutesById: FileRoutesById
 }
@@ -195,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/fiscal': {
+      id: '/_authenticated/fiscal'
+      path: '/fiscal'
+      fullPath: '/fiscal'
+      preLoaderRoute: typeof AuthenticatedFiscalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/equipo': {
       id: '/_authenticated/equipo'
       path: '/equipo'
@@ -231,6 +250,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
+  AuthenticatedFiscalRoute: typeof AuthenticatedFiscalRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
 }
 
@@ -239,6 +259,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
+  AuthenticatedFiscalRoute: AuthenticatedFiscalRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
 }
 
