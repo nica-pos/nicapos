@@ -38,6 +38,7 @@ const navItems = [
   { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
   { to: "/pos", label: "Punto de Venta", icon: ShoppingCart },
   { to: "/productos", label: "Productos", icon: Package },
+  { to: "/promociones", label: "Promociones", icon: Tag },
   { to: "/inventario", label: "Inventario", icon: Warehouse },
   { to: "/caja", label: "Caja", icon: Wallet },
   { to: "/clientes", label: "Clientes y Créditos", icon: HandCoins },
