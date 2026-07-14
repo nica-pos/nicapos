@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json
+          entity: string
+          entity_id: string | null
+          id: string
+          tenant_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json
+          entity: string
+          entity_id?: string | null
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brands: {
         Row: {
           created_at: string
@@ -1154,6 +1195,7 @@ export type Database = {
           sale_id: string
           tax_usd: number
           tenant_id: string
+          unit_cost_usd: number
           unit_price_usd: number
         }
         Insert: {
@@ -1166,6 +1208,7 @@ export type Database = {
           sale_id: string
           tax_usd?: number
           tenant_id: string
+          unit_cost_usd?: number
           unit_price_usd?: number
         }
         Update: {
@@ -1178,6 +1221,7 @@ export type Database = {
           sale_id?: string
           tax_usd?: number
           tenant_id?: string
+          unit_cost_usd?: number
           unit_price_usd?: number
         }
         Relationships: [
