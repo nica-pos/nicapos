@@ -220,6 +220,7 @@ export type Database = {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      shares_tenant: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       app_role: "superadmin" | "user"
