@@ -110,7 +110,11 @@ export function useFinancials() {
         if (new Date(m.created_at).getTime() < todayStart) continue;
         if (m.type === "expense" || m.type === "egreso" || m.type === "out") {
           const amt =
-            m.currency === "USD" ? Number(m.amount) : Number(m.amount) / 36.6;
+            m.currency === "USD"
+              ? Number(m.amount)
+              : nioPerUsd > 0
+                ? Number(m.amount) / nioPerUsd
+                : 0;
           expensesUsd += amt;
         }
       }
