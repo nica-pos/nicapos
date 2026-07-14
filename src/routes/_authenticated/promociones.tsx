@@ -133,7 +133,7 @@ function PromocionesPage() {
       toast.success("Promoción guardada");
       setOpen(false);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(getFriendlyErrorMessage(e));
     }
   }
 
