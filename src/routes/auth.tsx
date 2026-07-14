@@ -46,44 +46,69 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  function validateForm(requireLength = false): string | null {
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if (!email.trim() || !emailOk) return "Ingresa un correo electrónico válido.";
+    if (!password) return "Ingresa tu contraseña.";
+    if (requireLength && password.length < 6)
+      return "La contraseña debe tener al menos 6 caracteres.";
+    return null;
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    const invalid = validateForm();
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
     setLoading(true);
     setError(null);
     setMessage(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setError(getFriendlyErrorMessage(error));
+        return;
+      }
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    navigate({ to: "/dashboard" });
   }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    const invalid = validateForm(true);
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
     setLoading(true);
     setError(null);
     setMessage(null);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      if (error) {
+        setError(getFriendlyErrorMessage(error));
+        return;
+      }
+      setMessage("Revisa tu correo para confirmar tu cuenta.");
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    setMessage("Revisa tu correo para confirmar tu cuenta.");
   }
 
   async function handleGoogle() {
@@ -91,16 +116,20 @@ function AuthPage() {
     setError(null);
     setMessage(null);
 
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-
-    setLoading(false);
-
-    if (result.error) {
-      setError(result.error.message);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setError(getFriendlyErrorMessage(result.error));
+      }
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
   }
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
