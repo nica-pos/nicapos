@@ -53,7 +53,10 @@ const emptyForm = {
   model: "",
   price_usd: "",
   stock: "",
+  min_stock: "",
   is_tax_exempt: false,
+  is_combo: false,
+
 };
 
 function ProductsPage() {
@@ -90,7 +93,10 @@ function ProductsPage() {
       model: p.model ?? "",
       price_usd: String(p.price_usd),
       stock: String(p.stock),
+      min_stock: String(p.min_stock),
       is_tax_exempt: p.is_tax_exempt,
+      is_combo: p.is_combo,
+
     });
     setOpen(true);
   }
@@ -110,7 +116,10 @@ function ProductsPage() {
         model: form.model.trim() || null,
         price_usd: Number(form.price_usd) || 0,
         stock: Number(form.stock) || 0,
+        min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
+        is_combo: form.is_combo,
+
       });
       toast.success("Producto guardado");
       setOpen(false);
@@ -297,6 +306,17 @@ function ProductsPage() {
                   onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 />
               </div>
+              <div className="grid gap-2">
+                <Label>Existencia mínima (alerta)</Label>
+                <Input
+                  type="number"
+                  step="1"
+                  value={form.min_stock}
+                  onChange={(e) =>
+                    setForm({ ...form, min_stock: e.target.value })
+                  }
+                />
+              </div>
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
@@ -310,6 +330,19 @@ function ProductsPage() {
                 onCheckedChange={(v) => setForm({ ...form, is_tax_exempt: v })}
               />
             </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <Label>Es combo / paquete</Label>
+                <p className="text-sm text-muted-foreground">
+                  Al venderlo se descuentan sus componentes del inventario.
+                </p>
+              </div>
+              <Switch
+                checked={form.is_combo}
+                onCheckedChange={(v) => setForm({ ...form, is_combo: v })}
+              />
+            </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>

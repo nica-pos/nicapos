@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      brands: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brands_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_movements: {
         Row: {
           amount: number
@@ -124,6 +156,87 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      combo_components: {
+        Row: {
+          combo_id: string
+          component_id: string
+          created_at: string
+          id: string
+          quantity: number
+          tenant_id: string
+        }
+        Insert: {
+          combo_id: string
+          component_id: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          tenant_id: string
+        }
+        Update: {
+          combo_id?: string
+          component_id?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "combo_components_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "combo_components_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "combo_components_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -215,6 +328,63 @@ export type Database = {
           },
         ]
       }
+      inventory_movements: {
+        Row: {
+          avg_cost_usd: number
+          balance_qty: number
+          created_at: string
+          created_by: string | null
+          id: string
+          movement_type: string
+          product_id: string
+          quantity: number
+          reference: string | null
+          tenant_id: string
+          unit_cost_usd: number
+        }
+        Insert: {
+          avg_cost_usd?: number
+          balance_qty?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type: string
+          product_id: string
+          quantity: number
+          reference?: string | null
+          tenant_id: string
+          unit_cost_usd?: number
+        }
+        Update: {
+          avg_cost_usd?: number
+          balance_qty?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type?: string
+          product_id?: string
+          quantity?: number
+          reference?: string | null
+          tenant_id?: string
+          unit_cost_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_movements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           created_at: string
@@ -257,16 +427,64 @@ export type Database = {
         }
         Relationships: []
       }
+      product_models: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_models_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_models_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           barcode: string | null
           brand: string | null
+          brand_id: string | null
           category: string | null
+          category_id: string | null
+          cost_usd: number
           created_at: string
           id: string
           is_active: boolean
+          is_combo: boolean
           is_tax_exempt: boolean
+          min_stock: number
           model: string | null
+          model_id: string | null
           name: string
           price_usd: number
           sku: string | null
@@ -277,12 +495,18 @@ export type Database = {
         Insert: {
           barcode?: string | null
           brand?: string | null
+          brand_id?: string | null
           category?: string | null
+          category_id?: string | null
+          cost_usd?: number
           created_at?: string
           id?: string
           is_active?: boolean
+          is_combo?: boolean
           is_tax_exempt?: boolean
+          min_stock?: number
           model?: string | null
+          model_id?: string | null
           name: string
           price_usd?: number
           sku?: string | null
@@ -293,12 +517,18 @@ export type Database = {
         Update: {
           barcode?: string | null
           brand?: string | null
+          brand_id?: string | null
           category?: string | null
+          category_id?: string | null
+          cost_usd?: number
           created_at?: string
           id?: string
           is_active?: boolean
+          is_combo?: boolean
           is_tax_exempt?: boolean
+          min_stock?: number
           model?: string | null
+          model_id?: string | null
           name?: string
           price_usd?: number
           sku?: string | null
@@ -307,6 +537,27 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "product_models"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -342,6 +593,73 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      promotions: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          discount_type: string
+          discount_value: number
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          product_id: string | null
+          starts_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          product_id?: string | null
+          starts_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          product_id?: string | null
+          starts_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sale_items: {
         Row: {
@@ -503,6 +821,99 @@ export type Database = {
           },
         ]
       }
+      stock_audit_items: {
+        Row: {
+          audit_id: string
+          counted_qty: number
+          created_at: string
+          id: string
+          product_id: string
+          system_qty: number
+          tenant_id: string
+        }
+        Insert: {
+          audit_id: string
+          counted_qty?: number
+          created_at?: string
+          id?: string
+          product_id: string
+          system_qty?: number
+          tenant_id: string
+        }
+        Update: {
+          audit_id?: string
+          counted_qty?: number
+          created_at?: string
+          id?: string
+          product_id?: string
+          system_qty?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_audit_items_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "stock_audits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_audit_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_audit_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_audits: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_audits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_members: {
         Row: {
           created_at: string
@@ -639,6 +1050,34 @@ export type Database = {
       is_tenant_member: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
+      }
+      record_inventory_movement: {
+        Args: {
+          _movement_type: string
+          _product_id: string
+          _quantity: number
+          _reference?: string
+          _unit_cost?: number
+        }
+        Returns: {
+          avg_cost_usd: number
+          balance_qty: number
+          created_at: string
+          created_by: string | null
+          id: string
+          movement_type: string
+          product_id: string
+          quantity: number
+          reference: string | null
+          tenant_id: string
+          unit_cost_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "inventory_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       shares_tenant: { Args: { _a: string; _b: string }; Returns: boolean }
     }
