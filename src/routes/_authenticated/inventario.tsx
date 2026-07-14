@@ -133,6 +133,8 @@ function InventoryPage() {
           <TabsList>
             <TabsTrigger value="stock">Existencias</TabsTrigger>
             <TabsTrigger value="catalog">Catálogo</TabsTrigger>
+            <TabsTrigger value="combos">Combos</TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="stock">
