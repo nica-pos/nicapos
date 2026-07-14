@@ -25,7 +25,7 @@ import {
   YAxis,
 } from "recharts";
 import { DashboardShell } from "@/components/app/DashboardShell";
-import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { useFinancials } from "@/hooks/use-analytics";
 import { useLatestRate } from "@/hooks/use-fiscal";
 
