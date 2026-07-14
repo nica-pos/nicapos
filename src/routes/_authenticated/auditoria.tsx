@@ -211,9 +211,9 @@ function AuditDetail({
                     return (
                       <TableRow key={it.id}>
                         <TableCell className="font-medium">
-                          {/* @ts-expect-error joined relation */}
-                          {it.product?.name ?? "—"}
+                          {(it as { product?: { name?: string } }).product?.name ?? "—"}
                         </TableCell>
+
                         <TableCell className="text-right text-muted-foreground">
                           {Number(it.system_qty)}
                         </TableCell>
