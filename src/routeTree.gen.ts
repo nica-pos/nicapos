@@ -23,6 +23,7 @@ import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
+import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/caja'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -97,6 +98,11 @@ const AuthenticatedConfiguracionRoute =
     path: '/configuracion',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCajaRoute = AuthenticatedCajaRouteImport.update({
   id: '/caja',
   path: '/caja',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/caja': typeof AuthenticatedCajaRoute
+  '/clientes': typeof AuthenticatedClientesRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/caja': typeof AuthenticatedCajaRoute
+  '/clientes': typeof AuthenticatedClientesRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/caja': typeof AuthenticatedCajaRoute
+  '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auditoria'
     | '/caja'
+    | '/clientes'
     | '/configuracion'
     | '/dashboard'
     | '/documentos'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auditoria'
     | '/caja'
+    | '/clientes'
     | '/configuracion'
     | '/dashboard'
     | '/documentos'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/auditoria'
     | '/_authenticated/caja'
+    | '/_authenticated/clientes'
     | '/_authenticated/configuracion'
     | '/_authenticated/dashboard'
     | '/_authenticated/documentos'
@@ -335,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clientes': {
+      id: '/_authenticated/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof AuthenticatedClientesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/caja': {
       id: '/_authenticated/caja'
       path: '/caja'
@@ -363,6 +382,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedCajaRoute: typeof AuthenticatedCajaRoute
+  AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
@@ -378,6 +398,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedCajaRoute: AuthenticatedCajaRoute,
+  AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
