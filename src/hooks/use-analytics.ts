@@ -32,7 +32,7 @@ export function useFinancials() {
       since.setDate(since.getDate() - 13); // last 14 days
       const sinceIso = since.toISOString();
 
-      const [{ data: sales }, { data: items }, { data: movements }] =
+      const [{ data: sales }, { data: items }, { data: movements }, { data: rateRow }] =
         await Promise.all([
           supabase
             .from("sales")
@@ -49,7 +49,17 @@ export function useFinancials() {
             .select("type, amount, currency, created_at")
             .eq("tenant_id", tenant!.id)
             .gte("created_at", sinceIso),
+          supabase
+            .from("exchange_rates")
+            .select("rate")
+            .eq("tenant_id", tenant!.id)
+            .order("effective_date", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
         ]);
+
+      // Real configured exchange rate (NIO per USD); fallback avoids div-by-zero.
+      const nioPerUsd = rateRow?.rate ? Number(rateRow.rate) : 0;
 
       const todayStart = startOfLocalDay(new Date()).getTime();
 
