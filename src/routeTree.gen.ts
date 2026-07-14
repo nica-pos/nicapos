@@ -21,6 +21,7 @@ import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
+import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/caja'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -83,6 +84,11 @@ const AuthenticatedConfiguracionRoute =
     path: '/configuracion',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCajaRoute = AuthenticatedCajaRouteImport.update({
+  id: '/caja',
+  path: '/caja',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/caja': typeof AuthenticatedCajaRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/caja': typeof AuthenticatedCajaRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/caja': typeof AuthenticatedCajaRoute
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/precios'
     | '/sitemap.xml'
     | '/admin'
+    | '/caja'
     | '/configuracion'
     | '/dashboard'
     | '/documentos'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/precios'
     | '/sitemap.xml'
     | '/admin'
+    | '/caja'
     | '/configuracion'
     | '/dashboard'
     | '/documentos'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/precios'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/caja'
     | '/_authenticated/configuracion'
     | '/_authenticated/dashboard'
     | '/_authenticated/documentos'
@@ -273,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/caja': {
+      id: '/_authenticated/caja'
+      path: '/caja'
+      fullPath: '/caja'
+      preLoaderRoute: typeof AuthenticatedCajaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -285,6 +304,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCajaRoute: typeof AuthenticatedCajaRoute
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
@@ -296,6 +316,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCajaRoute: AuthenticatedCajaRoute,
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
