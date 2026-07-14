@@ -25,7 +25,7 @@ import {
   YAxis,
 } from "recharts";
 import { DashboardShell } from "@/components/app/DashboardShell";
-import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { useFinancials } from "@/hooks/use-analytics";
 import { useLatestRate } from "@/hooks/use-fiscal";
 
@@ -53,14 +53,17 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 function DashboardPage() {
   const navigate = useNavigate();
   const { isLoading, hasTenant, tenant, role } = useActiveTenant();
+  const { data: isSuperadmin, isLoading: saLoading } = useIsSuperadmin();
   const { data: fin } = useFinancials();
   const latestRate = useLatestRate();
 
   useEffect(() => {
-    if (!isLoading && !hasTenant) {
-      navigate({ to: "/onboarding" });
+    if (isLoading || saLoading) return;
+    if (!hasTenant) {
+      // Un superadmin sin tienda va a la consola de administración, no a onboarding.
+      navigate({ to: isSuperadmin ? "/admin" : "/onboarding" });
     }
-  }, [isLoading, hasTenant, navigate]);
+  }, [isLoading, saLoading, hasTenant, isSuperadmin, navigate]);
 
   if (isLoading || !tenant) {
     return (
