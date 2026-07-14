@@ -230,7 +230,12 @@ function InventoryPage() {
               <LookupCard table="product_models" title="Modelos" />
             </div>
           </TabsContent>
+
+          <TabsContent value="combos">
+            <CombosManager products={products ?? []} />
+          </TabsContent>
         </Tabs>
+
       </div>
 
       {purchaseFor && (
