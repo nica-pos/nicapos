@@ -27,7 +27,7 @@ import {
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { useFinancials } from "@/hooks/use-analytics";
-import { useFiscal } from "@/hooks/use-fiscal";
+import { useLatestRate } from "@/hooks/use-fiscal";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -54,7 +54,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const { isLoading, hasTenant, tenant, role } = useActiveTenant();
   const { data: fin } = useFinancials();
-  const { data: fiscal } = useFiscal();
+  const latestRate = useLatestRate();
 
   useEffect(() => {
     if (!isLoading && !hasTenant) {
@@ -70,7 +70,7 @@ function DashboardPage() {
     );
   }
 
-  const rate = Number(fiscal?.exchange_rate ?? 36.6) || 36.6;
+  const rate = latestRate ?? 36.6;
   const nio = (usd: number) => `C$ ${(usd * rate).toFixed(2)}`;
   const usd = (v: number) => `$${v.toFixed(2)}`;
 
