@@ -1,0 +1,226 @@
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Loader2, UserPlus, Trash2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { DashboardShell } from "@/components/app/DashboardShell";
+import { useActiveTenant } from "@/hooks/use-tenant";
+import { addTenantMemberByEmail } from "@/lib/tenant.functions";
+
+export const Route = createFileRoute("/_authenticated/equipo")({
+  component: TeamPage,
+  head: () => ({ meta: [{ title: "Equipo — Nica-POS" }] }),
+});
+
+const roleLabels: Record<string, string> = {
+  owner: "Dueño",
+  admin: "Administrador",
+  cashier: "Cajero",
+  accountant: "Contador",
+};
+
+function TeamPage() {
+  const queryClient = useQueryClient();
+  const { tenant, role } = useActiveTenant();
+  const addMember = useServerFn(addTenantMemberByEmail);
+  const canManage = role === "owner" || role === "admin";
+
+  const [email, setEmail] = useState("");
+  const [newRole, setNewRole] = useState<"admin" | "cashier" | "accountant">("cashier");
+
+  const members = useQuery({
+    queryKey: ["tenant-members", tenant?.id],
+    enabled: !!tenant,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenant_members")
+        .select("*, profile:profiles(email, full_name)")
+        .eq("tenant_id", tenant!.id)
+        .order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const invite = useMutation({
+    mutationFn: async () => {
+      if (!tenant) throw new Error("Sin tienda activa");
+      await addMember({ data: { tenantId: tenant.id, email: email.trim(), role: newRole } });
+    },
+    onSuccess: () => {
+      setEmail("");
+      queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
+      toast.success("Miembro agregado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateRole = useMutation({
+    mutationFn: async ({ id, role: r }: { id: string; role: string }) => {
+      const { error } = await supabase
+        .from("tenant_members")
+        .update({ role: r as never })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
+      toast.success("Rol actualizado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeMember = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("tenant_members").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
+      toast.success("Miembro eliminado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <DashboardShell>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Equipo</h1>
+        <p className="text-muted-foreground">Gestiona quién tiene acceso a tu tienda y sus roles.</p>
+      </div>
+
+      {canManage && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" /> Agregar miembro
+            </CardTitle>
+            <CardDescription>El usuario debe tener una cuenta registrada en Nica-POS.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="email">Correo</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="cajero@correo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Rol</Label>
+                <Select value={newRole} onValueChange={(v) => setNewRole(v as typeof newRole)}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="cashier">Cajero</SelectItem>
+                    <SelectItem value="accountant">Contador</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={() => invite.mutate()} disabled={!email.trim() || invite.isPending}>
+                {invite.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Agregar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Miembros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {members.isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Correo</TableHead>
+                  <TableHead>Rol</TableHead>
+                  {canManage && <TableHead className="text-right">Acciones</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(members.data ?? []).map((m: any) => {
+                  const isOwner = m.role === "owner";
+                  return (
+                    <TableRow key={m.id}>
+                      <TableCell className="font-medium">{m.profile?.full_name ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{m.profile?.email ?? "—"}</TableCell>
+                      <TableCell>
+                        {canManage && !isOwner ? (
+                          <Select value={m.role} onValueChange={(v) => updateRole.mutate({ id: m.id, role: v })}>
+                            <SelectTrigger className="w-36">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Administrador</SelectItem>
+                              <SelectItem value="cashier">Cajero</SelectItem>
+                              <SelectItem value="accountant">Contador</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Badge variant={isOwner ? "default" : "secondary"}>{roleLabels[m.role]}</Badge>
+                        )}
+                      </TableCell>
+                      {canManage && (
+                        <TableCell className="text-right">
+                          {!isOwner && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeMember.mutate(m.id)}
+                              disabled={removeMember.isPending}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </DashboardShell>
+  );
+}
