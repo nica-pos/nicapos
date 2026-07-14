@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +16,7 @@ import {
   Warehouse,
   HandCoins,
   Truck,
+  Tag,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const navItems = [
   { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
   { to: "/pos", label: "Punto de Venta", icon: ShoppingCart },
   { to: "/productos", label: "Productos", icon: Package },
+  { to: "/promociones", label: "Promociones", icon: Tag },
   { to: "/inventario", label: "Inventario", icon: Warehouse },
   { to: "/caja", label: "Caja", icon: Wallet },
   { to: "/clientes", label: "Clientes y Créditos", icon: HandCoins },
@@ -55,6 +57,39 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { tenant, memberships } = useActiveTenant();
   const { data: isSuperadmin } = useIsSuperadmin();
+
+  // Aplica el color de marca de la tienda en tiempo real (white-labeling).
+  const primaryColor = tenant?.primary_color ?? null;
+  useEffect(() => {
+    const root = document.documentElement;
+    if (primaryColor) {
+      root.style.setProperty("--primary", primaryColor);
+      root.style.setProperty("--ring", primaryColor);
+      root.style.setProperty("--sidebar-primary", primaryColor);
+    } else {
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--ring");
+      root.style.removeProperty("--sidebar-primary");
+    }
+  }, [primaryColor]);
+
+  // Aplica el favicon de la tienda si está configurado.
+  const faviconUrl = tenant?.favicon_url ?? null;
+  useEffect(() => {
+    if (!faviconUrl) return;
+    let link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    const prev = link.href;
+    link.href = faviconUrl;
+    return () => {
+      if (link) link.href = prev;
+    };
+  }, [faviconUrl]);
+
 
   async function handleSignOut() {
     await queryClient.cancelQueries();

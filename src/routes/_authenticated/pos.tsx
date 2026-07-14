@@ -41,6 +41,7 @@ import {
   type PaymentMethod,
 } from "@/hooks/use-pos";
 import { useFiscalSettings, useLatestRate, formatNIO, formatUSD } from "@/hooks/use-fiscal";
+import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   component: PosPage,
@@ -57,6 +58,7 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
 function PosPage() {
   const navigate = useNavigate();
   const { data: products } = useProducts();
+  const { data: promotions } = usePromotions();
   const { data: session } = useOpenCashSession();
   const { data: fiscal } = useFiscalSettings();
   const rate = useLatestRate() ?? 0;
@@ -113,13 +115,18 @@ function PosPage() {
         next[idx] = { ...next[idx], quantity: next[idx].quantity + 1 };
         return next;
       }
+      const { price, promo } = applyPromotions(
+        Number(p.price_usd),
+        { id: p.id, category_id: p.category_id },
+        promotions ?? [],
+      );
       return [
         ...prev,
         {
           product_id: p.id,
-          name: p.name,
+          name: promo ? `${p.name} (${promo.name})` : p.name,
           quantity: 1,
-          unit_price_usd: Number(p.price_usd),
+          unit_price_usd: price,
           is_tax_exempt: p.is_tax_exempt,
         },
       ];
@@ -322,12 +329,32 @@ function PosPage() {
                         {[p.barcode, p.category, p.brand].filter(Boolean).join(" · ")}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{formatUSD(Number(p.price_usd))}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Stock: {Number(p.stock)}
-                      </p>
-                    </div>
+                    {(() => {
+                      const { price, promo } = applyPromotions(
+                        Number(p.price_usd),
+                        { id: p.id, category_id: p.category_id },
+                        promotions ?? [],
+                      );
+                      return (
+                        <div className="text-right">
+                          {promo ? (
+                            <p className="font-semibold text-primary">
+                              {formatUSD(price)}{" "}
+                              <span className="text-xs text-muted-foreground line-through">
+                                {formatUSD(Number(p.price_usd))}
+                              </span>
+                            </p>
+                          ) : (
+                            <p className="font-semibold">
+                              {formatUSD(Number(p.price_usd))}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">
+                            Stock: {Number(p.stock)}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </button>
                 ))}
               </div>
