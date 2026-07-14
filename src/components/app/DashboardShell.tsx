@@ -8,6 +8,8 @@ import {
   Settings,
   Users,
   ShieldCheck,
+  Coins,
+  FileText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,6 +29,8 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
+  { to: "/fiscal", label: "Moneda e impuestos", icon: Coins },
+  { to: "/documentos", label: "Documentos", icon: FileText },
   { to: "/equipo", label: "Equipo", icon: Users },
   { to: "/configuracion", label: "Configuración", icon: Settings },
 ] as const;
