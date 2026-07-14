@@ -44,14 +44,18 @@ export function useCreateLookup(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: { name: string; brand_id?: string | null }) => {
-      const payload: Record<string, unknown> = {
-        tenant_id: tenant!.id,
-        name: v.name,
-      };
-      if (table === "product_models") payload.brand_id = v.brand_id ?? null;
+      if (table === "product_models") {
+        const { data, error } = await supabase
+          .from("product_models")
+          .insert({ tenant_id: tenant!.id, name: v.name, brand_id: v.brand_id ?? null })
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
       const { data, error } = await supabase
         .from(table)
-        .insert(payload)
+        .insert({ tenant_id: tenant!.id, name: v.name })
         .select()
         .single();
       if (error) throw error;
@@ -60,6 +64,7 @@ export function useCreateLookup(
     onSuccess: () => qc.invalidateQueries({ queryKey: [table] }),
   });
 }
+
 
 export function useDeleteLookup(
   table: "categories" | "brands" | "product_models",
