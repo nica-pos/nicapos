@@ -237,6 +237,56 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          credit_limit_usd: number
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          ruc: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          credit_limit_usd?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          ruc?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          credit_limit_usd?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          ruc?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -378,6 +428,208 @@ export type Database = {
           },
           {
             foreignKeyName: "inventory_movements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      layaway_items: {
+        Row: {
+          id: string
+          layaway_id: string
+          name: string
+          product_id: string | null
+          quantity: number
+          tenant_id: string
+          unit_price_usd: number
+        }
+        Insert: {
+          id?: string
+          layaway_id: string
+          name: string
+          product_id?: string | null
+          quantity?: number
+          tenant_id: string
+          unit_price_usd?: number
+        }
+        Update: {
+          id?: string
+          layaway_id?: string
+          name?: string
+          product_id?: string | null
+          quantity?: number
+          tenant_id?: string
+          unit_price_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "layaway_items_layaway_id_fkey"
+            columns: ["layaway_id"]
+            isOneToOne: false
+            referencedRelation: "layaways"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "layaway_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "layaway_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      layaway_payments: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          created_by: string | null
+          id: string
+          layaway_id: string
+          method: string
+          note: string | null
+          tenant_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          layaway_id: string
+          method?: string
+          note?: string | null
+          tenant_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          layaway_id?: string
+          method?: string
+          note?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "layaway_payments_layaway_id_fkey"
+            columns: ["layaway_id"]
+            isOneToOne: false
+            referencedRelation: "layaways"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "layaway_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      layaways: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          expires_at: string | null
+          id: string
+          paid_usd: number
+          status: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          expires_at?: string | null
+          id?: string
+          paid_usd?: number
+          status?: string
+          tenant_id: string
+          total_usd?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          expires_at?: string | null
+          id?: string
+          paid_usd?: number
+          status?: string
+          tenant_id?: string
+          total_usd?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "layaways_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "layaways_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payable_payments: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          created_by: string | null
+          id: string
+          method: string
+          note: string | null
+          purchase_order_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          method?: string
+          note?: string | null
+          purchase_order_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          method?: string
+          note?: string | null
+          purchase_order_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payable_payments_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payable_payments_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -661,6 +913,236 @@ export type Database = {
           },
         ]
       }
+      purchase_order_items: {
+        Row: {
+          id: string
+          name: string
+          product_id: string | null
+          purchase_order_id: string
+          quantity: number
+          tenant_id: string
+          unit_cost_usd: number
+        }
+        Insert: {
+          id?: string
+          name: string
+          product_id?: string | null
+          purchase_order_id: string
+          quantity?: number
+          tenant_id: string
+          unit_cost_usd?: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          product_id?: string | null
+          purchase_order_id?: string
+          quantity?: number
+          tenant_id?: string
+          unit_cost_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expected_at: string | null
+          id: string
+          notes: string | null
+          paid_usd: number
+          po_number: number
+          received_at: string | null
+          status: string
+          supplier_id: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expected_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_usd?: number
+          po_number?: number
+          received_at?: string | null
+          status?: string
+          supplier_id: string
+          tenant_id: string
+          total_usd?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expected_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_usd?: number
+          po_number?: number
+          received_at?: string | null
+          status?: string
+          supplier_id?: string
+          tenant_id?: string
+          total_usd?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receivable_payments: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          created_by: string | null
+          id: string
+          method: string
+          note: string | null
+          receivable_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          method?: string
+          note?: string | null
+          receivable_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          method?: string
+          note?: string | null
+          receivable_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receivable_payments_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "receivables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receivable_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receivables: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          description: string | null
+          due_date: string | null
+          id: string
+          paid_usd: number
+          sale_id: string | null
+          status: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          paid_usd?: number
+          sale_id?: string | null
+          status?: string
+          tenant_id: string
+          total_usd?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          paid_usd?: number
+          sale_id?: string | null
+          status?: string
+          tenant_id?: string
+          total_usd?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receivables_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receivables_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receivables_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_items: {
         Row: {
           created_at: string
@@ -914,6 +1396,56 @@ export type Database = {
           },
         ]
       }
+      suppliers: {
+        Row: {
+          address: string | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          ruc: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          ruc?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          ruc?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_members: {
         Row: {
           created_at: string
@@ -1051,6 +1583,30 @@ export type Database = {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      receive_purchase_order: {
+        Args: { _po_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          expected_at: string | null
+          id: string
+          notes: string | null
+          paid_usd: number
+          po_number: number
+          received_at: string | null
+          status: string
+          supplier_id: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "purchase_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       record_inventory_movement: {
         Args: {
           _movement_type: string
@@ -1075,6 +1631,89 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "inventory_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_layaway_payment: {
+        Args: {
+          _amount: number
+          _layaway_id: string
+          _method?: string
+          _note?: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          expires_at: string | null
+          id: string
+          paid_usd: number
+          status: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "layaways"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_payable_payment: {
+        Args: {
+          _amount: number
+          _method?: string
+          _note?: string
+          _po_id: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          expected_at: string | null
+          id: string
+          notes: string | null
+          paid_usd: number
+          po_number: number
+          received_at: string | null
+          status: string
+          supplier_id: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "purchase_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_receivable_payment: {
+        Args: {
+          _amount: number
+          _method?: string
+          _note?: string
+          _receivable_id: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          description: string | null
+          due_date: string | null
+          id: string
+          paid_usd: number
+          sale_id: string | null
+          status: string
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "receivables"
           isOneToOne: true
           isSetofReturn: false
         }
