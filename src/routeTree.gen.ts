@@ -26,6 +26,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/caja'
+import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -115,6 +116,11 @@ const AuthenticatedCajaRoute = AuthenticatedCajaRouteImport.update({
   path: '/caja',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBitacoraRoute = AuthenticatedBitacoraRouteImport.update({
+  id: '/bitacora',
+  path: '/bitacora',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
+  '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
+  '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
+  '/_authenticated/bitacora': typeof AuthenticatedBitacoraRoute
   '/_authenticated/caja': typeof AuthenticatedCajaRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/auditoria'
+    | '/bitacora'
     | '/caja'
     | '/clientes'
     | '/configuracion'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/auditoria'
+    | '/bitacora'
     | '/caja'
     | '/clientes'
     | '/configuracion'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/auditoria'
+    | '/_authenticated/bitacora'
     | '/_authenticated/caja'
     | '/_authenticated/clientes'
     | '/_authenticated/configuracion'
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCajaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bitacora': {
+      id: '/_authenticated/bitacora'
+      path: '/bitacora'
+      fullPath: '/bitacora'
+      preLoaderRoute: typeof AuthenticatedBitacoraRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/auditoria': {
       id: '/_authenticated/auditoria'
       path: '/auditoria'
@@ -401,6 +420,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
+  AuthenticatedBitacoraRoute: typeof AuthenticatedBitacoraRoute
   AuthenticatedCajaRoute: typeof AuthenticatedCajaRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
@@ -418,6 +438,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
+  AuthenticatedBitacoraRoute: AuthenticatedBitacoraRoute,
   AuthenticatedCajaRoute: AuthenticatedCajaRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,

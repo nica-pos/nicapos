@@ -232,6 +232,19 @@ export function useCreateSale() {
         .maybeSingle();
       const saleNumber = (last?.sale_number ?? 0) + 1;
 
+      // fetch current costs for COGS capture
+      const productIds = v.lines
+        .map((l) => l.product_id)
+        .filter((id): id is string => !!id);
+      const costMap = new Map<string, number>();
+      if (productIds.length) {
+        const { data: costRows } = await supabase
+          .from("products")
+          .select("id, cost_usd")
+          .in("id", productIds);
+        for (const r of costRows ?? []) costMap.set(r.id, Number(r.cost_usd));
+      }
+
       let subtotal = 0;
       let tax = 0;
       const itemsPayload = v.lines.map((l) => {
@@ -246,11 +259,13 @@ export function useCreateSale() {
           name: l.name,
           quantity: l.quantity,
           unit_price_usd: l.unit_price_usd,
+          unit_cost_usd: l.product_id ? (costMap.get(l.product_id) ?? 0) : 0,
           tax_usd: Number(lineTax.toFixed(2)),
           line_total_usd: Number((lineSubtotal + lineTax).toFixed(2)),
         };
       });
       const total = subtotal + tax;
+
 
       const { data: sale, error: saleErr } = await supabase
         .from("sales")
