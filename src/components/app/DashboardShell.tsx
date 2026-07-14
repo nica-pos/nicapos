@@ -35,6 +35,7 @@ const navItems = [
   { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
   { to: "/pos", label: "Punto de Venta", icon: ShoppingCart },
   { to: "/productos", label: "Productos", icon: Package },
+  { to: "/inventario", label: "Inventario", icon: Warehouse },
   { to: "/caja", label: "Caja", icon: Wallet },
   { to: "/fiscal", label: "Moneda e impuestos", icon: Coins },
   { to: "/documentos", label: "Documentos", icon: FileText },
