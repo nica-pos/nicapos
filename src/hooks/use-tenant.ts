@@ -24,6 +24,7 @@ export type MembershipWithTenant = TenantMember & { tenant: Tenant };
 export function useMyMemberships() {
   return useQuery({
     queryKey: ["my-memberships"],
+    staleTime: 5 * 60_000,
     queryFn: async (): Promise<MembershipWithTenant[]> => {
       const { data, error } = await supabase
         .from("tenant_members")
