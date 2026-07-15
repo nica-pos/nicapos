@@ -210,7 +210,6 @@ function OnboardingPage() {
                 })}
               </div>
             </div>
-            </div>
 
             <Button
               className="w-full"
