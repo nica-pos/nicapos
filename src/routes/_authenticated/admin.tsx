@@ -422,8 +422,8 @@ function AdminPage() {
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem disabled>
-                          Ver detalle (próximamente)
+                        <DropdownMenuItem onClick={() => setDetailTenant(t)}>
+                          <Eye className="mr-2 h-4 w-4" /> Ver detalle
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
