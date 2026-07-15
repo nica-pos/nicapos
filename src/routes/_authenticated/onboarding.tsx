@@ -132,17 +132,19 @@ function OnboardingPage() {
     onError: (e: Error) => toast.error(e.message ?? "No se pudo crear la tienda"),
   });
 
-  // Bloqueo: 1 sola tienda activa por usuario (después de todos los hooks)
+  // Bloqueo: 1 sola tienda activa por usuario — redirige vía efecto
   const existingActive = (memberships ?? []).find((m) => {
     const s = m.tenant?.status as string | undefined;
     return s && ["trial", "active", "pending_payment", "pending_verification"].includes(s);
   });
-  if (!loadingMemberships && existingActive) {
+  useEffect(() => {
+    if (loadingMemberships || !existingActive) return;
     const s = existingActive.tenant.status as string;
-    if (s === "pending_payment") return <Navigate to="/pago-pendiente" replace />;
-    if (s === "pending_verification") return <Navigate to="/verificacion-pendiente" replace />;
-    return <Navigate to="/dashboard" replace />;
-  }
+    if (s === "pending_payment") navigate({ to: "/pago-pendiente", replace: true });
+    else if (s === "pending_verification") navigate({ to: "/verificacion-pendiente", replace: true });
+    else navigate({ to: "/dashboard", replace: true });
+  }, [loadingMemberships, existingActive, navigate]);
+  const blocking = !loadingMemberships && !!existingActive;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
