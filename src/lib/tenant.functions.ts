@@ -13,6 +13,83 @@ const tenantStatusInput = z.object({
   status: z.enum(["trial", "active", "suspended", "cancelled"]),
 });
 
+const createClientInput = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  tenantName: z.string().min(2).max(80),
+  planId: z.string().uuid(),
+  durationDays: z.number().int().min(1).max(3650),
+});
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 40) || "tienda";
+}
+
+export const adminCreateClient = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => createClientInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isSuper, error: roleErr } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "superadmin",
+    });
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isSuper) throw new Error("Solo el superadmin puede crear clientes.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 1) Crear usuario en Auth (email confirmado)
+    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email.toLowerCase(),
+      password: data.password,
+      email_confirm: true,
+    });
+    if (createErr || !created?.user) {
+      throw new Error(createErr?.message ?? "No se pudo crear el usuario.");
+    }
+    const newUserId = created.user.id;
+
+    // 2) Crear tenant activo con plan asignado
+    const slug = `${slugify(data.tenantName)}-${Math.random().toString(36).slice(2, 6)}`;
+    const { data: tenant, error: tErr } = await supabaseAdmin
+      .from("tenants")
+      .insert({
+        name: data.tenantName,
+        slug,
+        owner_id: newUserId,
+        plan_id: data.planId,
+        status: "active",
+        trial_ends_at: null,
+      })
+      .select("id")
+      .single();
+    if (tErr || !tenant) {
+      // Rollback: eliminar usuario si falló el tenant
+      await supabaseAdmin.auth.admin.deleteUser(newUserId).catch(() => {});
+      throw new Error(tErr?.message ?? "No se pudo crear la tienda.");
+    }
+
+    // 3) Registrar suscripción manual con duración
+    const endsAt = new Date(Date.now() + data.durationDays * 24 * 60 * 60 * 1000).toISOString();
+    await supabaseAdmin.from("tenant_subscriptions").insert({
+      tenant_id: tenant.id,
+      plan_id: data.planId,
+      provider: "manual",
+      status: "active",
+      current_period_end: endsAt,
+      raw: { created_by: context.userId, duration_days: data.durationDays },
+    });
+
+    return { ok: true, tenantId: tenant.id, userId: newUserId };
+  });
+
+
 export const addTenantMemberByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => addMemberInput.parse(input))
