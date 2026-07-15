@@ -18,6 +18,7 @@ import {
   Store,
   Pencil,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useIsSuperadmin, usePlans } from "@/hooks/use-tenant";
-import { getAdminTenantSummaries, setAdminTenantStatus, adminCreateClient } from "@/lib/tenant.functions";
+import { getAdminTenantSummaries, setAdminTenantStatus, adminCreateClient, adminDeleteTenant } from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
