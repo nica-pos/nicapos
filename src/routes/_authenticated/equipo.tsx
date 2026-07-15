@@ -84,12 +84,16 @@ function TeamPage() {
   const invite = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
-      await addMember({ data: { tenantId: tenant.id, email: email.trim(), role: newRole } });
+      return await addMember({ data: { tenantId: tenant.id, email: email.trim(), role: newRole } });
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       setEmail("");
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
-      toast.success("Miembro agregado");
+      if (res?.invited) {
+        toast.success("Invitación enviada. Se unirá automáticamente al registrarse con ese correo.");
+      } else {
+        toast.success("Miembro agregado");
+      }
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
