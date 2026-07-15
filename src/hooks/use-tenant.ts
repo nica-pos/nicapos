@@ -38,7 +38,36 @@ export function useMyMemberships() {
         .eq("user_id", uid)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as MembershipWithTenant[];
+      const real = (data ?? []) as MembershipWithTenant[];
+
+      // Superadmins can operate on any tenant. If they aren't already a
+      // member, expose all tenants as virtual "owner" memberships so the
+      // tenant selector and RLS-scoped screens work for them too.
+      const { data: isSuper } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "superadmin")
+        .maybeSingle();
+      if (!isSuper) return real;
+
+      const { data: allTenants } = await supabase
+        .from("tenants")
+        .select("*")
+        .order("created_at", { ascending: true });
+      const existingIds = new Set(real.map((m) => m.tenant_id));
+      const virtual: MembershipWithTenant[] = (allTenants ?? [])
+        .filter((t) => !existingIds.has(t.id))
+        .map((t) => ({
+          id: `virtual-${t.id}`,
+          tenant_id: t.id,
+          user_id: uid,
+          role: "owner" as TenantRole,
+          created_at: t.created_at,
+          updated_at: t.updated_at,
+          tenant: t,
+        }) as unknown as MembershipWithTenant);
+      return [...real, ...virtual];
     },
   });
 }
