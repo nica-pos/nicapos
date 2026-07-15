@@ -149,24 +149,24 @@ function DocumentsPage() {
       window.print();
       return;
     }
-    const field =
+    const payload: Record<string, number> =
       docType === "ticket"
-        ? "next_ticket_number"
+        ? { next_ticket_number: nextNum + 1 }
         : docType === "factura"
-        ? "next_invoice_number"
-        : "next_proforma_number";
+        ? { next_invoice_number: nextNum + 1 }
+        : { next_proforma_number: nextNum + 1 };
     window.print();
-    // Increment correlative after printing
     try {
       await supabase
         .from("fiscal_settings")
-        .update({ [field]: nextNum + 1 })
+        .update(payload)
         .eq("tenant_id", tenant.id);
       queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant.id] });
     } catch {
       // silent — printing is what matters
     }
   }
+
 
 
   return (
