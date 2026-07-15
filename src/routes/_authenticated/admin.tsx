@@ -162,6 +162,20 @@ function AdminPage() {
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
+  const deleteTenant = useMutation({
+    mutationFn: (tenantId: string) => deleteTenantFn({ data: { tenantId, deleteOrphanUsers: true } }),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+      const n = res?.deletedUserIds?.length ?? 0;
+      toast.success(
+        n > 0
+          ? `Tienda eliminada. Se eliminaron ${n} usuario(s) huérfano(s).`
+          : "Tienda eliminada por completo.",
+      );
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
   const list = tenants.data ?? [];
 
   const filtered = useMemo(() => {
