@@ -678,6 +678,42 @@ export type Database = {
           },
         ]
       }
+      payment_provider_settings: {
+        Row: {
+          client_id: string | null
+          client_secret_ciphertext: string | null
+          created_at: string
+          id: string
+          is_enabled: boolean
+          mode: string
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_secret_ciphertext?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          mode?: string
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_secret_ciphertext?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          mode?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           created_at: string
@@ -1559,6 +1595,63 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          external_customer_id: string | null
+          external_subscription_id: string | null
+          id: string
+          plan_id: string | null
+          provider: string
+          raw: Json
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          external_customer_id?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          plan_id?: string | null
+          provider: string
+          raw?: Json
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          external_customer_id?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          plan_id?: string | null
+          provider?: string
+          raw?: Json
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

@@ -1,55 +1,77 @@
-# Activar todos los módulos del sistema
+# Cobro de planes con Stripe y PayPal
 
-El sistema tiene 15 módulos ya construidos visualmente. Muchos leen datos reales, otros tienen botones o secciones sin conectar. Voy a auditar módulo por módulo y dejar todo funcional, en fases priorizadas por importancia operativa (una tienda no puede vender sin POS y caja; sí puede esperar reportes fiscales avanzados).
+Objetivo: que los dueños de tienda paguen su plan (Free/Pro/etc) con **Stripe** o **PayPal**, y que tú (superadmin) puedas pegar/actualizar las credenciales de PayPal desde `/admin` cuando quieras, sin tocar código.
 
-## Fase 1 — Núcleo operativo (vender y controlar dinero)
+## Fase 1 — Stripe (integrado en Lovable)
 
-Sin esto la tienda no funciona.
+- Activo la integración de pagos Stripe de Lovable (no necesitas cuenta propia para empezar; después la reclamas para recibir el dinero).
+- Creo los productos/precios en Stripe a partir de la tabla `plans` que ya existe (Free se salta; los de pago se sincronizan).
+- En la landing (`/precios`) y en `Configuración → Plan`, el botón "Suscribirme" abre Stripe Checkout.
+- Webhook de Stripe (`/api/public/webhooks/stripe`) actualiza el `plan_id` y estado del tenant cuando el pago se confirma / se cancela / falla.
 
-- **Dashboard** — verificar métricas reales (ventas del día, caja abierta, stock crítico, cuentas por cobrar) y accesos rápidos.
-- **POS** — flujo completo: buscar producto, agregar al carrito, aplicar descuento/promoción, cobrar (efectivo/tarjeta/mixto), imprimir/mostrar recibo, descontar inventario.
-- **Caja** — abrir/cerrar sesión, arqueo, ingresos/egresos, historial de movimientos y cierres.
-- **Productos** — CRUD completo con categorías, marcas, modelos, precio/costo, código de barras, stock inicial.
-- **Inventario** — movimientos manuales (entrada/salida/ajuste), auditorías de stock, alertas de stock bajo, kardex por producto.
+## Fase 2 — PayPal (manual, credenciales tuyas configurables)
 
-## Fase 2 — Relaciones comerciales
+### Panel superadmin
+Nueva sección en `/admin → Configuración de pagos`:
+- Campos: `Client ID`, `Client Secret`, modo (`Sandbox` / `Live`), activar/desactivar PayPal.
+- Botón "Probar conexión" (llama a PayPal para verificar que el token OAuth funciona).
+- Guardar y editar cuando quieras.
 
-- **Clientes** — CRUD, historial de compras, saldo por cobrar, apartados (layaways) con abonos.
-- **Proveedores** — CRUD, órdenes de compra, recepción de mercancía (dispara movimientos de inventario), pagos a proveedores.
-- **Promociones** — activar/desactivar, aplicar automáticamente en POS por producto/categoría/monto mínimo.
+### Almacenamiento seguro
+- Tabla nueva `payment_provider_settings` (una fila por proveedor, solo lectura/escritura para superadmin vía RLS).
+- El `client_secret` se cifra con AES-256-GCM usando una clave del entorno (`PAYPAL_CREDENTIALS_SECRET`, generada automáticamente).
+- Solo server functions con rol `superadmin` pueden leer/escribir; nunca llega al navegador en texto plano.
 
-## Fase 3 — Administración de la tienda
+### Flujo de pago
+- Server function `createPaypalSubscription({ plan_id })`:
+  1. Lee credenciales cifradas → obtiene access token de PayPal.
+  2. Crea/reutiliza `Product` + `Plan` de PayPal correspondientes al plan interno.
+  3. Crea `Subscription` y devuelve el `approve_url`.
+  4. Redirige al usuario a PayPal.
+- Endpoint público `/api/public/webhooks/paypal` verifica la firma con las credenciales guardadas y actualiza el estado del tenant (activo / cancelado / fallido).
+- Si PayPal está desactivado en el panel superadmin, el botón "Pagar con PayPal" no aparece.
 
-- **Equipo** — invitar miembros por correo, asignar rol (owner/admin/cashier), remover miembros.
-- **Configuración** — datos de tienda, logo, colores, tipo de cambio manual, ajustes generales.
-- **Fiscal** — datos fiscales (RUC, razón social, régimen), configuración de impuestos, plantillas de comprobantes.
-- **Documentos** — generación de facturas/recibos/tickets desde ventas ya registradas.
+## Fase 3 — UI del usuario final
 
-## Fase 4 — Trazabilidad y control
+En `Configuración → Plan` (dentro de la tienda):
+- Muestra el plan actual y estado (activo, por vencer, cancelado).
+- Botones: "Pagar con tarjeta (Stripe)" y "Pagar con PayPal" (este último solo si superadmin lo activó).
+- Después de pagar, el tenant queda en el plan nuevo automáticamente vía webhook.
 
-- **Auditoría** — visor de `audit_logs` con filtros por usuario, entidad, fecha y acción.
-- **Bitácora** — actividad reciente de la tienda (ventas, cambios de precio, aperturas de caja).
-- **Admin (Superadmin)** — ya funciona: listar tiendas, cambiar estado, editar planes. Verificar que no falte nada.
-
-## Método por módulo
-
-Para cada uno haré exactamente esto:
-
-1. Leer el archivo actual y las tablas/funciones RPC involucradas.
-2. Listar qué ya funciona y qué está pendiente o roto.
-3. Implementar lo pendiente sin romper lo existente (nuevas mutations, formularios, diálogos, conexiones a Supabase).
-4. Verificar RLS y `GRANT` de cada tabla usada.
-5. Probar el flujo mentalmente y dejar el módulo cerrado antes de pasar al siguiente.
+En la landing `/precios`:
+- Mismos dos botones por plan, redirigen a auth si no hay sesión.
 
 ## Detalles técnicos
 
-- Toda mutación pasa por `useMutation` + `queryClient.invalidateQueries` para refrescar UI.
-- Todo formulario valida con Zod antes de tocar la base.
-- Los movimientos de inventario y pagos usan las funciones RPC existentes (`record_inventory_movement`, `receive_purchase_order`, `record_receivable_payment`, `record_payable_payment`, `record_layaway_payment`) — no reimplemento lógica ya en la base.
-- Cuando un módulo necesite tablas nuevas (ejemplo: `sucursales` si aparece), abro una migración aparte con GRANT + RLS.
-- Nada de datos de ejemplo hardcodeados: todo viene de la base filtrado por `tenant_id` de la tienda activa.
-- Superadmin sigue aislado: no ve datos operativos de tiendas ajenas fuera de `/admin`.
+- **Tablas nuevas**:
+  - `payment_provider_settings` (id, provider, is_enabled, mode, client_id, client_secret_ciphertext, updated_at, updated_by). RLS: solo superadmin.
+  - `tenant_subscriptions` (tenant_id, provider, external_subscription_id, status, current_period_end, plan_id). RLS: miembros del tenant leen su fila; solo webhooks (service role) escriben.
+- **Server fns nuevas** (todas en `src/lib/billing.functions.ts`):
+  - `getPaymentProviderSettings` (superadmin)
+  - `savePaymentProviderSettings` (superadmin, cifra el secret)
+  - `testPaypalCredentials` (superadmin)
+  - `createStripeCheckout({ plan_id })`
+  - `createPaypalSubscription({ plan_id })`
+  - `getMySubscription()`
+- **Server routes nuevas** (webhooks públicos con verificación de firma):
+  - `src/routes/api/public/webhooks/stripe.ts`
+  - `src/routes/api/public/webhooks/paypal.ts`
+- **Secrets**:
+  - Stripe: los inyecta Lovable al activar la integración.
+  - PayPal: no se piden por `add_secret` — el superadmin los pega en la UI. Solo se genera `PAYPAL_CREDENTIALS_SECRET` (clave de cifrado interna).
 
-## Entrega
+## Lo que NO incluye este plan
 
-Empezaré por la **Fase 1** en el siguiente mensaje una vez apruebes este plan. Cada fase la entregaré junta para que puedas probarla completa. Si quieres reordenar prioridades (por ejemplo, empezar por Equipo o Fiscal), dímelo antes de aprobar.
+- Facturación automática/reintentos avanzados (dejo que Stripe/PayPal manejen retries nativos).
+- Métodos manuales tipo transferencia bancaria (se puede agregar después con la misma estructura).
+- Cambio de plan a mitad de ciclo con prorrateo (por ahora: cancelar y crear nuevo).
+
+## Orden de entrega
+
+1. Migraciones (tablas + RLS + GRANT).
+2. Server fns + panel superadmin de credenciales PayPal.
+3. Activar Stripe integrado + productos.
+4. Webhooks Stripe + PayPal.
+5. UI de pago en `/precios` y en `Configuración → Plan`.
+
+Cuando apruebes, arranco por la Fase 1 (Stripe integrado) porque necesita activarse antes de escribir código, y en paralelo dejo la Fase 2 lista.
