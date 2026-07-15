@@ -18,6 +18,7 @@ import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPromocionesRouteImport } from './routes/_authenticated/promociones'
 import { Route as AuthenticatedProductosRouteImport } from './routes/_authenticated/productos'
 import { Route as AuthenticatedPosRouteImport } from './routes/_authenticated/pos'
+import { Route as AuthenticatedPagosRouteImport } from './routes/_authenticated/pagos'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedFiscalRouteImport } from './routes/_authenticated/fiscal'
@@ -30,6 +31,8 @@ import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
+import { Route as ApiPublicWebhooksPaypalRouteImport } from './routes/api/public/webhooks/paypal'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -75,6 +78,11 @@ const AuthenticatedProductosRoute = AuthenticatedProductosRouteImport.update({
 const AuthenticatedPosRoute = AuthenticatedPosRouteImport.update({
   id: '/pos',
   path: '/pos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPagosRoute = AuthenticatedPagosRouteImport.update({
+  id: '/pagos',
+  path: '/pagos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -138,6 +146,16 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
+  id: '/api/public/webhooks/stripe',
+  path: '/api/public/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWebhooksPaypalRoute = ApiPublicWebhooksPaypalRouteImport.update({
+  id: '/api/public/webhooks/paypal',
+  path: '/api/public/webhooks/paypal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -156,10 +174,13 @@ export interface FileRoutesByFullPath {
   '/fiscal': typeof AuthenticatedFiscalRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pagos': typeof AuthenticatedPagosRoute
   '/pos': typeof AuthenticatedPosRoute
   '/productos': typeof AuthenticatedProductosRoute
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
+  '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -178,10 +199,13 @@ export interface FileRoutesByTo {
   '/fiscal': typeof AuthenticatedFiscalRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pagos': typeof AuthenticatedPagosRoute
   '/pos': typeof AuthenticatedPosRoute
   '/productos': typeof AuthenticatedProductosRoute
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
+  '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -202,10 +226,13 @@ export interface FileRoutesById {
   '/_authenticated/fiscal': typeof AuthenticatedFiscalRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/pagos': typeof AuthenticatedPagosRoute
   '/_authenticated/pos': typeof AuthenticatedPosRoute
   '/_authenticated/productos': typeof AuthenticatedProductosRoute
   '/_authenticated/promociones': typeof AuthenticatedPromocionesRoute
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
+  '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -226,10 +253,13 @@ export interface FileRouteTypes {
     | '/fiscal'
     | '/inventario'
     | '/onboarding'
+    | '/pagos'
     | '/pos'
     | '/productos'
     | '/promociones'
     | '/proveedores'
+    | '/api/public/webhooks/paypal'
+    | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -248,10 +278,13 @@ export interface FileRouteTypes {
     | '/fiscal'
     | '/inventario'
     | '/onboarding'
+    | '/pagos'
     | '/pos'
     | '/productos'
     | '/promociones'
     | '/proveedores'
+    | '/api/public/webhooks/paypal'
+    | '/api/public/webhooks/stripe'
   id:
     | '__root__'
     | '/'
@@ -271,10 +304,13 @@ export interface FileRouteTypes {
     | '/_authenticated/fiscal'
     | '/_authenticated/inventario'
     | '/_authenticated/onboarding'
+    | '/_authenticated/pagos'
     | '/_authenticated/pos'
     | '/_authenticated/productos'
     | '/_authenticated/promociones'
     | '/_authenticated/proveedores'
+    | '/api/public/webhooks/paypal'
+    | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -283,6 +319,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PreciosRoute: typeof PreciosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicWebhooksPaypalRoute: typeof ApiPublicWebhooksPaypalRoute
+  ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -348,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/pos'
       fullPath: '/pos'
       preLoaderRoute: typeof AuthenticatedPosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pagos': {
+      id: '/_authenticated/pagos'
+      path: '/pagos'
+      fullPath: '/pagos'
+      preLoaderRoute: typeof AuthenticatedPagosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -434,6 +479,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/webhooks/stripe': {
+      id: '/api/public/webhooks/stripe'
+      path: '/api/public/webhooks/stripe'
+      fullPath: '/api/public/webhooks/stripe'
+      preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/paypal': {
+      id: '/api/public/webhooks/paypal'
+      path: '/api/public/webhooks/paypal'
+      fullPath: '/api/public/webhooks/paypal'
+      preLoaderRoute: typeof ApiPublicWebhooksPaypalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -450,6 +509,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFiscalRoute: typeof AuthenticatedFiscalRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPagosRoute: typeof AuthenticatedPagosRoute
   AuthenticatedPosRoute: typeof AuthenticatedPosRoute
   AuthenticatedProductosRoute: typeof AuthenticatedProductosRoute
   AuthenticatedPromocionesRoute: typeof AuthenticatedPromocionesRoute
@@ -469,6 +529,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFiscalRoute: AuthenticatedFiscalRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPagosRoute: AuthenticatedPagosRoute,
   AuthenticatedPosRoute: AuthenticatedPosRoute,
   AuthenticatedProductosRoute: AuthenticatedProductosRoute,
   AuthenticatedPromocionesRoute: AuthenticatedPromocionesRoute,
@@ -484,6 +545,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PreciosRoute: PreciosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicWebhooksPaypalRoute: ApiPublicWebhooksPaypalRoute,
+  ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

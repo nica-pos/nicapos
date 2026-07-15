@@ -1,5 +1,5 @@
 import { getFriendlyErrorMessage } from "@/lib/errors";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
@@ -271,6 +271,12 @@ function AdminPage() {
             Supervisa tiendas, suscripciones y planes de toda la red Nica-POS.
           </p>
         </div>
+        <Button asChild variant="outline">
+          <Link to="/pagos">
+            <DollarSign className="mr-2 h-4 w-4" />
+            Configuración de pagos
+          </Link>
+        </Button>
       </div>
 
       {/* KPIs */}
