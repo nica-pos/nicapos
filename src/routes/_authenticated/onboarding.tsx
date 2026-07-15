@@ -78,12 +78,25 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: plans } = usePlans();
+  const { data: memberships, isLoading: loadingMemberships } = useMyMemberships();
   const [name, setName] = useState("");
   const [ruc, setRuc] = useState("");
   const [planId, setPlanId] = useState<string | null>(null);
 
   const selectedPlan = (plans ?? []).find((p) => p.id === planId);
   const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0;
+
+  // Bloqueo: 1 sola tienda activa por usuario
+  const existingActive = (memberships ?? []).find((m) => {
+    const s = m.tenant?.status as string | undefined;
+    return s && ["trial", "active", "pending_payment", "pending_verification"].includes(s);
+  });
+  if (!loadingMemberships && existingActive) {
+    const s = existingActive.tenant.status as string;
+    if (s === "pending_payment") return <Navigate to="/pago-pendiente" replace />;
+    if (s === "pending_verification") return <Navigate to="/verificacion-pendiente" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const createTenant = useMutation({
     mutationFn: async () => {
