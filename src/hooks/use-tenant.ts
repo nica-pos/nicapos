@@ -26,9 +26,16 @@ export function useMyMemberships() {
     queryKey: ["my-memberships"],
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<MembershipWithTenant[]> => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return [];
+      // IMPORTANT: filter explicitly by the current user. The RLS SELECT
+      // policy allows superadmins to read ALL memberships, which would
+      // otherwise leak other tenants' data into the personal dashboard.
       const { data, error } = await supabase
         .from("tenant_members")
         .select("*, tenant:tenants(*)")
+        .eq("user_id", uid)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []) as MembershipWithTenant[];
