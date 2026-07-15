@@ -265,15 +265,3 @@ export const adminDeleteTenant = createServerFn({ method: "POST" })
 
     return { ok: true, deletedUserIds };
   });
-
-    if (roleError) throw new Error(roleError.message);
-    if (!isSuper) throw new Error("Solo el superadmin puede cambiar estados de tiendas.");
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("tenants")
-      .update({ status: data.status })
-      .eq("id", data.tenantId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
