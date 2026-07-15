@@ -108,12 +108,24 @@ function ConfigPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="logo">URL del logo</Label>
-                <Input id="logo" placeholder="https://..." value={logoUrl} disabled={!canEdit} onChange={(e) => setLogoUrl(e.target.value)} />
+                <Label htmlFor="logo">Logo</Label>
+                <LogoUploader
+                  tenantId={tenant.id}
+                  disabled={!canEdit}
+                  value={logoUrl}
+                  onChange={setLogoUrl}
+                  field="logo"
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="favicon">URL del favicon</Label>
-                <Input id="favicon" placeholder="https://..." value={faviconUrl} disabled={!canEdit} onChange={(e) => setFaviconUrl(e.target.value)} />
+                <Label htmlFor="favicon">Favicon</Label>
+                <LogoUploader
+                  tenantId={tenant.id}
+                  disabled={!canEdit}
+                  value={faviconUrl}
+                  onChange={setFaviconUrl}
+                  field="favicon"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Color principal</Label>
