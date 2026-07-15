@@ -261,6 +261,10 @@ function AdminPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="default" onClick={() => setCreatingClient(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Crear cliente
+          </Button>
           <Button asChild variant="default">
             <Link to="/admin/pagos-pendientes">
               <CheckCircle2 className="mr-2 h-4 w-4" />
