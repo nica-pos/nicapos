@@ -340,6 +340,11 @@ function DocumentsPage() {
                 breakdown={breakdown}
                 rate={rate}
                 nio={nio}
+                logoUrl={logoUrl}
+                primaryColor={primaryColor}
+                docNumber={docNumber}
+                ticketHeader={ticketHeader}
+                thankYou={thankYou}
               />
             ) : (
               <InvoiceView
@@ -354,8 +359,12 @@ function DocumentsPage() {
                 rate={rate}
                 nio={nio}
                 isProforma={docType === "proforma"}
+                logoUrl={logoUrl}
+                primaryColor={primaryColor}
+                docNumber={docNumber}
               />
             )}
+
           </div>
           {!rate && (
             <p className="mt-3 text-sm text-muted-foreground no-print">
