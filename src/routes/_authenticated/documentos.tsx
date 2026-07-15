@@ -48,6 +48,7 @@ function newItem(): LineItem {
 }
 
 function DocumentsPage() {
+  const queryClient = useQueryClient();
   const { tenant } = useActiveTenant();
   const { data: settings } = useFiscalSettings();
   const rate = useLatestRate();
@@ -56,6 +57,7 @@ function DocumentsPage() {
   const [customerRuc, setCustomerRuc] = useState("");
   const [items, setItems] = useState<LineItem[]>([newItem()]);
   const [loadOpen, setLoadOpen] = useState(false);
+
 
   const recentSales = useQuery({
     queryKey: ["documentos-recent-sales", tenant?.id],
