@@ -55,6 +55,48 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          account_holder: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          created_at: string
+          currency: string
+          id: string
+          instructions: string | null
+          is_active: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          account_holder: string
+          account_number: string
+          account_type?: string
+          bank_name: string
+          created_at?: string
+          currency: string
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          account_holder?: string
+          account_number?: string
+          account_type?: string
+          bank_name?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
@@ -740,6 +782,85 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      payment_submissions: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          months_covered: number | null
+          plan_id: string
+          receipt_url: string
+          reference: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          currency: string
+          id?: string
+          months_covered?: number | null
+          plan_id: string
+          receipt_url: string
+          reference?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          months_covered?: number | null
+          plan_id?: string
+          receipt_url?: string
+          reference?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_submissions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_submissions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_submissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plans: {
         Row: {
@@ -1927,7 +2048,13 @@ export type Database = {
     }
     Enums: {
       app_role: "superadmin" | "user"
-      subscription_status: "trial" | "active" | "suspended" | "cancelled"
+      subscription_status:
+        | "trial"
+        | "active"
+        | "suspended"
+        | "cancelled"
+        | "pending_payment"
+        | "pending_verification"
       tenant_role: "owner" | "admin" | "cashier" | "accountant"
     }
     CompositeTypes: {
@@ -2057,7 +2184,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["superadmin", "user"],
-      subscription_status: ["trial", "active", "suspended", "cancelled"],
+      subscription_status: [
+        "trial",
+        "active",
+        "suspended",
+        "cancelled",
+        "pending_payment",
+        "pending_verification",
+      ],
       tenant_role: ["owner", "admin", "cashier", "accountant"],
     },
   },
