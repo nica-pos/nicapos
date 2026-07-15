@@ -188,14 +188,14 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: plan } = await supabaseAdmin
       .from("plans")
-      .select("id, name, price_usd_monthly")
+      .select("id, name, price_usd")
       .eq("id", data.planId)
       .maybeSingle();
     if (!plan) throw new Error("Plan no encontrado.");
-    if (!plan.price_usd_monthly || Number(plan.price_usd_monthly) <= 0)
+    if (!plan.price_usd || Number(plan.price_usd) <= 0)
       throw new Error("Este plan es gratis, no requiere pago.");
 
-    const amountCents = Math.round(Number(plan.price_usd_monthly) * 100);
+    const amountCents = Math.round(Number(plan.price_usd) * 100);
 
     const params = new URLSearchParams();
     params.set("mode", "subscription");
@@ -258,11 +258,11 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: plan } = await supabaseAdmin
       .from("plans")
-      .select("id, name, price_usd_monthly")
+      .select("id, name, price_usd")
       .eq("id", data.planId)
       .maybeSingle();
     if (!plan) throw new Error("Plan no encontrado.");
-    if (!plan.price_usd_monthly || Number(plan.price_usd_monthly) <= 0)
+    if (!plan.price_usd || Number(plan.price_usd) <= 0)
       throw new Error("Este plan es gratis, no requiere pago.");
 
     const base = await paypalBaseUrl(row.mode);
@@ -296,7 +296,7 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
             total_cycles: 0,
             pricing_scheme: {
               fixed_price: {
-                value: Number(plan.price_usd_monthly).toFixed(2),
+                value: Number(plan.price_usd).toFixed(2),
                 currency_code: "USD",
               },
             },
