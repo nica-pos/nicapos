@@ -1,9 +1,9 @@
 import { getFriendlyErrorMessage } from "@/lib/errors";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Palette } from "lucide-react";
+import { Loader2, Palette, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,12 +108,24 @@ function ConfigPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="logo">URL del logo</Label>
-                <Input id="logo" placeholder="https://..." value={logoUrl} disabled={!canEdit} onChange={(e) => setLogoUrl(e.target.value)} />
+                <Label htmlFor="logo">Logo</Label>
+                <LogoUploader
+                  tenantId={tenant.id}
+                  disabled={!canEdit}
+                  value={logoUrl}
+                  onChange={setLogoUrl}
+                  field="logo"
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="favicon">URL del favicon</Label>
-                <Input id="favicon" placeholder="https://..." value={faviconUrl} disabled={!canEdit} onChange={(e) => setFaviconUrl(e.target.value)} />
+                <Label htmlFor="favicon">Favicon</Label>
+                <LogoUploader
+                  tenantId={tenant.id}
+                  disabled={!canEdit}
+                  value={faviconUrl}
+                  onChange={setFaviconUrl}
+                  field="favicon"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Color principal</Label>
@@ -206,5 +218,110 @@ function ConfigPage() {
         </div>
       </div>
     </DashboardShell>
+  );
+}
+
+function LogoUploader({
+  tenantId,
+  value,
+  onChange,
+  disabled,
+  field,
+}: {
+  tenantId: string;
+  value: string;
+  onChange: (url: string) => void;
+  disabled?: boolean;
+  field: "logo" | "favicon";
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("El archivo excede 3 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${tenantId}/${field}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("branding")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      // Bucket privado: firmamos una URL con expiración larga (~10 años)
+      const { data: signed, error: signErr } = await supabase.storage
+        .from("branding")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr) throw signErr;
+      onChange(signed.signedUrl);
+      toast.success("Archivo subido. Recuerda pulsar “Guardar cambios”.");
+    } catch (e) {
+      toast.error(getFriendlyErrorMessage(e as Error));
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-start gap-3">
+        {value ? (
+          <img
+            src={value}
+            alt={field}
+            className="h-16 w-16 rounded border object-contain bg-muted"
+          />
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded border border-dashed text-xs text-muted-foreground">
+            Sin {field}
+          </div>
+        )}
+        <div className="flex flex-1 flex-col gap-2">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={disabled || uploading}
+              onClick={() => fileRef.current?.click()}
+            >
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              Subir archivo
+            </Button>
+            {value && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                disabled={disabled}
+                onClick={() => onChange("")}
+              >
+                <X className="mr-1 h-4 w-4" /> Quitar
+              </Button>
+            )}
+          </div>
+          <Input
+            placeholder="…o pega una URL"
+            value={value}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleFile(f);
+        }}
+      />
+    </div>
   );
 }
