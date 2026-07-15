@@ -108,7 +108,7 @@ function DashboardPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
-        .select("id, sale_number, total_usd, created_at, customers(name)")
+        .select("id, sale_number, total_usd, created_at")
         .eq("tenant_id", tenant!.id)
         .order("created_at", { ascending: false })
         .limit(5);
