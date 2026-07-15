@@ -17,6 +17,7 @@ import {
   HandCoins,
   Truck,
   Tag,
+  ClipboardCheck,
   ChevronDown,
   Menu,
   X,
