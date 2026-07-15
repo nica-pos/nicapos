@@ -1,12 +1,22 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Trash2, Printer } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Plus, Trash2, Printer, FileSearch } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import {
@@ -43,10 +53,51 @@ function DocumentsPage() {
   const [docType, setDocType] = useState<DocType>("ticket");
   const [customer, setCustomer] = useState("");
   const [customerRuc, setCustomerRuc] = useState("");
-  const [items, setItems] = useState<LineItem[]>([
-    { id: crypto.randomUUID(), description: "Producto de ejemplo", qty: 2, unitUsd: 10, taxable: true },
-    { id: crypto.randomUUID(), description: "Producto exento", qty: 1, unitUsd: 5, taxable: false },
-  ]);
+  const [items, setItems] = useState<LineItem[]>([newItem()]);
+  const [loadOpen, setLoadOpen] = useState(false);
+
+  const recentSales = useQuery({
+    queryKey: ["documentos-recent-sales", tenant?.id],
+    enabled: !!tenant && loadOpen,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("id, sale_number, total_usd, created_at")
+        .eq("tenant_id", tenant!.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  async function loadSale(saleId: string) {
+    try {
+      const { data, error } = await supabase
+        .from("sale_items")
+        .select("name, quantity, unit_price_usd, tax_usd")
+        .eq("sale_id", saleId);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        toast.error("Esa venta no tiene líneas");
+        return;
+      }
+      setItems(
+        data.map((it) => ({
+          id: crypto.randomUUID(),
+          description: it.name,
+          qty: Number(it.quantity),
+          unitUsd: Number(it.unit_price_usd),
+          taxable: Number(it.tax_usd) > 0,
+        })),
+      );
+      setLoadOpen(false);
+      toast.success("Venta cargada al documento");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
 
   const ivaRate = settings ? Number(settings.iva_rate) : 0.15;
   const ivaEnabled = settings?.iva_enabled ?? true;
