@@ -453,6 +453,19 @@ function AdminPage() {
                             <Pause className="mr-2 h-4 w-4" /> Suspender
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem
+                          onClick={() => {
+                            const confirmMsg =
+                              `¿Eliminar por completo "${label}"?\n\n` +
+                              "Se borrarán TODOS los datos de la tienda (productos, ventas, caja, clientes, etc.) " +
+                              "y los usuarios que solo pertenecían a ella también se eliminarán del sistema de autenticación.\n\n" +
+                              "Esta acción NO se puede deshacer.";
+                            if (window.confirm(confirmMsg)) deleteTenant.mutate(t.id);
+                          }}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar por completo
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
