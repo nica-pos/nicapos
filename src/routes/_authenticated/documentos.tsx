@@ -278,9 +278,10 @@ function DocumentsPage() {
             </CardContent>
           </Card>
 
-          <Button onClick={() => window.print()} className="w-full" disabled={items.length === 0}>
-            <Printer className="mr-2 h-4 w-4" /> Imprimir / Guardar PDF
+          <Button onClick={handlePrint} className="w-full" disabled={items.length === 0}>
+            <Printer className="mr-2 h-4 w-4" /> Imprimir {docNumber}
           </Button>
+
         </div>
 
         <Dialog open={loadOpen} onOpenChange={setLoadOpen}>
