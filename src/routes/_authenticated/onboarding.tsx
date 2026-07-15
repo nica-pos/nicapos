@@ -11,6 +11,48 @@ import { Card, CardContent } from "@/components/ui/card";
 import { usePlans, setActiveTenantId } from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
 
+const PLAN_META: Record<
+  string,
+  { description: string; features: string[]; popular?: boolean }
+> = {
+  basico: {
+    description: "Ideal para tiendas de un solo mostrador.",
+    features: [
+      "1 sucursal",
+      "2 cajeros activos",
+      "Hasta 500 productos",
+      "Facturación e impresión térmica",
+      "Caja y arqueo básico",
+      "Soporte por email",
+    ],
+  },
+  negocio: {
+    description: "Para comercios en crecimiento con múltiples cajas.",
+    popular: true,
+    features: [
+      "3 sucursales",
+      "8 cajeros activos",
+      "Productos ilimitados",
+      "Multimoneda NIO/USD y pagos mixtos",
+      "Créditos, apartados y cuentas por cobrar",
+      "Dashboard y reportes financieros",
+      "Soporte prioritario",
+    ],
+  },
+  empresarial: {
+    description: "Multi-tienda con administración centralizada.",
+    features: [
+      "Sucursales ilimitadas",
+      "Cajeros ilimitados",
+      "Productos ilimitados",
+      "Consola de superadmin",
+      "White-label y API de integración",
+      "Auditoría antifraude avanzada",
+      "Soporte dedicado",
+    ],
+  },
+};
+
 export const Route = createFileRoute("/_authenticated/onboarding")({
   component: OnboardingPage,
   head: () => ({
