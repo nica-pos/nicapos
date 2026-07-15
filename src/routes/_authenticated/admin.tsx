@@ -90,6 +90,38 @@ function AdminPage() {
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
+  const [editingPlan, setEditingPlan] = useState<any | null>(null);
+
+  const savePlan = useMutation({
+    mutationFn: async (p: {
+      id: string;
+      name: string;
+      price_usd: number;
+      max_products: number;
+      max_cashiers: number;
+      max_branches: number;
+      is_active: boolean;
+    }) => {
+      const { error } = await supabase
+        .from("plans")
+        .update({
+          name: p.name,
+          price_usd: p.price_usd,
+          max_products: p.max_products,
+          max_cashiers: p.max_cashiers,
+          max_branches: p.max_branches,
+          is_active: p.is_active,
+        })
+        .eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["plans"] });
+      toast.success("Plan actualizado");
+      setEditingPlan(null);
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
 
   const tenants = useQuery({
     queryKey: ["admin-tenants"],
