@@ -124,6 +124,51 @@ function DocumentsPage() {
   const docTitle =
     docType === "ticket" ? "TICKET DE VENTA" : docType === "factura" ? "FACTURA" : "PROFORMA / COTIZACIÓN";
 
+  const s = settings as any;
+  const prefix =
+    docType === "ticket"
+      ? s?.ticket_prefix ?? "TKT-"
+      : docType === "factura"
+      ? s?.invoice_prefix ?? "FAC-"
+      : s?.proforma_prefix ?? "PRO-";
+  const nextNum =
+    docType === "ticket"
+      ? s?.next_ticket_number ?? 1
+      : docType === "factura"
+      ? s?.next_invoice_number ?? 1
+      : s?.next_proforma_number ?? 1;
+  const docNumber = `${prefix}${String(nextNum).padStart(6, "0")}`;
+  const showLogo = s?.show_logo ?? true;
+  const logoUrl = showLogo ? tenant?.logo_url ?? null : null;
+  const primaryColor = tenant?.primary_color ?? "#f59e0b";
+  const thankYou = s?.thank_you_message || "¡Gracias por su compra!";
+  const ticketHeader = s?.ticket_header || "";
+
+  async function handlePrint() {
+    if (!tenant || !settings) {
+      window.print();
+      return;
+    }
+    const field =
+      docType === "ticket"
+        ? "next_ticket_number"
+        : docType === "factura"
+        ? "next_invoice_number"
+        : "next_proforma_number";
+    window.print();
+    // Increment correlative after printing
+    try {
+      await supabase
+        .from("fiscal_settings")
+        .update({ [field]: nextNum + 1 })
+        .eq("tenant_id", tenant.id);
+      queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant.id] });
+    } catch {
+      // silent — printing is what matters
+    }
+  }
+
+
   return (
     <DashboardShell>
       <style>{`
