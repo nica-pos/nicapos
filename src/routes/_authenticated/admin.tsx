@@ -16,6 +16,7 @@ import {
   MoreHorizontal,
   Store,
   Pencil,
+  Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -91,6 +92,7 @@ function AdminPage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
   const [editingPlan, setEditingPlan] = useState<any | null>(null);
+  const [detailTenant, setDetailTenant] = useState<any | null>(null);
 
   const savePlan = useMutation({
     mutationFn: async (p: {
@@ -422,8 +424,8 @@ function AdminPage() {
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem disabled>
-                          Ver detalle (próximamente)
+                        <DropdownMenuItem onClick={() => setDetailTenant(t)}>
+                          <Eye className="mr-2 h-4 w-4" /> Ver detalle
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -524,6 +526,11 @@ function AdminPage() {
         onClose={() => setEditingPlan(null)}
         onSave={(values) => savePlan.mutate(values)}
         saving={savePlan.isPending}
+      />
+
+      <TenantDetailDialog
+        tenant={detailTenant}
+        onClose={() => setDetailTenant(null)}
       />
     </DashboardShell>
   );
@@ -658,6 +665,145 @@ function EditPlanDialog({
             Guardar cambios
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TenantDetailDialog({
+  tenant,
+  onClose,
+}: {
+  tenant: any | null;
+  onClose: () => void;
+}) {
+  const open = !!tenant;
+  const members = useQuery({
+    queryKey: ["admin-tenant-detail", tenant?.id],
+    enabled: !!tenant,
+    queryFn: async () => {
+      const [membersRes, salesRes] = await Promise.all([
+        supabase
+          .from("tenant_members")
+          .select("user_id, role, created_at")
+          .eq("tenant_id", tenant!.id),
+        supabase
+          .from("sales")
+          .select("id, total_usd", { count: "exact" })
+          .eq("tenant_id", tenant!.id),
+      ]);
+      if (membersRes.error) throw membersRes.error;
+      if (salesRes.error) throw salesRes.error;
+      const userIds = (membersRes.data ?? []).map((m) => m.user_id);
+      let profiles: Record<string, { email: string | null; full_name: string | null }> = {};
+      if (userIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, email, full_name")
+          .in("id", userIds);
+        profiles = Object.fromEntries(
+          (profs ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name }]),
+        );
+      }
+      const totalUsd = (salesRes.data ?? []).reduce(
+        (s, r: any) => s + Number(r.total_usd ?? 0),
+        0,
+      );
+      return {
+        members: (membersRes.data ?? []).map((m) => ({
+          ...m,
+          profile: profiles[m.user_id] ?? null,
+        })),
+        totalSales: salesRes.count ?? 0,
+        totalRevenueUsd: totalUsd,
+      };
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{tenant?.name}</DialogTitle>
+          <DialogDescription>
+            Detalle operativo de la tienda (solo lectura).
+          </DialogDescription>
+        </DialogHeader>
+        {members.isLoading ? (
+          <div className="py-8 text-center">
+            <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Ventas
+                </div>
+                <div className="mt-1 text-lg font-semibold tabular-nums">
+                  {members.data?.totalSales ?? 0}
+                </div>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Ingresos
+                </div>
+                <div className="mt-1 text-lg font-semibold tabular-nums">
+                  ${(members.data?.totalRevenueUsd ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Equipo
+                </div>
+                <div className="mt-1 text-lg font-semibold tabular-nums">
+                  {members.data?.members.length ?? 0}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Miembros
+              </div>
+              <div className="space-y-1.5">
+                {(members.data?.members ?? []).map((m: any) => (
+                  <div
+                    key={m.user_id}
+                    className="flex items-center justify-between rounded-lg border border-border/50 bg-background/40 px-3 py-2"
+                  >
+                    <div>
+                      <div className="text-sm font-medium">
+                        {m.profile?.full_name || m.profile?.email || "Sin nombre"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{m.profile?.email}</div>
+                    </div>
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium capitalize text-primary">
+                      {m.role}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border/50 bg-background/40 p-3 text-xs text-muted-foreground">
+              <div>
+                <span className="font-medium text-foreground">Slug:</span> /{tenant?.slug}
+              </div>
+              {tenant?.ruc && (
+                <div>
+                  <span className="font-medium text-foreground">RUC:</span> {tenant.ruc}
+                </div>
+              )}
+              <div>
+                <span className="font-medium text-foreground">Creada:</span>{" "}
+                {tenant?.created_at
+                  ? new Date(tenant.created_at).toLocaleDateString("es-NI")
+                  : "—"}
+              </div>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
