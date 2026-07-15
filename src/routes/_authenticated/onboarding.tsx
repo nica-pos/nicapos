@@ -122,7 +122,12 @@ function OnboardingPage() {
         })
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === "23505" || /one_active_tenant_per_owner/i.test(error.message)) {
+          throw new Error("Ya tienes una tienda activa o pendiente. Solo se permite una por usuario.");
+        }
+        throw error;
+      }
       return data;
     },
     onSuccess: (tenant) => {
