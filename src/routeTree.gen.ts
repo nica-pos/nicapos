@@ -19,6 +19,7 @@ import { Route as AuthenticatedPromocionesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedProductosRouteImport } from './routes/_authenticated/productos'
 import { Route as AuthenticatedPosRouteImport } from './routes/_authenticated/pos'
 import { Route as AuthenticatedPagosRouteImport } from './routes/_authenticated/pagos'
+import { Route as AuthenticatedPagoPendienteRouteImport } from './routes/_authenticated/pago-pendiente'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedFiscalRouteImport } from './routes/_authenticated/fiscal'
@@ -85,6 +86,12 @@ const AuthenticatedPagosRoute = AuthenticatedPagosRouteImport.update({
   path: '/pagos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPagoPendienteRoute =
+  AuthenticatedPagoPendienteRouteImport.update({
+    id: '/pago-pendiente',
+    path: '/pago-pendiente',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/fiscal': typeof AuthenticatedFiscalRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pago-pendiente': typeof AuthenticatedPagoPendienteRoute
   '/pagos': typeof AuthenticatedPagosRoute
   '/pos': typeof AuthenticatedPosRoute
   '/productos': typeof AuthenticatedProductosRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/fiscal': typeof AuthenticatedFiscalRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pago-pendiente': typeof AuthenticatedPagoPendienteRoute
   '/pagos': typeof AuthenticatedPagosRoute
   '/pos': typeof AuthenticatedPosRoute
   '/productos': typeof AuthenticatedProductosRoute
@@ -226,6 +235,7 @@ export interface FileRoutesById {
   '/_authenticated/fiscal': typeof AuthenticatedFiscalRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/pago-pendiente': typeof AuthenticatedPagoPendienteRoute
   '/_authenticated/pagos': typeof AuthenticatedPagosRoute
   '/_authenticated/pos': typeof AuthenticatedPosRoute
   '/_authenticated/productos': typeof AuthenticatedProductosRoute
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/fiscal'
     | '/inventario'
     | '/onboarding'
+    | '/pago-pendiente'
     | '/pagos'
     | '/pos'
     | '/productos'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/fiscal'
     | '/inventario'
     | '/onboarding'
+    | '/pago-pendiente'
     | '/pagos'
     | '/pos'
     | '/productos'
@@ -304,6 +316,7 @@ export interface FileRouteTypes {
     | '/_authenticated/fiscal'
     | '/_authenticated/inventario'
     | '/_authenticated/onboarding'
+    | '/_authenticated/pago-pendiente'
     | '/_authenticated/pagos'
     | '/_authenticated/pos'
     | '/_authenticated/productos'
@@ -393,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/pagos'
       fullPath: '/pagos'
       preLoaderRoute: typeof AuthenticatedPagosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pago-pendiente': {
+      id: '/_authenticated/pago-pendiente'
+      path: '/pago-pendiente'
+      fullPath: '/pago-pendiente'
+      preLoaderRoute: typeof AuthenticatedPagoPendienteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -509,6 +529,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFiscalRoute: typeof AuthenticatedFiscalRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPagoPendienteRoute: typeof AuthenticatedPagoPendienteRoute
   AuthenticatedPagosRoute: typeof AuthenticatedPagosRoute
   AuthenticatedPosRoute: typeof AuthenticatedPosRoute
   AuthenticatedProductosRoute: typeof AuthenticatedProductosRoute
@@ -529,6 +550,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFiscalRoute: AuthenticatedFiscalRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPagoPendienteRoute: AuthenticatedPagoPendienteRoute,
   AuthenticatedPagosRoute: AuthenticatedPagosRoute,
   AuthenticatedPosRoute: AuthenticatedPosRoute,
   AuthenticatedProductosRoute: AuthenticatedProductosRoute,
