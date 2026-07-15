@@ -86,10 +86,27 @@ function AdminPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenants")
-        .select("*, plan:plans(name, price_usd), owner:profiles!tenants_owner_id_fkey(email)")
+        .select("*, plan:plans(name, price_usd)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      const ownerIds = Array.from(
+        new Set((data ?? []).map((t: any) => t.owner_id).filter(Boolean)),
+      );
+      let ownersById: Record<string, { email: string | null; full_name: string | null }> = {};
+      if (ownerIds.length > 0) {
+        const { data: owners, error: ownersError } = await supabase
+          .from("profiles")
+          .select("id, email, full_name")
+          .in("id", ownerIds);
+        if (ownersError) throw ownersError;
+        ownersById = Object.fromEntries(
+          (owners ?? []).map((o: any) => [o.id, { email: o.email, full_name: o.full_name }]),
+        );
+      }
+      return (data ?? []).map((t: any) => ({
+        ...t,
+        owner: t.owner_id ? ownersById[t.owner_id] ?? null : null,
+      }));
     },
   });
 
