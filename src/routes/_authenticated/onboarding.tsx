@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Store, Loader2, Check } from "lucide-react";
@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { usePlans, setActiveTenantId } from "@/hooks/use-tenant";
+import {
+  usePlans,
+  setActiveTenantId,
+  useMyMemberships,
+} from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
 
 const PLAN_META: Record<
