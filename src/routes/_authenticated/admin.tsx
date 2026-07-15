@@ -683,3 +683,110 @@ function EditPlanDialog({
   );
 }
 
+function CreateClientDialog({
+  open,
+  onClose,
+  plans,
+  onCreate,
+  saving,
+}: {
+  open: boolean;
+  onClose: () => void;
+  plans: { id: string; name: string; price_usd: number; is_active: boolean }[];
+  onCreate: (v: { email: string; password: string; tenantName: string; planId: string; durationDays: number }) => void;
+  saving: boolean;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [tenantName, setTenantName] = useState("");
+  const [planId, setPlanId] = useState("");
+  const [durationDays, setDurationDays] = useState("30");
+
+  useEffect(() => {
+    if (open) {
+      setEmail("");
+      setPassword("");
+      setTenantName("");
+      setPlanId(plans.find((p) => p.is_active)?.id ?? "");
+      setDurationDays("30");
+    }
+  }, [open, plans]);
+
+  const genPassword = () => {
+    const s = Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 6).toUpperCase() + "!";
+    setPassword(s);
+  };
+
+  const canSubmit = email.trim() && password.length >= 6 && tenantName.trim().length >= 2 && planId && Number(durationDays) > 0;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Crear cliente</DialogTitle>
+          <DialogDescription>
+            Se crea el usuario con acceso inmediato y su tienda queda activa con el plan seleccionado.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="cc-email">Correo del cliente</Label>
+            <Input id="cc-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="cliente@empresa.com" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="cc-pass">Contraseña temporal</Label>
+            <div className="flex gap-2">
+              <Input id="cc-pass" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mínimo 6 caracteres" />
+              <Button type="button" variant="outline" onClick={genPassword}>Generar</Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Compártela con el cliente para su primer inicio de sesión.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="cc-name">Nombre de la tienda</Label>
+            <Input id="cc-name" value={tenantName} onChange={(e) => setTenantName(e.target.value)} placeholder="Mi Tienda" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="cc-plan">Plan</Label>
+              <select
+                id="cc-plan"
+                value={planId}
+                onChange={(e) => setPlanId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Selecciona…</option>
+                {plans.filter((p) => p.is_active).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} — ${Number(p.price_usd)}/mes</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cc-days">Duración (días)</Label>
+              <Input id="cc-days" type="number" min={1} value={durationDays} onChange={(e) => setDurationDays(e.target.value)} />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>Cancelar</Button>
+          <Button
+            disabled={!canSubmit || saving}
+            onClick={() =>
+              onCreate({
+                email: email.trim().toLowerCase(),
+                password,
+                tenantName: tenantName.trim(),
+                planId,
+                durationDays: Math.max(1, Math.floor(Number(durationDays) || 30)),
+              })
+            }
+          >
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Crear cliente
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
