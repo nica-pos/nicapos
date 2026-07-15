@@ -82,7 +82,7 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("tenants")
-      .select("id, name, slug, status, created_at, plan:plans(name, price_usd)")
+      .select("id, status, created_at, plan:plans(name, price_usd)")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];

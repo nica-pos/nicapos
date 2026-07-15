@@ -85,6 +85,10 @@ function initialsOf(name?: string | null) {
   return src.slice(0, 2).toUpperCase();
 }
 
+function privateTenantLabel(id: string, index: number) {
+  return `Cliente privado ${String(index + 1).padStart(2, "0")}`;
+}
+
 function AdminPage() {
   const queryClient = useQueryClient();
   const { data: isSuperadmin, isLoading: checking } = useIsSuperadmin();
@@ -150,7 +154,7 @@ function AdminPage() {
       const okFilter = filter === "all" || t.status === filter;
       const okQuery =
         !q ||
-        t.name?.toLowerCase().includes(q) ||
+        t.id?.toLowerCase().includes(q) ||
         t.plan?.name?.toLowerCase().includes(q);
       return okFilter && okQuery;
     });
@@ -290,7 +294,7 @@ function AdminPage() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar tienda o plan…"
+                placeholder="Buscar ID interno o plan…"
                 className="h-9 w-64 pl-8"
               />
             </div>
@@ -330,8 +334,9 @@ function AdminPage() {
           </div>
         ) : (
           <div className="divide-y divide-border/50">
-            {filtered.map((t: any) => {
+            {filtered.map((t: any, index: number) => {
               const meta = statusMeta[t.status] ?? statusMeta.trial;
+              const label = privateTenantLabel(t.id, index);
               return (
                 <div
                   key={t.id}
@@ -339,12 +344,12 @@ function AdminPage() {
                 >
                   <div className="col-span-12 flex items-center gap-3 md:col-span-4">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-primary">
-                      {initialsOf(t.name)}
+                      {initialsOf(label)}
                     </div>
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-medium text-foreground">{t.name}</div>
+                      <div className="truncate text-sm font-medium text-foreground">{label}</div>
                       <div className="truncate text-xs text-muted-foreground">
-                        {t.slug}
+                        ID interno {String(t.id).slice(0, 8)}
                       </div>
                     </div>
                   </div>
