@@ -165,11 +165,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const Sidebar = (
     <div className="flex h-full flex-col">
       {/* Marca */}
-      <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 ring-1 ring-primary/30">
-          <Store className="h-4 w-4 text-primary" />
+      <div className="flex h-16 items-center gap-3 border-b border-border/60 px-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient shadow-lg shadow-primary/20">
+          <div className="h-4 w-4 rotate-45 rounded-sm bg-white/25" />
         </div>
-        <span className="text-lg font-bold tracking-tight text-gradient">Nica-POS</span>
+        <span className="text-lg font-bold tracking-tight text-white">Nica-POS</span>
       </div>
 
       {/* Selector de tienda */}
