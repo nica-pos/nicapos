@@ -82,10 +82,26 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("tenants")
-      .select("id, status, created_at, plan:plans(name, price_usd)")
+      .select("id, status, created_at, owner_id, plan:plans(name, price_usd)")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data ?? [];
+
+    const ownerIds = Array.from(new Set((data ?? []).map((t) => t.owner_id).filter(Boolean))) as string[];
+    let superOwners = new Set<string>();
+    if (ownerIds.length > 0) {
+      const { data: roles, error: rolesError } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "superadmin")
+        .in("user_id", ownerIds);
+      if (rolesError) throw new Error(rolesError.message);
+      superOwners = new Set((roles ?? []).map((r) => r.user_id));
+    }
+
+    return (data ?? [])
+      .filter((t) => !t.owner_id || !superOwners.has(t.owner_id))
+      .map(({ owner_id: _o, ...rest }) => rest);
+
   });
 
 export const setAdminTenantStatus = createServerFn({ method: "POST" })
