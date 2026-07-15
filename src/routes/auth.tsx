@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import {
   Store,
-  Chrome,
+
   Loader2,
   ShieldCheck,
   Zap,
@@ -130,21 +129,6 @@ function AuthPage() {
     }
   }
 
-  async function handleGoogle() {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) setError(getFriendlyErrorMessage(result.error));
-    } catch (err) {
-      setError(getFriendlyErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -336,25 +320,6 @@ function AuthPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/60" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase tracking-wider">
-              <span className="bg-background px-3 text-muted-foreground">O continúa con</span>
-            </div>
-          </div>
-
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full"
-            onClick={handleGoogle}
-            disabled={loading}
-          >
-            <Chrome className="mr-2 h-4 w-4" />
-            Google
-          </Button>
 
           {error && (
             <div className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
