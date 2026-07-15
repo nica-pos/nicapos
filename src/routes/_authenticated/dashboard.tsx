@@ -117,6 +117,12 @@ function DashboardPage() {
     },
   });
 
+  const heroData = fin?.chart ?? [];
+  const heroTotal = useMemo(
+    () => heroData.reduce((acc, d) => acc + Number(d.sales || 0), 0),
+    [heroData],
+  );
+
   if (isLoading || !tenant) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -131,11 +137,6 @@ function DashboardPage() {
   const usd = (v: number) =>
     `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const heroData = fin?.chart ?? [];
-  const heroTotal = useMemo(
-    () => heroData.reduce((acc, d) => acc + Number(d.sales || 0), 0),
-    [heroData],
-  );
 
   const catColors = ["bg-cyan-400", "bg-violet-500", "bg-orange-400", "bg-emerald-400"];
 
