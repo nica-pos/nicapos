@@ -78,6 +78,9 @@ function OnboardingPage() {
   const [ruc, setRuc] = useState("");
   const [planId, setPlanId] = useState<string | null>(null);
 
+  const selectedPlan = (plans ?? []).find((p) => p.id === planId);
+  const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0;
+
   const createTenant = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -95,8 +98,10 @@ function OnboardingPage() {
           ruc: ruc.trim() || null,
           owner_id: uid,
           plan_id: planId,
-          status: "trial",
-          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          status: (isPaidPlan ? "pending_payment" : "trial") as any,
+          trial_ends_at: isPaidPlan
+            ? null
+            : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         })
         .select()
         .single();
@@ -106,8 +111,13 @@ function OnboardingPage() {
     onSuccess: (tenant) => {
       setActiveTenantId(tenant.id);
       queryClient.invalidateQueries();
-      toast.success("¡Tienda creada! Bienvenido a Nica-POS.");
-      navigate({ to: "/dashboard" });
+      if (isPaidPlan) {
+        toast.success("Tienda creada. Realiza el pago para activarla.");
+        navigate({ to: "/pago-pendiente" });
+      } else {
+        toast.success("¡Tienda creada! Bienvenido a Nica-POS.");
+        navigate({ to: "/dashboard" });
+      }
     },
     onError: (e: Error) => toast.error(e.message ?? "No se pudo crear la tienda"),
   });

@@ -246,12 +246,26 @@ function AdminPage() {
             Supervisa tiendas, suscripciones y planes de toda la red Nica-POS.
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link to="/pagos">
-            <DollarSign className="mr-2 h-4 w-4" />
-            Configuración de pagos
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="default">
+            <Link to="/admin/pagos-pendientes">
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Pagos pendientes
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/bancos">
+              <Building2 className="mr-2 h-4 w-4" />
+              Cuentas bancarias
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/pagos">
+              <DollarSign className="mr-2 h-4 w-4" />
+              Pasarelas
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* KPIs */}

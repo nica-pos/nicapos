@@ -14,11 +14,13 @@ import { Route as PreciosRouteImport } from './routes/precios'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVerificacionPendienteRouteImport } from './routes/_authenticated/verificacion-pendiente'
 import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenticated/proveedores'
 import { Route as AuthenticatedPromocionesRouteImport } from './routes/_authenticated/promociones'
 import { Route as AuthenticatedProductosRouteImport } from './routes/_authenticated/productos'
 import { Route as AuthenticatedPosRouteImport } from './routes/_authenticated/pos'
 import { Route as AuthenticatedPagosRouteImport } from './routes/_authenticated/pagos'
+import { Route as AuthenticatedPagoPendienteRouteImport } from './routes/_authenticated/pago-pendiente'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedFiscalRouteImport } from './routes/_authenticated/fiscal'
@@ -31,6 +33,8 @@ import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminPagosPendientesRouteImport } from './routes/_authenticated/admin.pagos-pendientes'
+import { Route as AuthenticatedAdminBancosRouteImport } from './routes/_authenticated/admin.bancos'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicWebhooksPaypalRouteImport } from './routes/api/public/webhooks/paypal'
 
@@ -58,6 +62,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVerificacionPendienteRoute =
+  AuthenticatedVerificacionPendienteRouteImport.update({
+    id: '/verificacion-pendiente',
+    path: '/verificacion-pendiente',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProveedoresRoute =
   AuthenticatedProveedoresRouteImport.update({
     id: '/proveedores',
@@ -85,6 +95,12 @@ const AuthenticatedPagosRoute = AuthenticatedPagosRouteImport.update({
   path: '/pagos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPagoPendienteRoute =
+  AuthenticatedPagoPendienteRouteImport.update({
+    id: '/pago-pendiente',
+    path: '/pago-pendiente',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -146,6 +162,18 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminPagosPendientesRoute =
+  AuthenticatedAdminPagosPendientesRouteImport.update({
+    id: '/pagos-pendientes',
+    path: '/pagos-pendientes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBancosRoute =
+  AuthenticatedAdminBancosRouteImport.update({
+    id: '/bancos',
+    path: '/bancos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   id: '/api/public/webhooks/stripe',
   path: '/api/public/webhooks/stripe',
@@ -162,7 +190,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
@@ -174,11 +202,15 @@ export interface FileRoutesByFullPath {
   '/fiscal': typeof AuthenticatedFiscalRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pago-pendiente': typeof AuthenticatedPagoPendienteRoute
   '/pagos': typeof AuthenticatedPagosRoute
   '/pos': typeof AuthenticatedPosRoute
   '/productos': typeof AuthenticatedProductosRoute
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
+  '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
+  '/admin/bancos': typeof AuthenticatedAdminBancosRoute
+  '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -187,7 +219,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
@@ -199,11 +231,15 @@ export interface FileRoutesByTo {
   '/fiscal': typeof AuthenticatedFiscalRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pago-pendiente': typeof AuthenticatedPagoPendienteRoute
   '/pagos': typeof AuthenticatedPagosRoute
   '/pos': typeof AuthenticatedPosRoute
   '/productos': typeof AuthenticatedProductosRoute
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
+  '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
+  '/admin/bancos': typeof AuthenticatedAdminBancosRoute
+  '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -214,7 +250,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/bitacora': typeof AuthenticatedBitacoraRoute
   '/_authenticated/caja': typeof AuthenticatedCajaRoute
@@ -226,11 +262,15 @@ export interface FileRoutesById {
   '/_authenticated/fiscal': typeof AuthenticatedFiscalRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/pago-pendiente': typeof AuthenticatedPagoPendienteRoute
   '/_authenticated/pagos': typeof AuthenticatedPagosRoute
   '/_authenticated/pos': typeof AuthenticatedPosRoute
   '/_authenticated/productos': typeof AuthenticatedProductosRoute
   '/_authenticated/promociones': typeof AuthenticatedPromocionesRoute
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
+  '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
+  '/_authenticated/admin/bancos': typeof AuthenticatedAdminBancosRoute
+  '/_authenticated/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -253,11 +293,15 @@ export interface FileRouteTypes {
     | '/fiscal'
     | '/inventario'
     | '/onboarding'
+    | '/pago-pendiente'
     | '/pagos'
     | '/pos'
     | '/productos'
     | '/promociones'
     | '/proveedores'
+    | '/verificacion-pendiente'
+    | '/admin/bancos'
+    | '/admin/pagos-pendientes'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
@@ -278,11 +322,15 @@ export interface FileRouteTypes {
     | '/fiscal'
     | '/inventario'
     | '/onboarding'
+    | '/pago-pendiente'
     | '/pagos'
     | '/pos'
     | '/productos'
     | '/promociones'
     | '/proveedores'
+    | '/verificacion-pendiente'
+    | '/admin/bancos'
+    | '/admin/pagos-pendientes'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   id:
@@ -304,11 +352,15 @@ export interface FileRouteTypes {
     | '/_authenticated/fiscal'
     | '/_authenticated/inventario'
     | '/_authenticated/onboarding'
+    | '/_authenticated/pago-pendiente'
     | '/_authenticated/pagos'
     | '/_authenticated/pos'
     | '/_authenticated/productos'
     | '/_authenticated/promociones'
     | '/_authenticated/proveedores'
+    | '/_authenticated/verificacion-pendiente'
+    | '/_authenticated/admin/bancos'
+    | '/_authenticated/admin/pagos-pendientes'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
@@ -360,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/verificacion-pendiente': {
+      id: '/_authenticated/verificacion-pendiente'
+      path: '/verificacion-pendiente'
+      fullPath: '/verificacion-pendiente'
+      preLoaderRoute: typeof AuthenticatedVerificacionPendienteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/proveedores': {
       id: '/_authenticated/proveedores'
       path: '/proveedores'
@@ -393,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/pagos'
       fullPath: '/pagos'
       preLoaderRoute: typeof AuthenticatedPagosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pago-pendiente': {
+      id: '/_authenticated/pago-pendiente'
+      path: '/pago-pendiente'
+      fullPath: '/pago-pendiente'
+      preLoaderRoute: typeof AuthenticatedPagoPendienteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -479,6 +545,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/pagos-pendientes': {
+      id: '/_authenticated/admin/pagos-pendientes'
+      path: '/pagos-pendientes'
+      fullPath: '/admin/pagos-pendientes'
+      preLoaderRoute: typeof AuthenticatedAdminPagosPendientesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/bancos': {
+      id: '/_authenticated/admin/bancos'
+      path: '/bancos'
+      fullPath: '/admin/bancos'
+      preLoaderRoute: typeof AuthenticatedAdminBancosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/webhooks/stripe': {
       id: '/api/public/webhooks/stripe'
       path: '/api/public/webhooks/stripe'
@@ -496,8 +576,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
+  AuthenticatedAdminPagosPendientesRoute: typeof AuthenticatedAdminPagosPendientesRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBancosRoute: AuthenticatedAdminBancosRoute,
+  AuthenticatedAdminPagosPendientesRoute:
+    AuthenticatedAdminPagosPendientesRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedBitacoraRoute: typeof AuthenticatedBitacoraRoute
   AuthenticatedCajaRoute: typeof AuthenticatedCajaRoute
@@ -509,15 +603,17 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFiscalRoute: typeof AuthenticatedFiscalRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPagoPendienteRoute: typeof AuthenticatedPagoPendienteRoute
   AuthenticatedPagosRoute: typeof AuthenticatedPagosRoute
   AuthenticatedPosRoute: typeof AuthenticatedPosRoute
   AuthenticatedProductosRoute: typeof AuthenticatedProductosRoute
   AuthenticatedPromocionesRoute: typeof AuthenticatedPromocionesRoute
   AuthenticatedProveedoresRoute: typeof AuthenticatedProveedoresRoute
+  AuthenticatedVerificacionPendienteRoute: typeof AuthenticatedVerificacionPendienteRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedBitacoraRoute: AuthenticatedBitacoraRoute,
   AuthenticatedCajaRoute: AuthenticatedCajaRoute,
@@ -529,11 +625,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFiscalRoute: AuthenticatedFiscalRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPagoPendienteRoute: AuthenticatedPagoPendienteRoute,
   AuthenticatedPagosRoute: AuthenticatedPagosRoute,
   AuthenticatedPosRoute: AuthenticatedPosRoute,
   AuthenticatedProductosRoute: AuthenticatedProductosRoute,
   AuthenticatedPromocionesRoute: AuthenticatedPromocionesRoute,
   AuthenticatedProveedoresRoute: AuthenticatedProveedoresRoute,
+  AuthenticatedVerificacionPendienteRoute:
+    AuthenticatedVerificacionPendienteRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
