@@ -62,8 +62,20 @@ function FiscalPage() {
   const [email, setEmail] = useState("");
   const [invoiceFooter, setInvoiceFooter] = useState("");
 
+  // Document customization
+  const [showLogo, setShowLogo] = useState(true);
+  const [ticketPrefix, setTicketPrefix] = useState("TKT-");
+  const [nextTicket, setNextTicket] = useState("1");
+  const [invoicePrefix, setInvoicePrefix] = useState("FAC-");
+  const [nextInvoice, setNextInvoice] = useState("1");
+  const [proformaPrefix, setProformaPrefix] = useState("PRO-");
+  const [nextProforma, setNextProforma] = useState("1");
+  const [ticketHeader, setTicketHeader] = useState("");
+  const [thankYou, setThankYou] = useState("¡Gracias por su compra!");
+
   useEffect(() => {
     if (settings) {
+      const s = settings as any;
       setIvaRate((Number(settings.iva_rate) * 100).toString());
       setIvaEnabled(settings.iva_enabled);
       setIrRate((Number(settings.ir_rate) * 100).toString());
@@ -73,8 +85,18 @@ function FiscalPage() {
       setPhone(settings.phone ?? "");
       setEmail(settings.email ?? "");
       setInvoiceFooter(settings.invoice_footer ?? "");
+      setShowLogo(s.show_logo ?? true);
+      setTicketPrefix(s.ticket_prefix ?? "TKT-");
+      setNextTicket(String(s.next_ticket_number ?? 1));
+      setInvoicePrefix(s.invoice_prefix ?? "FAC-");
+      setNextInvoice(String(s.next_invoice_number ?? 1));
+      setProformaPrefix(s.proforma_prefix ?? "PRO-");
+      setNextProforma(String(s.next_proforma_number ?? 1));
+      setTicketHeader(s.ticket_header ?? "");
+      setThankYou(s.thank_you_message ?? "¡Gracias por su compra!");
     }
   }, [settings]);
+
 
   const saveSettings = useMutation({
     mutationFn: async () => {
