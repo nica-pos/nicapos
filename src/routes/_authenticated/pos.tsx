@@ -42,6 +42,7 @@ import {
   type PaymentMethod,
 } from "@/hooks/use-pos";
 import { useFiscalSettings, useLatestRate, formatNIO, formatUSD } from "@/hooks/use-fiscal";
+import { useActiveTenant } from "@/hooks/use-tenant";
 import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
 
 export const Route = createFileRoute("/_authenticated/pos")({
