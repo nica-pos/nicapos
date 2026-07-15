@@ -253,16 +253,31 @@ function PosPage() {
       return;
     }
     try {
+      const snapLines = cart;
+      const snapPayments = payments;
+      const snapTotals = totals;
+      const snapChangeUsd = changeUsd;
+      const snapChangeNio = changeNio;
       const res = await createSale.mutateAsync({
         sessionId: session?.id ?? null,
-        lines: cart,
-        payments,
+        lines: snapLines,
+        payments: snapPayments,
         exchangeRate: rate,
         ivaRate,
         ivaEnabled,
       });
-      toast.success(`Venta #${res.saleNumber} registrada`, {
-        description: `Total ${formatUSD(res.total)} · Vuelto ${formatNIO(Math.max(0, changeNio))}`,
+      toast.success(`Venta #${res.saleNumber} registrada`);
+      setLastSale({
+        saleNumber: res.saleNumber,
+        lines: snapLines,
+        payments: snapPayments,
+        subtotal: snapTotals.subtotal,
+        tax: snapTotals.tax,
+        total: snapTotals.total,
+        rate,
+        changeUsd: Math.max(0, snapChangeUsd),
+        changeNio: Math.max(0, snapChangeNio),
+        createdAt: new Date(),
       });
       clearCart();
       setPayOpen(false);
