@@ -350,6 +350,11 @@ function PosPage() {
                               {formatUSD(Number(p.price_usd))}
                             </p>
                           )}
+                          {rate > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              {formatNIO(price * rate)}
+                            </p>
+                          )}
                           <p className="text-xs text-muted-foreground">
                             Stock: {Number(p.stock)}
                           </p>
@@ -378,7 +383,8 @@ function PosPage() {
                     <div className="flex-1">
                       <p className="font-medium">{l.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {formatUSD(l.unit_price_usd)}{" "}
+                        {formatUSD(l.unit_price_usd)}
+                        {rate > 0 && ` · ${formatNIO(l.unit_price_usd * rate)}`}
                         {l.is_tax_exempt && (
                           <Badge variant="secondary" className="ml-1">Exento</Badge>
                         )}
@@ -393,8 +399,13 @@ function PosPage() {
                         <Plus className="h-3 w-3" />
                       </Button>
                     </div>
-                    <div className="w-24 text-right font-semibold">
-                      {formatUSD(l.unit_price_usd * l.quantity)}
+                    <div className="w-28 text-right">
+                      <div className="font-semibold">{formatUSD(l.unit_price_usd * l.quantity)}</div>
+                      {rate > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {formatNIO(l.unit_price_usd * l.quantity * rate)}
+                        </div>
+                      )}
                     </div>
                     <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => removeLine(i)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
