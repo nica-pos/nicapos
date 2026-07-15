@@ -62,6 +62,7 @@ function PosPage() {
   const { data: promotions } = usePromotions();
   const { data: session } = useOpenCashSession();
   const { data: fiscal } = useFiscalSettings();
+  const { tenant } = useActiveTenant();
   const rate = useLatestRate() ?? 0;
   const createSale = useCreateSale();
 
@@ -70,6 +71,18 @@ function PosPage() {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [payOpen, setPayOpen] = useState(false);
   const [payments, setPayments] = useState<PaymentLine[]>([]);
+  const [lastSale, setLastSale] = useState<{
+    saleNumber: number;
+    lines: CartLine[];
+    payments: PaymentLine[];
+    subtotal: number;
+    tax: number;
+    total: number;
+    rate: number;
+    changeUsd: number;
+    changeNio: number;
+    createdAt: Date;
+  } | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
