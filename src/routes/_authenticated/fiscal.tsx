@@ -145,6 +145,37 @@ function FiscalPage() {
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
+  const saveDocCustomization = useMutation({
+    mutationFn: async () => {
+      if (!tenant) throw new Error("Sin tienda activa");
+      const { error } = await supabase
+        .from("fiscal_settings")
+        .upsert(
+          {
+            tenant_id: tenant.id,
+            show_logo: showLogo,
+            ticket_prefix: ticketPrefix.trim() || "TKT-",
+            next_ticket_number: Math.max(1, parseInt(nextTicket) || 1),
+            invoice_prefix: invoicePrefix.trim() || "FAC-",
+            next_invoice_number: Math.max(1, parseInt(nextInvoice) || 1),
+            proforma_prefix: proformaPrefix.trim() || "PRO-",
+            next_proforma_number: Math.max(1, parseInt(nextProforma) || 1),
+            ticket_header: ticketHeader.trim() || null,
+            thank_you_message: thankYou.trim() || null,
+          },
+          { onConflict: "tenant_id" },
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant?.id] });
+      toast.success("Personalización de documentos guardada");
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
+
+
   // New exchange rate
   const [newRate, setNewRate] = useState("");
   const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
