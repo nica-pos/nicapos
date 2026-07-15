@@ -245,7 +245,7 @@ function OnboardingPage() {
 
             <Button
               className="w-full"
-              disabled={!name.trim() || createTenant.isPending}
+              disabled={!name.trim() || !planId || createTenant.isPending}
               onClick={() => createTenant.mutate()}
             >
               {createTenant.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
