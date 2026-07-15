@@ -35,7 +35,18 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (!profile) {
-      throw new Error("No existe un usuario registrado con ese correo.");
+      // No user with that email yet — create a pending invitation so it auto-joins on signup.
+      const { error: invErr } = await supabase.from("tenant_invitations").insert({
+        tenant_id: data.tenantId,
+        email: data.email.toLowerCase(),
+        role: data.role,
+        invited_by: userId,
+      });
+      if (invErr) {
+        if (invErr.code === "23505") throw new Error("Ya existe una invitación pendiente para ese correo.");
+        throw new Error(invErr.message);
+      }
+      return { ok: true, invited: true };
     }
 
     // Insert membership as the authenticated caller so RLS applies.
@@ -50,5 +61,5 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       throw new Error(error.message);
     }
 
-    return { ok: true };
+    return { ok: true, invited: false };
   });
