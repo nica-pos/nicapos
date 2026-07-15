@@ -537,6 +537,14 @@ function AdminPage() {
         onSave={(values) => savePlan.mutate(values)}
         saving={savePlan.isPending}
       />
+
+      <CreateClientDialog
+        open={creatingClient}
+        onClose={() => setCreatingClient(false)}
+        plans={plans ?? []}
+        onCreate={(v) => createClient.mutate(v)}
+        saving={createClient.isPending}
+      />
     </DashboardShell>
   );
 }
