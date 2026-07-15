@@ -389,14 +389,24 @@ function Row({ label, usd, nio, bold }: { label: string; usd: string; nio: strin
   );
 }
 
-function TicketView({ legalName, settings, items, breakdown, rate, nio }: any) {
+function TicketView({ legalName, settings, items, breakdown, rate, nio, logoUrl, docNumber, ticketHeader, thankYou }: any) {
   return (
     <div className="space-y-1">
       <div className="text-center">
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt="Logo"
+            className="mx-auto mb-1 max-h-16 object-contain"
+            crossOrigin="anonymous"
+          />
+        )}
         <div className="text-sm font-bold uppercase">{legalName}</div>
         {settings?.address && <div>{settings.address}</div>}
         {settings?.phone && <div>Tel: {settings.phone}</div>}
+        {ticketHeader && <div className="whitespace-pre-line">{ticketHeader}</div>}
         <div>{new Date().toLocaleString("es-NI")}</div>
+        {docNumber && <div className="font-semibold">N° {docNumber}</div>}
       </div>
       <div className="border-t border-dashed border-black my-1" />
       {items.map((i: LineItem) => (
@@ -417,10 +427,11 @@ function TicketView({ legalName, settings, items, breakdown, rate, nio }: any) {
       )}
       <Row label="TOTAL" usd={formatUSD(breakdown.total)} nio={formatNIO(nio(breakdown.total))} bold />
       {rate && <div className="mt-1 text-center">Tasa: C$ {rate.toFixed(4)} / US$1</div>}
-      <div className="mt-2 text-center">¡Gracias por su compra!</div>
+      <div className="mt-2 text-center whitespace-pre-line">{thankYou}</div>
     </div>
   );
 }
+
 
 function InvoiceView({
   title,
