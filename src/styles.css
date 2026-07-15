@@ -175,7 +175,17 @@
 
   html {
     scroll-behavior: smooth;
+    /* Escala global reducida: baja el rem base de 16px a 14px.
+     * Reduce proporcionalmente tipografía, spacing, radios y tamaños de todo el sistema. */
+    font-size: 87.5%;
   }
+
+  @media (min-width: 1280px) {
+    html {
+      font-size: 87.5%;
+    }
+  }
+
 }
 
 @layer utilities {
