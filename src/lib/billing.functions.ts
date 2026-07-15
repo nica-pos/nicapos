@@ -95,23 +95,22 @@ export const savePaymentProviderSettings = createServerFn({ method: "POST" })
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const update: Record<string, unknown> = {
-      is_enabled: data.is_enabled,
-      mode: data.mode,
-      client_id: data.client_id || null,
-      updated_by: context.userId,
-      updated_at: new Date().toISOString(),
-    };
-
-    // Only rewrite the ciphertext when a new secret is provided.
+    let ciphertext: string | undefined;
     if (data.client_secret && data.client_secret.length > 0) {
       const { encryptSecret } = await import("@/lib/paymentCrypto.server");
-      update.client_secret_ciphertext = encryptSecret(data.client_secret);
+      ciphertext = encryptSecret(data.client_secret);
     }
 
     const { error } = await supabaseAdmin
       .from("payment_provider_settings")
-      .update(update)
+      .update({
+        is_enabled: data.is_enabled,
+        mode: data.mode,
+        client_id: data.client_id || null,
+        updated_by: context.userId,
+        updated_at: new Date().toISOString(),
+        ...(ciphertext ? { client_secret_ciphertext: ciphertext } : {}),
+      })
       .eq("provider", data.provider);
     if (error) throw new Error(error.message);
     return { ok: true };
