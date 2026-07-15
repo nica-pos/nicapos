@@ -1,5 +1,6 @@
 import { getFriendlyErrorMessage } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
@@ -35,11 +36,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useIsSuperadmin, usePlans } from "@/hooks/use-tenant";
+import { getAdminTenantSummaries, setAdminTenantStatus } from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -87,6 +88,8 @@ function initialsOf(name?: string | null) {
 function AdminPage() {
   const queryClient = useQueryClient();
   const { data: isSuperadmin, isLoading: checking } = useIsSuperadmin();
+  const fetchTenantSummaries = useServerFn(getAdminTenantSummaries);
+  const updateTenantStatus = useServerFn(setAdminTenantStatus);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
@@ -126,24 +129,12 @@ function AdminPage() {
   const tenants = useQuery({
     queryKey: ["admin-tenants"],
     enabled: !!isSuperadmin,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, slug, status, created_at, plan:plans(name, price_usd)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
+    queryFn: () => fetchTenantSummaries(),
   });
 
   const setStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
-        .from("tenants")
-        .update({ status: status as never })
-        .eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: ({ id, status }: { id: string; status: "trial" | "active" | "suspended" | "cancelled" }) =>
+      updateTenantStatus({ data: { tenantId: id, status } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
       toast.success("Estado actualizado");

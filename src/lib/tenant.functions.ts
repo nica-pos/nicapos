@@ -8,6 +8,11 @@ const addMemberInput = z.object({
   role: z.enum(["admin", "cashier", "accountant"]),
 });
 
+const tenantStatusInput = z.object({
+  tenantId: z.string().uuid(),
+  status: z.enum(["trial", "active", "suspended", "cancelled"]),
+});
+
 export const addTenantMemberByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => addMemberInput.parse(input))
@@ -62,4 +67,43 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
     }
 
     return { ok: true, invited: false };
+  });
+
+export const getAdminTenantSummaries = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isSuper, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "superadmin",
+    });
+    if (roleError) throw new Error(roleError.message);
+    if (!isSuper) throw new Error("Solo el superadmin puede ver esta consola.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("tenants")
+      .select("id, name, slug, status, created_at, plan:plans(name, price_usd)")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const setAdminTenantStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => tenantStatusInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isSuper, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "superadmin",
+    });
+    if (roleError) throw new Error(roleError.message);
+    if (!isSuper) throw new Error("Solo el superadmin puede cambiar estados de tiendas.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("tenants")
+      .update({ status: data.status })
+      .eq("id", data.tenantId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
