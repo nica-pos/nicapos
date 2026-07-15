@@ -555,7 +555,7 @@ function EditPlanDialog({
   const [maxBranches, setMaxBranches] = useState("0");
   const [isActive, setIsActive] = useState(true);
 
-  useMemo(() => {
+  useEffect(() => {
     if (plan) {
       setName(plan.name ?? "");
       setPrice(String(plan.price_usd ?? 0));
