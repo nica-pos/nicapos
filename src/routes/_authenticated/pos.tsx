@@ -591,6 +591,169 @@ function PosPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ReceiptDialog
+        sale={lastSale}
+        onClose={() => setLastSale(null)}
+        tenantName={tenant?.name ?? ""}
+        tenantRuc={tenant?.ruc ?? null}
+        logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
+        primaryColor={tenant?.primary_color ?? "#f59e0b"}
+        settings={fiscal}
+      />
     </div>
+  );
+}
+
+function ReceiptDialog({
+  sale,
+  onClose,
+  tenantName,
+  tenantRuc,
+  logoUrl,
+  primaryColor,
+  settings,
+}: {
+  sale: {
+    saleNumber: number;
+    lines: CartLine[];
+    payments: PaymentLine[];
+    subtotal: number;
+    tax: number;
+    total: number;
+    rate: number;
+    changeUsd: number;
+    changeNio: number;
+    createdAt: Date;
+  } | null;
+  onClose: () => void;
+  tenantName: string;
+  tenantRuc: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  settings: any;
+}) {
+  const s = settings ?? {};
+  const legalName = s.legal_name || tenantName;
+  const prefix = s.ticket_prefix ?? "TKT-";
+  const nextNum = s.next_ticket_number ?? sale?.saleNumber ?? 1;
+  const docNumber = `${prefix}${String(nextNum).padStart(6, "0")}`;
+  const thankYou = s.thank_you_message || "¡Gracias por su compra!";
+  const ticketHeader = s.ticket_header || "";
+
+  function doPrint() {
+    window.print();
+  }
+
+  return (
+    <Dialog open={!!sale} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-md">
+        <style>{`
+          @media print {
+            body * { visibility: hidden !important; }
+            #pos-receipt, #pos-receipt * { visibility: visible !important; }
+            #pos-receipt { position: absolute; left: 0; top: 0; width: 80mm; }
+            .no-print { display: none !important; }
+          }
+        `}</style>
+        <DialogHeader>
+          <DialogTitle className="no-print">
+            Venta #{sale?.saleNumber} — comprobante listo
+          </DialogTitle>
+        </DialogHeader>
+        {sale && (
+          <div
+            id="pos-receipt"
+            className="mx-auto max-h-[60vh] w-full max-w-[320px] overflow-auto rounded border bg-white p-3 font-mono text-[12px] text-black"
+          >
+            <div className="text-center">
+              {logoUrl && (
+                <img
+                  src={logoUrl}
+                  alt="Logo"
+                  className="mx-auto mb-1 max-h-16 object-contain"
+                />
+              )}
+              <div className="text-sm font-bold uppercase" style={{ color: primaryColor }}>
+                {legalName}
+              </div>
+              {tenantRuc && <div>RUC: {tenantRuc}</div>}
+              {s.address && <div>{s.address}</div>}
+              {s.phone && <div>Tel: {s.phone}</div>}
+              {ticketHeader && <div className="whitespace-pre-line">{ticketHeader}</div>}
+              <div>{sale.createdAt.toLocaleString("es-NI")}</div>
+              <div className="font-semibold">N° {docNumber}</div>
+              <div>Venta interna #{sale.saleNumber}</div>
+            </div>
+            <div className="my-1 border-t border-dashed border-black" />
+            {sale.lines.map((l, i) => (
+              <div key={i}>
+                <div className="flex justify-between">
+                  <span className="pr-2">{l.quantity} x {l.name}</span>
+                  <span>{formatUSD(l.unit_price_usd * l.quantity)}</span>
+                </div>
+                {sale.rate > 0 && (
+                  <div className="text-right opacity-70">
+                    {formatNIO(l.unit_price_usd * l.quantity * sale.rate)}
+                  </div>
+                )}
+              </div>
+            ))}
+            <div className="my-1 border-t border-dashed border-black" />
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{formatUSD(sale.subtotal)}</span>
+            </div>
+            {sale.tax > 0 && (
+              <div className="flex justify-between">
+                <span>IVA</span>
+                <span>{formatUSD(sale.tax)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold">
+              <span>TOTAL</span>
+              <span>{formatUSD(sale.total)}</span>
+            </div>
+            {sale.rate > 0 && (
+              <div className="flex justify-between font-bold">
+                <span>TOTAL C$</span>
+                <span>{formatNIO(sale.total * sale.rate)}</span>
+              </div>
+            )}
+            <div className="my-1 border-t border-dashed border-black" />
+            {sale.payments.map((p, i) => (
+              <div key={i} className="flex justify-between">
+                <span>{PAYMENT_LABELS[p.method]}</span>
+                <span>
+                  {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
+                </span>
+              </div>
+            ))}
+            {sale.changeUsd > 0 && (
+              <div className="flex justify-between font-semibold">
+                <span>Vuelto</span>
+                <span>
+                  {sale.rate > 0 ? formatNIO(sale.changeNio) : formatUSD(sale.changeUsd)}
+                </span>
+              </div>
+            )}
+            {sale.rate > 0 && (
+              <div className="mt-1 text-center">
+                Tasa: C$ {sale.rate.toFixed(4)} / US$1
+              </div>
+            )}
+            <div className="mt-2 whitespace-pre-line text-center">{thankYou}</div>
+          </div>
+        )}
+        <DialogFooter className="no-print">
+          <Button variant="outline" onClick={onClose}>
+            Cerrar
+          </Button>
+          <Button onClick={doPrint}>
+            <CreditCard className="mr-2 h-4 w-4" /> Imprimir
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
