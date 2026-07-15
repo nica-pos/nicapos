@@ -33,6 +33,7 @@ import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminBancosRouteImport } from './routes/_authenticated/admin.bancos'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicWebhooksPaypalRouteImport } from './routes/api/public/webhooks/paypal'
 
@@ -160,6 +161,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminBancosRoute =
+  AuthenticatedAdminBancosRouteImport.update({
+    id: '/bancos',
+    path: '/bancos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   id: '/api/public/webhooks/stripe',
   path: '/api/public/webhooks/stripe',
@@ -176,7 +183,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
+  '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -203,7 +211,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
+  '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -232,7 +241,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/bitacora': typeof AuthenticatedBitacoraRoute
   '/_authenticated/caja': typeof AuthenticatedCajaRoute
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/promociones': typeof AuthenticatedPromocionesRoute
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
   '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
+  '/_authenticated/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/promociones'
     | '/proveedores'
     | '/verificacion-pendiente'
+    | '/admin/bancos'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/promociones'
     | '/proveedores'
     | '/verificacion-pendiente'
+    | '/admin/bancos'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   id:
@@ -335,6 +347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/promociones'
     | '/_authenticated/proveedores'
     | '/_authenticated/verificacion-pendiente'
+    | '/_authenticated/admin/bancos'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
@@ -519,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/bancos': {
+      id: '/_authenticated/admin/bancos'
+      path: '/bancos'
+      fullPath: '/admin/bancos'
+      preLoaderRoute: typeof AuthenticatedAdminBancosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/webhooks/stripe': {
       id: '/api/public/webhooks/stripe'
       path: '/api/public/webhooks/stripe'
@@ -536,8 +556,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBancosRoute: AuthenticatedAdminBancosRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedBitacoraRoute: typeof AuthenticatedBitacoraRoute
   AuthenticatedCajaRoute: typeof AuthenticatedCajaRoute
@@ -559,7 +590,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedBitacoraRoute: AuthenticatedBitacoraRoute,
   AuthenticatedCajaRoute: AuthenticatedCajaRoute,
