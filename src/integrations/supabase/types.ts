@@ -370,13 +370,22 @@ export type Database = {
           email: string | null
           id: string
           invoice_footer: string | null
+          invoice_prefix: string
           ir_enabled: boolean
           ir_rate: number
           iva_enabled: boolean
           iva_rate: number
           legal_name: string | null
+          next_invoice_number: number
+          next_proforma_number: number
+          next_ticket_number: number
           phone: string | null
+          proforma_prefix: string
+          show_logo: boolean
           tenant_id: string
+          thank_you_message: string | null
+          ticket_header: string | null
+          ticket_prefix: string
           updated_at: string
         }
         Insert: {
@@ -385,13 +394,22 @@ export type Database = {
           email?: string | null
           id?: string
           invoice_footer?: string | null
+          invoice_prefix?: string
           ir_enabled?: boolean
           ir_rate?: number
           iva_enabled?: boolean
           iva_rate?: number
           legal_name?: string | null
+          next_invoice_number?: number
+          next_proforma_number?: number
+          next_ticket_number?: number
           phone?: string | null
+          proforma_prefix?: string
+          show_logo?: boolean
           tenant_id: string
+          thank_you_message?: string | null
+          ticket_header?: string | null
+          ticket_prefix?: string
           updated_at?: string
         }
         Update: {
@@ -400,13 +418,22 @@ export type Database = {
           email?: string | null
           id?: string
           invoice_footer?: string | null
+          invoice_prefix?: string
           ir_enabled?: boolean
           ir_rate?: number
           iva_enabled?: boolean
           iva_rate?: number
           legal_name?: string | null
+          next_invoice_number?: number
+          next_proforma_number?: number
+          next_ticket_number?: number
           phone?: string | null
+          proforma_prefix?: string
+          show_logo?: boolean
           tenant_id?: string
+          thank_you_message?: string | null
+          ticket_header?: string | null
+          ticket_prefix?: string
           updated_at?: string
         }
         Relationships: [
