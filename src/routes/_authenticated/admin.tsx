@@ -97,6 +97,7 @@ function AdminPage() {
   const fetchTenantSummaries = useServerFn(getAdminTenantSummaries);
   const updateTenantStatus = useServerFn(setAdminTenantStatus);
   const createClientFn = useServerFn(adminCreateClient);
+  const deleteTenantFn = useServerFn(adminDeleteTenant);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
