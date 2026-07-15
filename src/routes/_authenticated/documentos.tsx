@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Trash2, Printer, FileSearch } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ function newItem(): LineItem {
 }
 
 function DocumentsPage() {
+  const queryClient = useQueryClient();
   const { tenant } = useActiveTenant();
   const { data: settings } = useFiscalSettings();
   const rate = useLatestRate();
@@ -55,6 +57,7 @@ function DocumentsPage() {
   const [customerRuc, setCustomerRuc] = useState("");
   const [items, setItems] = useState<LineItem[]>([newItem()]);
   const [loadOpen, setLoadOpen] = useState(false);
+
 
   const recentSales = useQuery({
     queryKey: ["documentos-recent-sales", tenant?.id],
@@ -120,6 +123,50 @@ function DocumentsPage() {
   const legalName = settings?.legal_name || tenant?.name || "Mi Negocio";
   const docTitle =
     docType === "ticket" ? "TICKET DE VENTA" : docType === "factura" ? "FACTURA" : "PROFORMA / COTIZACIÓN";
+
+  const s = settings as any;
+  const prefix =
+    docType === "ticket"
+      ? s?.ticket_prefix ?? "TKT-"
+      : docType === "factura"
+      ? s?.invoice_prefix ?? "FAC-"
+      : s?.proforma_prefix ?? "PRO-";
+  const nextNum =
+    docType === "ticket"
+      ? s?.next_ticket_number ?? 1
+      : docType === "factura"
+      ? s?.next_invoice_number ?? 1
+      : s?.next_proforma_number ?? 1;
+  const docNumber = `${prefix}${String(nextNum).padStart(6, "0")}`;
+  const showLogo = s?.show_logo ?? true;
+  const logoUrl = showLogo ? tenant?.logo_url ?? null : null;
+  const primaryColor = tenant?.primary_color ?? "#f59e0b";
+  const thankYou = s?.thank_you_message || "¡Gracias por su compra!";
+  const ticketHeader = s?.ticket_header || "";
+
+  async function handlePrint() {
+    if (!tenant || !settings) {
+      window.print();
+      return;
+    }
+    window.print();
+    try {
+      const q = supabase.from("fiscal_settings");
+      const update =
+        docType === "ticket"
+          ? q.update({ next_ticket_number: nextNum + 1 })
+          : docType === "factura"
+          ? q.update({ next_invoice_number: nextNum + 1 })
+          : q.update({ next_proforma_number: nextNum + 1 });
+      await update.eq("tenant_id", tenant.id);
+      queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant.id] });
+    } catch {
+      // silent — printing is what matters
+    }
+  }
+
+
+
 
   return (
     <DashboardShell>
@@ -231,9 +278,10 @@ function DocumentsPage() {
             </CardContent>
           </Card>
 
-          <Button onClick={() => window.print()} className="w-full" disabled={items.length === 0}>
-            <Printer className="mr-2 h-4 w-4" /> Imprimir / Guardar PDF
+          <Button onClick={handlePrint} className="w-full" disabled={items.length === 0}>
+            <Printer className="mr-2 h-4 w-4" /> Imprimir {docNumber}
           </Button>
+
         </div>
 
         <Dialog open={loadOpen} onOpenChange={setLoadOpen}>
@@ -292,6 +340,11 @@ function DocumentsPage() {
                 breakdown={breakdown}
                 rate={rate}
                 nio={nio}
+                logoUrl={logoUrl}
+                primaryColor={primaryColor}
+                docNumber={docNumber}
+                ticketHeader={ticketHeader}
+                thankYou={thankYou}
               />
             ) : (
               <InvoiceView
@@ -306,8 +359,12 @@ function DocumentsPage() {
                 rate={rate}
                 nio={nio}
                 isProforma={docType === "proforma"}
+                logoUrl={logoUrl}
+                primaryColor={primaryColor}
+                docNumber={docNumber}
               />
             )}
+
           </div>
           {!rate && (
             <p className="mt-3 text-sm text-muted-foreground no-print">
@@ -332,14 +389,24 @@ function Row({ label, usd, nio, bold }: { label: string; usd: string; nio: strin
   );
 }
 
-function TicketView({ legalName, settings, items, breakdown, rate, nio }: any) {
+function TicketView({ legalName, settings, items, breakdown, rate, nio, logoUrl, docNumber, ticketHeader, thankYou }: any) {
   return (
     <div className="space-y-1">
       <div className="text-center">
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt="Logo"
+            className="mx-auto mb-1 max-h-16 object-contain"
+            crossOrigin="anonymous"
+          />
+        )}
         <div className="text-sm font-bold uppercase">{legalName}</div>
         {settings?.address && <div>{settings.address}</div>}
         {settings?.phone && <div>Tel: {settings.phone}</div>}
+        {ticketHeader && <div className="whitespace-pre-line">{ticketHeader}</div>}
         <div>{new Date().toLocaleString("es-NI")}</div>
+        {docNumber && <div className="font-semibold">N° {docNumber}</div>}
       </div>
       <div className="border-t border-dashed border-black my-1" />
       {items.map((i: LineItem) => (
@@ -360,10 +427,11 @@ function TicketView({ legalName, settings, items, breakdown, rate, nio }: any) {
       )}
       <Row label="TOTAL" usd={formatUSD(breakdown.total)} nio={formatNIO(nio(breakdown.total))} bold />
       {rate && <div className="mt-1 text-center">Tasa: C$ {rate.toFixed(4)} / US$1</div>}
-      <div className="mt-2 text-center">¡Gracias por su compra!</div>
+      <div className="mt-2 text-center whitespace-pre-line">{thankYou}</div>
     </div>
   );
 }
+
 
 function InvoiceView({
   title,
@@ -377,23 +445,45 @@ function InvoiceView({
   rate,
   nio,
   isProforma,
+  logoUrl,
+  primaryColor,
+  docNumber,
 }: any) {
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xl font-bold uppercase">{legalName}</div>
-          {tenantRuc && <div className="text-sm">RUC: {tenantRuc}</div>}
-          {settings?.address && <div className="text-sm">{settings.address}</div>}
-          {settings?.phone && <div className="text-sm">Tel: {settings.phone}</div>}
-          {settings?.email && <div className="text-sm">{settings.email}</div>}
+      <div
+        className="flex items-start justify-between border-b-4 pb-3"
+        style={{ borderColor: primaryColor || "#e5e7eb" }}
+      >
+        <div className="flex items-start gap-4">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Logo"
+              className="h-16 w-16 rounded object-contain"
+              crossOrigin="anonymous"
+            />
+          )}
+          <div>
+            <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>
+              {legalName}
+            </div>
+            {tenantRuc && <div className="text-sm">RUC: {tenantRuc}</div>}
+            {settings?.address && <div className="text-sm">{settings.address}</div>}
+            {settings?.phone && <div className="text-sm">Tel: {settings.phone}</div>}
+            {settings?.email && <div className="text-sm">{settings.email}</div>}
+          </div>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold">{title}</div>
+          <div className="text-lg font-bold" style={{ color: primaryColor }}>
+            {title}
+          </div>
+          {docNumber && <div className="text-sm font-semibold">N° {docNumber}</div>}
           <div className="text-sm">Fecha: {new Date().toLocaleDateString("es-NI")}</div>
           {rate && <div className="text-sm">Tasa: C$ {rate.toFixed(4)}/US$1</div>}
         </div>
       </div>
+
 
       <div className="border-t pt-2 text-sm">
         <div><span className="font-semibold">Cliente:</span> {customer || "—"}</div>

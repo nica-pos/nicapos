@@ -62,8 +62,20 @@ function FiscalPage() {
   const [email, setEmail] = useState("");
   const [invoiceFooter, setInvoiceFooter] = useState("");
 
+  // Document customization
+  const [showLogo, setShowLogo] = useState(true);
+  const [ticketPrefix, setTicketPrefix] = useState("TKT-");
+  const [nextTicket, setNextTicket] = useState("1");
+  const [invoicePrefix, setInvoicePrefix] = useState("FAC-");
+  const [nextInvoice, setNextInvoice] = useState("1");
+  const [proformaPrefix, setProformaPrefix] = useState("PRO-");
+  const [nextProforma, setNextProforma] = useState("1");
+  const [ticketHeader, setTicketHeader] = useState("");
+  const [thankYou, setThankYou] = useState("¡Gracias por su compra!");
+
   useEffect(() => {
     if (settings) {
+      const s = settings as any;
       setIvaRate((Number(settings.iva_rate) * 100).toString());
       setIvaEnabled(settings.iva_enabled);
       setIrRate((Number(settings.ir_rate) * 100).toString());
@@ -73,8 +85,18 @@ function FiscalPage() {
       setPhone(settings.phone ?? "");
       setEmail(settings.email ?? "");
       setInvoiceFooter(settings.invoice_footer ?? "");
+      setShowLogo(s.show_logo ?? true);
+      setTicketPrefix(s.ticket_prefix ?? "TKT-");
+      setNextTicket(String(s.next_ticket_number ?? 1));
+      setInvoicePrefix(s.invoice_prefix ?? "FAC-");
+      setNextInvoice(String(s.next_invoice_number ?? 1));
+      setProformaPrefix(s.proforma_prefix ?? "PRO-");
+      setNextProforma(String(s.next_proforma_number ?? 1));
+      setTicketHeader(s.ticket_header ?? "");
+      setThankYou(s.thank_you_message ?? "¡Gracias por su compra!");
     }
   }, [settings]);
+
 
   const saveSettings = useMutation({
     mutationFn: async () => {
@@ -122,6 +144,37 @@ function FiscalPage() {
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
+
+  const saveDocCustomization = useMutation({
+    mutationFn: async () => {
+      if (!tenant) throw new Error("Sin tienda activa");
+      const { error } = await supabase
+        .from("fiscal_settings")
+        .upsert(
+          {
+            tenant_id: tenant.id,
+            show_logo: showLogo,
+            ticket_prefix: ticketPrefix.trim() || "TKT-",
+            next_ticket_number: Math.max(1, parseInt(nextTicket) || 1),
+            invoice_prefix: invoicePrefix.trim() || "FAC-",
+            next_invoice_number: Math.max(1, parseInt(nextInvoice) || 1),
+            proforma_prefix: proformaPrefix.trim() || "PRO-",
+            next_proforma_number: Math.max(1, parseInt(nextProforma) || 1),
+            ticket_header: ticketHeader.trim() || null,
+            thank_you_message: thankYou.trim() || null,
+          },
+          { onConflict: "tenant_id" },
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant?.id] });
+      toast.success("Personalización de documentos guardada");
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
+
 
   // New exchange rate
   const [newRate, setNewRate] = useState("");
@@ -329,6 +382,80 @@ function FiscalPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Personalización de documentos</CardTitle>
+          <CardDescription>
+            Logo, prefijos y correlativos que se muestran en tickets, facturas y proformas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="flex items-center gap-3">
+            <Switch checked={showLogo} disabled={!canEdit} onCheckedChange={setShowLogo} />
+            <div>
+              <div className="text-sm font-medium">Mostrar logo de la tienda</div>
+              <div className="text-xs text-muted-foreground">
+                Se toma el logo configurado en Configuración › Identidad de marca.
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Prefijo ticket</Label>
+              <Input value={ticketPrefix} disabled={!canEdit} onChange={(e) => setTicketPrefix(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Siguiente número ticket</Label>
+              <Input type="number" min="1" value={nextTicket} disabled={!canEdit} onChange={(e) => setNextTicket(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Prefijo factura</Label>
+              <Input value={invoicePrefix} disabled={!canEdit} onChange={(e) => setInvoicePrefix(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Siguiente número factura</Label>
+              <Input type="number" min="1" value={nextInvoice} disabled={!canEdit} onChange={(e) => setNextInvoice(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Prefijo proforma</Label>
+              <Input value={proformaPrefix} disabled={!canEdit} onChange={(e) => setProformaPrefix(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Siguiente número proforma</Label>
+              <Input type="number" min="1" value={nextProforma} disabled={!canEdit} onChange={(e) => setNextProforma(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Encabezado extra del ticket</Label>
+            <Textarea
+              value={ticketHeader}
+              disabled={!canEdit}
+              placeholder="Ej. Facebook: @mitienda"
+              onChange={(e) => setTicketHeader(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Mensaje de agradecimiento</Label>
+            <Textarea
+              value={thankYou}
+              disabled={!canEdit}
+              onChange={(e) => setThankYou(e.target.value)}
+            />
+          </div>
+
+          {canEdit && (
+            <Button onClick={() => saveDocCustomization.mutate()} disabled={saveDocCustomization.isPending}>
+              {saveDocCustomization.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar personalización
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
 
       <Card className="mt-6">
         <CardHeader>
