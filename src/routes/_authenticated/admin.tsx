@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useIsSuperadmin, usePlans } from "@/hooks/use-tenant";
-import { getAdminTenantSummaries, setAdminTenantStatus } from "@/lib/tenant.functions";
+import { getAdminTenantSummaries, setAdminTenantStatus, adminCreateClient } from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
