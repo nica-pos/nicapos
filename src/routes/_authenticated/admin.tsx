@@ -2,7 +2,7 @@ import { getFriendlyErrorMessage } from "@/lib/errors";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Loader2,
   ShieldAlert,
@@ -15,11 +15,22 @@ import {
   Pause,
   MoreHorizontal,
   Store,
+  Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,6 +90,38 @@ function AdminPage() {
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
+  const [editingPlan, setEditingPlan] = useState<any | null>(null);
+
+  const savePlan = useMutation({
+    mutationFn: async (p: {
+      id: string;
+      name: string;
+      price_usd: number;
+      max_products: number;
+      max_cashiers: number;
+      max_branches: number;
+      is_active: boolean;
+    }) => {
+      const { error } = await supabase
+        .from("plans")
+        .update({
+          name: p.name,
+          price_usd: p.price_usd,
+          max_products: p.max_products,
+          max_cashiers: p.max_cashiers,
+          max_branches: p.max_branches,
+          is_active: p.is_active,
+        })
+        .eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["plans"] });
+      toast.success("Plan actualizado");
+      setEditingPlan(null);
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
 
   const tenants = useQuery({
     queryKey: ["admin-tenants"],
@@ -462,10 +505,160 @@ function AdminPage() {
                   </dd>
                 </div>
               </dl>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4 w-full"
+                onClick={() => setEditingPlan(p)}
+              >
+                <Pencil className="mr-2 h-3.5 w-3.5" />
+                Editar plan
+              </Button>
             </div>
           ))}
         </div>
       </Card>
+
+      <EditPlanDialog
+        plan={editingPlan}
+        onClose={() => setEditingPlan(null)}
+        onSave={(values) => savePlan.mutate(values)}
+        saving={savePlan.isPending}
+      />
     </DashboardShell>
+  );
+}
+
+function EditPlanDialog({
+  plan,
+  onClose,
+  onSave,
+  saving,
+}: {
+  plan: any | null;
+  onClose: () => void;
+  onSave: (v: {
+    id: string;
+    name: string;
+    price_usd: number;
+    max_products: number;
+    max_cashiers: number;
+    max_branches: number;
+    is_active: boolean;
+  }) => void;
+  saving: boolean;
+}) {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("0");
+  const [maxProducts, setMaxProducts] = useState("0");
+  const [maxCashiers, setMaxCashiers] = useState("0");
+  const [maxBranches, setMaxBranches] = useState("0");
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    if (plan) {
+      setName(plan.name ?? "");
+      setPrice(String(plan.price_usd ?? 0));
+      setMaxProducts(String(plan.max_products ?? 0));
+      setMaxCashiers(String(plan.max_cashiers ?? 0));
+      setMaxBranches(String(plan.max_branches ?? 0));
+      setIsActive(!!plan.is_active);
+    }
+  }, [plan]);
+
+  const open = !!plan;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Editar plan</DialogTitle>
+          <DialogDescription>
+            Ajusta precio, límites y disponibilidad del plan.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="plan-name">Nombre</Label>
+            <Input id="plan-name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="plan-price">Precio mensual (USD)</Label>
+            <Input
+              id="plan-price"
+              type="number"
+              min={0}
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="plan-products">Productos</Label>
+              <Input
+                id="plan-products"
+                type="number"
+                min={0}
+                value={maxProducts}
+                onChange={(e) => setMaxProducts(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="plan-cashiers">Cajeros</Label>
+              <Input
+                id="plan-cashiers"
+                type="number"
+                min={0}
+                value={maxCashiers}
+                onChange={(e) => setMaxCashiers(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="plan-branches">Sucursales</Label>
+              <Input
+                id="plan-branches"
+                type="number"
+                min={0}
+                value={maxBranches}
+                onChange={(e) => setMaxBranches(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 p-3">
+            <div>
+              <div className="text-sm font-medium">Plan activo</div>
+              <div className="text-xs text-muted-foreground">
+                Los planes inactivos no se muestran a nuevas tiendas.
+              </div>
+            </div>
+            <Switch checked={isActive} onCheckedChange={setIsActive} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={() =>
+              plan &&
+              onSave({
+                id: plan.id,
+                name: name.trim() || plan.name,
+                price_usd: Number(price) || 0,
+                max_products: Math.max(0, Math.floor(Number(maxProducts) || 0)),
+                max_cashiers: Math.max(0, Math.floor(Number(maxCashiers) || 0)),
+                max_branches: Math.max(0, Math.floor(Number(maxBranches) || 0)),
+                is_active: isActive,
+              })
+            }
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Guardar cambios
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
