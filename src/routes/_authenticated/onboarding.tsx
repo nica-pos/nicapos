@@ -146,6 +146,14 @@ function OnboardingPage() {
   }, [loadingMemberships, existingActive, navigate]);
   const blocking = !loadingMemberships && !!existingActive;
 
+  if (blocking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-lg">
