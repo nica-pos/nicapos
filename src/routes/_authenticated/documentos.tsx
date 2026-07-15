@@ -149,23 +149,22 @@ function DocumentsPage() {
       window.print();
       return;
     }
-    const payload: Record<string, number> =
-      docType === "ticket"
-        ? { next_ticket_number: nextNum + 1 }
-        : docType === "factura"
-        ? { next_invoice_number: nextNum + 1 }
-        : { next_proforma_number: nextNum + 1 };
     window.print();
     try {
-      await supabase
-        .from("fiscal_settings")
-        .update(payload)
-        .eq("tenant_id", tenant.id);
+      const q = supabase.from("fiscal_settings");
+      const update =
+        docType === "ticket"
+          ? q.update({ next_ticket_number: nextNum + 1 })
+          : docType === "factura"
+          ? q.update({ next_invoice_number: nextNum + 1 })
+          : q.update({ next_proforma_number: nextNum + 1 });
+      await update.eq("tenant_id", tenant.id);
       queryClient.invalidateQueries({ queryKey: ["fiscal-settings", tenant.id] });
     } catch {
       // silent — printing is what matters
     }
   }
+
 
 
 
