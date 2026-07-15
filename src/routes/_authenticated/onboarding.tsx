@@ -11,6 +11,48 @@ import { Card, CardContent } from "@/components/ui/card";
 import { usePlans, setActiveTenantId } from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
 
+const PLAN_META: Record<
+  string,
+  { description: string; features: string[]; popular?: boolean }
+> = {
+  basico: {
+    description: "Ideal para tiendas de un solo mostrador.",
+    features: [
+      "1 sucursal",
+      "2 cajeros activos",
+      "Hasta 500 productos",
+      "Facturación e impresión térmica",
+      "Caja y arqueo básico",
+      "Soporte por email",
+    ],
+  },
+  negocio: {
+    description: "Para comercios en crecimiento con múltiples cajas.",
+    popular: true,
+    features: [
+      "3 sucursales",
+      "8 cajeros activos",
+      "Productos ilimitados",
+      "Multimoneda NIO/USD y pagos mixtos",
+      "Créditos, apartados y cuentas por cobrar",
+      "Dashboard y reportes financieros",
+      "Soporte prioritario",
+    ],
+  },
+  empresarial: {
+    description: "Multi-tienda con administración centralizada.",
+    features: [
+      "Sucursales ilimitadas",
+      "Cajeros ilimitados",
+      "Productos ilimitados",
+      "Consola de superadmin",
+      "White-label y API de integración",
+      "Auditoría antifraude avanzada",
+      "Soporte dedicado",
+    ],
+  },
+};
+
 export const Route = createFileRoute("/_authenticated/onboarding")({
   component: OnboardingPage,
   head: () => ({
@@ -105,36 +147,67 @@ function OnboardingPage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>Elige un plan</Label>
               <div className="grid gap-3">
-                {(plans ?? []).map((plan) => (
-                  <button
-                    key={plan.id}
-                    type="button"
-                    onClick={() => setPlanId(plan.id)}
-                    className={cn(
-                      "flex items-center justify-between rounded-lg border p-4 text-left transition-colors",
-                      planId === plan.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50",
-                    )}
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 font-medium text-foreground">
-                        {plan.name}
-                        {planId === plan.id && <Check className="h-4 w-4 text-primary" />}
+                {(plans ?? []).map((plan) => {
+                  const meta = PLAN_META[plan.slug] ?? {
+                    description: "",
+                    features: [],
+                  };
+                  const selected = planId === plan.id;
+                  return (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => setPlanId(plan.id)}
+                      className={cn(
+                        "relative rounded-xl border p-4 text-left transition-all",
+                        selected
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      {meta.popular && (
+                        <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
+                          Más popular
+                        </span>
+                      )}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 font-semibold text-foreground">
+                            {plan.name}
+                            {selected && <Check className="h-4 w-4 text-primary" />}
+                          </div>
+                          {meta.description && (
+                            <div className="mt-0.5 text-xs text-muted-foreground">
+                              {meta.description}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-foreground">
+                            ${Number(plan.price_usd)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">/mes</div>
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        Hasta {plan.max_products.toLocaleString()} productos · {plan.max_cashiers} cajeros · {plan.max_branches} sucursales
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-foreground">${plan.price_usd}</div>
-                      <div className="text-xs text-muted-foreground">/mes</div>
-                    </div>
-                  </button>
-                ))}
+                      {meta.features.length > 0 && (
+                        <ul className="mt-3 grid gap-1.5 sm:grid-cols-2">
+                          {meta.features.map((f) => (
+                            <li
+                              key={f}
+                              className="flex items-start gap-1.5 text-xs text-muted-foreground"
+                            >
+                              <Check className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
