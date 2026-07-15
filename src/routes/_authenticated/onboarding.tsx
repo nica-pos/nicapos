@@ -167,6 +167,20 @@ function OnboardingPage() {
           </p>
         </div>
 
+        <div className="mb-4 flex justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate({ to: "/auth", replace: true });
+            }}
+          >
+            ¿No es tu cuenta? Cerrar sesión
+          </Button>
+        </div>
+
+
         <Card>
           <CardContent className="space-y-5 pt-6">
             <div className="space-y-2">
