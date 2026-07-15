@@ -271,6 +271,12 @@ function AdminPage() {
             Supervisa tiendas, suscripciones y planes de toda la red Nica-POS.
           </p>
         </div>
+        <Button asChild variant="outline">
+          <Link to="/pagos">
+            <DollarSign className="mr-2 h-4 w-4" />
+            Configuración de pagos
+          </Link>
+        </Button>
       </div>
 
       {/* KPIs */}
