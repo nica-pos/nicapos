@@ -527,6 +527,11 @@ function AdminPage() {
         onSave={(values) => savePlan.mutate(values)}
         saving={savePlan.isPending}
       />
+
+      <TenantDetailDialog
+        tenant={detailTenant}
+        onClose={() => setDetailTenant(null)}
+      />
     </DashboardShell>
   );
 }
