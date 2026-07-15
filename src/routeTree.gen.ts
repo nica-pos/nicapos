@@ -33,6 +33,7 @@ import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminPagosPendientesRouteImport } from './routes/_authenticated/admin.pagos-pendientes'
 import { Route as AuthenticatedAdminBancosRouteImport } from './routes/_authenticated/admin.bancos'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicWebhooksPaypalRouteImport } from './routes/api/public/webhooks/paypal'
@@ -161,6 +162,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminPagosPendientesRoute =
+  AuthenticatedAdminPagosPendientesRouteImport.update({
+    id: '/pagos-pendientes',
+    path: '/pagos-pendientes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminBancosRoute =
   AuthenticatedAdminBancosRouteImport.update({
     id: '/bancos',
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
+  '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -231,6 +239,7 @@ export interface FileRoutesByTo {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
+  '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -261,6 +270,7 @@ export interface FileRoutesById {
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
   '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/_authenticated/admin/bancos': typeof AuthenticatedAdminBancosRoute
+  '/_authenticated/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/verificacion-pendiente'
     | '/admin/bancos'
+    | '/admin/pagos-pendientes'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/verificacion-pendiente'
     | '/admin/bancos'
+    | '/admin/pagos-pendientes'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   id:
@@ -348,6 +360,7 @@ export interface FileRouteTypes {
     | '/_authenticated/proveedores'
     | '/_authenticated/verificacion-pendiente'
     | '/_authenticated/admin/bancos'
+    | '/_authenticated/admin/pagos-pendientes'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
@@ -532,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/pagos-pendientes': {
+      id: '/_authenticated/admin/pagos-pendientes'
+      path: '/pagos-pendientes'
+      fullPath: '/admin/pagos-pendientes'
+      preLoaderRoute: typeof AuthenticatedAdminPagosPendientesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/bancos': {
       id: '/_authenticated/admin/bancos'
       path: '/bancos'
@@ -558,10 +578,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
+  AuthenticatedAdminPagosPendientesRoute: typeof AuthenticatedAdminPagosPendientesRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBancosRoute: AuthenticatedAdminBancosRoute,
+  AuthenticatedAdminPagosPendientesRoute:
+    AuthenticatedAdminPagosPendientesRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
