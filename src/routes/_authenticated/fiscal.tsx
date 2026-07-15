@@ -385,6 +385,80 @@ function FiscalPage() {
 
       <Card className="mt-6">
         <CardHeader>
+          <CardTitle>Personalización de documentos</CardTitle>
+          <CardDescription>
+            Logo, prefijos y correlativos que se muestran en tickets, facturas y proformas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="flex items-center gap-3">
+            <Switch checked={showLogo} disabled={!canEdit} onCheckedChange={setShowLogo} />
+            <div>
+              <div className="text-sm font-medium">Mostrar logo de la tienda</div>
+              <div className="text-xs text-muted-foreground">
+                Se toma el logo configurado en Configuración › Identidad de marca.
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Prefijo ticket</Label>
+              <Input value={ticketPrefix} disabled={!canEdit} onChange={(e) => setTicketPrefix(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Siguiente número ticket</Label>
+              <Input type="number" min="1" value={nextTicket} disabled={!canEdit} onChange={(e) => setNextTicket(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Prefijo factura</Label>
+              <Input value={invoicePrefix} disabled={!canEdit} onChange={(e) => setInvoicePrefix(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Siguiente número factura</Label>
+              <Input type="number" min="1" value={nextInvoice} disabled={!canEdit} onChange={(e) => setNextInvoice(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Prefijo proforma</Label>
+              <Input value={proformaPrefix} disabled={!canEdit} onChange={(e) => setProformaPrefix(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Siguiente número proforma</Label>
+              <Input type="number" min="1" value={nextProforma} disabled={!canEdit} onChange={(e) => setNextProforma(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Encabezado extra del ticket</Label>
+            <Textarea
+              value={ticketHeader}
+              disabled={!canEdit}
+              placeholder="Ej. Facebook: @mitienda"
+              onChange={(e) => setTicketHeader(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Mensaje de agradecimiento</Label>
+            <Textarea
+              value={thankYou}
+              disabled={!canEdit}
+              onChange={(e) => setThankYou(e.target.value)}
+            />
+          </div>
+
+          {canEdit && (
+            <Button onClick={() => saveDocCustomization.mutate()} disabled={saveDocCustomization.isPending}>
+              {saveDocCustomization.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar personalización
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+
+      <Card className="mt-6">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-primary" /> Historial de tasa de cambio
           </CardTitle>
