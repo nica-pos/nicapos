@@ -18,6 +18,7 @@ import {
   Store,
   Pencil,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useIsSuperadmin, usePlans } from "@/hooks/use-tenant";
-import { getAdminTenantSummaries, setAdminTenantStatus, adminCreateClient } from "@/lib/tenant.functions";
+import { getAdminTenantSummaries, setAdminTenantStatus, adminCreateClient, adminDeleteTenant } from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -96,6 +97,7 @@ function AdminPage() {
   const fetchTenantSummaries = useServerFn(getAdminTenantSummaries);
   const updateTenantStatus = useServerFn(setAdminTenantStatus);
   const createClientFn = useServerFn(adminCreateClient);
+  const deleteTenantFn = useServerFn(adminDeleteTenant);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
@@ -156,6 +158,20 @@ function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
       toast.success("Estado actualizado");
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
+  const deleteTenant = useMutation({
+    mutationFn: (tenantId: string) => deleteTenantFn({ data: { tenantId, deleteOrphanUsers: true } }),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+      const n = res?.deletedUserIds?.length ?? 0;
+      toast.success(
+        n > 0
+          ? `Tienda eliminada. Se eliminaron ${n} usuario(s) huérfano(s).`
+          : "Tienda eliminada por completo.",
+      );
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
@@ -437,6 +453,19 @@ function AdminPage() {
                             <Pause className="mr-2 h-4 w-4" /> Suspender
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem
+                          onClick={() => {
+                            const confirmMsg =
+                              `¿Eliminar por completo "${label}"?\n\n` +
+                              "Se borrarán TODOS los datos de la tienda (productos, ventas, caja, clientes, etc.) " +
+                              "y los usuarios que solo pertenecían a ella también se eliminarán del sistema de autenticación.\n\n" +
+                              "Esta acción NO se puede deshacer.";
+                            if (window.confirm(confirmMsg)) deleteTenant.mutate(t.id);
+                          }}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar por completo
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

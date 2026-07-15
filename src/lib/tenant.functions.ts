@@ -13,6 +13,12 @@ const tenantStatusInput = z.object({
   status: z.enum(["trial", "active", "suspended", "cancelled"]),
 });
 
+const deleteTenantInput = z.object({
+  tenantId: z.string().uuid(),
+  deleteOrphanUsers: z.boolean().default(true),
+});
+
+
 const createClientInput = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -199,4 +205,63 @@ export const setAdminTenantStatus = createServerFn({ method: "POST" })
       .eq("id", data.tenantId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+
+
+export const adminDeleteTenant = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => deleteTenantInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isSuper, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "superadmin",
+    });
+    if (roleError) throw new Error(roleError.message);
+    if (!isSuper) throw new Error("Solo el superadmin puede eliminar tiendas.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 1) Recolectar todos los miembros de la tienda ANTES de eliminarla.
+    const { data: members, error: memErr } = await supabaseAdmin
+      .from("tenant_members")
+      .select("user_id")
+      .eq("tenant_id", data.tenantId);
+    if (memErr) throw new Error(memErr.message);
+    const memberIds = Array.from(new Set((members ?? []).map((m) => m.user_id).filter(Boolean))) as string[];
+
+    // 2) Eliminar la tienda (todas las tablas hijas están en CASCADE).
+    const { error: delErr } = await supabaseAdmin
+      .from("tenants")
+      .delete()
+      .eq("id", data.tenantId);
+    if (delErr) throw new Error(delErr.message);
+
+    // 3) Opcional: eliminar de Auth a los usuarios que quedaron huérfanos
+    //    (sin membresía en ninguna otra tienda, y sin ningún rol global).
+    const deletedUserIds: string[] = [];
+    if (data.deleteOrphanUsers && memberIds.length > 0) {
+      const { data: stillMember } = await supabaseAdmin
+        .from("tenant_members")
+        .select("user_id")
+        .in("user_id", memberIds);
+      const stillMemberSet = new Set((stillMember ?? []).map((r) => r.user_id));
+
+      const { data: withRoles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .in("user_id", memberIds);
+      const withRolesSet = new Set((withRoles ?? []).map((r) => r.user_id));
+
+      const orphanIds = memberIds.filter(
+        (id) => id !== context.userId && !stillMemberSet.has(id) && !withRolesSet.has(id),
+      );
+
+      for (const uid of orphanIds) {
+        const { error: dErr } = await supabaseAdmin.auth.admin.deleteUser(uid);
+        if (!dErr) deletedUserIds.push(uid);
+      }
+    }
+
+    return { ok: true, deletedUserIds };
   });
