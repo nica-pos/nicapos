@@ -2,38 +2,83 @@ import { getFriendlyErrorMessage } from "@/lib/errors";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, ShieldAlert, Building2, CheckCircle2, PauseCircle, DollarSign } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Loader2,
+  ShieldAlert,
+  Building2,
+  CheckCircle2,
+  PauseCircle,
+  DollarSign,
+  Search,
+  Play,
+  Pause,
+  MoreHorizontal,
+  Store,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useIsSuperadmin, usePlans } from "@/hooks/use-tenant";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
   head: () => ({ meta: [{ title: "Superadmin — Nica-POS" }] }),
 });
 
-const statusMeta: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-  trial: { label: "Prueba", variant: "secondary" },
-  active: { label: "Activa", variant: "default" },
-  suspended: { label: "Suspendida", variant: "destructive" },
-  cancelled: { label: "Cancelada", variant: "destructive" },
+const statusMeta: Record<
+  string,
+  { label: string; dot: string; text: string; ring: string }
+> = {
+  trial: {
+    label: "Prueba",
+    dot: "bg-warning",
+    text: "text-warning",
+    ring: "ring-warning/20 bg-warning/5",
+  },
+  active: {
+    label: "Activa",
+    dot: "bg-success",
+    text: "text-success",
+    ring: "ring-success/20 bg-success/5",
+  },
+  suspended: {
+    label: "Suspendida",
+    dot: "bg-destructive",
+    text: "text-destructive",
+    ring: "ring-destructive/20 bg-destructive/5",
+  },
+  cancelled: {
+    label: "Cancelada",
+    dot: "bg-muted-foreground",
+    text: "text-muted-foreground",
+    ring: "ring-border bg-muted/40",
+  },
 };
+
+function initialsOf(name?: string | null) {
+  const src = (name ?? "?").trim();
+  const parts = src.split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return src.slice(0, 2).toUpperCase();
+}
 
 function AdminPage() {
   const queryClient = useQueryClient();
   const { data: isSuperadmin, isLoading: checking } = useIsSuperadmin();
   const { data: plans } = usePlans(true);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
 
   const tenants = useQuery({
     queryKey: ["admin-tenants"],
@@ -63,10 +108,27 @@ function AdminPage() {
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
+  const list = tenants.data ?? [];
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return list.filter((t: any) => {
+      const okFilter = filter === "all" || t.status === filter;
+      const okQuery =
+        !q ||
+        t.name?.toLowerCase().includes(q) ||
+        t.owner?.email?.toLowerCase().includes(q) ||
+        t.plan?.name?.toLowerCase().includes(q);
+      return okFilter && okQuery;
+    });
+  }, [list, query, filter]);
+
   if (checking) {
     return (
       <DashboardShell>
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
       </DashboardShell>
     );
   }
@@ -74,133 +136,318 @@ function AdminPage() {
   if (!isSuperadmin) {
     return (
       <DashboardShell>
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ShieldAlert className="mb-4 h-12 w-12 text-destructive" />
+        <Card className="flex flex-col items-center justify-center border-destructive/30 bg-destructive/5 py-16 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+            <ShieldAlert className="h-6 w-6 text-destructive" />
+          </div>
           <h1 className="text-xl font-semibold text-foreground">Acceso restringido</h1>
-          <p className="mt-2 text-muted-foreground">Esta sección es solo para superadministradores de la plataforma.</p>
-        </div>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            Esta consola es exclusiva para superadministradores de la plataforma Nica-POS.
+          </p>
+        </Card>
       </DashboardShell>
     );
   }
 
-  const list = tenants.data ?? [];
   const active = list.filter((t: any) => t.status === "active").length;
+  const trial = list.filter((t: any) => t.status === "trial").length;
   const suspended = list.filter((t: any) => t.status === "suspended").length;
   const mrr = list
     .filter((t: any) => t.status === "active")
     .reduce((sum: number, t: any) => sum + Number(t.plan?.price_usd ?? 0), 0);
 
   const metrics = [
-    { title: "Tiendas totales", value: list.length, icon: Building2 },
-    { title: "Activas", value: active, icon: CheckCircle2 },
-    { title: "Suspendidas", value: suspended, icon: PauseCircle },
-    { title: "MRR estimado", value: `$${mrr.toFixed(2)}`, icon: DollarSign },
+    {
+      title: "Tiendas totales",
+      value: list.length.toString(),
+      hint: `${trial} en prueba`,
+      icon: Building2,
+      accent: "text-primary bg-primary/10",
+    },
+    {
+      title: "Suscripciones activas",
+      value: active.toString(),
+      hint: "Facturando este mes",
+      icon: CheckCircle2,
+      accent: "text-success bg-success/10",
+    },
+    {
+      title: "Suspendidas",
+      value: suspended.toString(),
+      hint: "Requieren atención",
+      icon: PauseCircle,
+      accent: "text-destructive bg-destructive/10",
+    },
+    {
+      title: "MRR estimado",
+      value: `$${mrr.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      hint: "USD / mes recurrente",
+      icon: DollarSign,
+      accent: "text-warning bg-warning/10",
+    },
+  ];
+
+  const filters: { key: typeof filter; label: string; count: number }[] = [
+    { key: "all", label: "Todas", count: list.length },
+    { key: "active", label: "Activas", count: active },
+    { key: "trial", label: "Prueba", count: trial },
+    { key: "suspended", label: "Suspendidas", count: suspended },
   ];
 
   return (
     <DashboardShell>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Consola de plataforma</h1>
-        <p className="text-muted-foreground">Administración central de todas las tiendas y planes.</p>
+      {/* Encabezado */}
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <div className="text-xs font-medium uppercase tracking-wider text-primary">
+            Plataforma
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Consola de superadministración
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Supervisa tiendas, suscripciones y planes de toda la red Nica-POS.
+          </p>
+        </div>
       </div>
 
-      <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* KPIs */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((m) => (
-          <Card key={m.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{m.title}</CardTitle>
-              <m.icon className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{m.value}</div>
-            </CardContent>
+          <Card
+            key={m.title}
+            className="border-border/60 bg-card/60 p-5 transition-all hover:border-primary/30"
+          >
+            <div className="flex items-start justify-between">
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {m.title}
+              </div>
+              <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", m.accent)}>
+                <m.icon className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-4 text-2xl font-bold tracking-tight text-foreground tabular-nums">
+              {m.value}
+            </div>
+            <div className="mt-3 border-t border-border/50 pt-3 text-[11px] text-muted-foreground">
+              {m.hint}
+            </div>
           </Card>
         ))}
       </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Tiendas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {tenants.isLoading ? (
+      {/* Tabla de tiendas */}
+      <Card className="mt-6 overflow-hidden border-border/60 bg-card/60">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-5">
+          <div>
+            <div className="text-sm font-semibold text-foreground">Tiendas</div>
+            <div className="text-xs text-muted-foreground">
+              {filtered.length} de {list.length} resultados
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar tienda, dueño o plan…"
+                className="h-9 w-64 pl-8"
+              />
+            </div>
+            <div className="flex overflow-hidden rounded-md border border-border/60">
+              {filters.map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  className={cn(
+                    "flex items-center gap-1.5 border-r border-border/60 px-3 py-1.5 text-xs font-medium transition-colors last:border-r-0",
+                    filter === f.key
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                  )}
+                >
+                  {f.label}
+                  <span className="tabular-nums text-[10px] opacity-70">{f.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {tenants.isLoading ? (
+          <div className="flex justify-center py-16">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tienda</TableHead>
-                  <TableHead>Dueño</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {list.map((t: any) => {
-                  const meta = statusMeta[t.status] ?? statusMeta.trial;
-                  return (
-                    <TableRow key={t.id}>
-                      <TableCell className="font-medium">{t.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{t.owner?.email ?? "—"}</TableCell>
-                      <TableCell>{t.plan?.name ?? "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant={meta.variant}>{meta.label}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted/40">
+              <Store className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="text-sm font-medium text-foreground">Sin resultados</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Ajusta la búsqueda o los filtros.
+            </div>
+          </div>
+        ) : (
+          <div className="divide-y divide-border/50">
+            {filtered.map((t: any) => {
+              const meta = statusMeta[t.status] ?? statusMeta.trial;
+              return (
+                <div
+                  key={t.id}
+                  className="grid grid-cols-12 items-center gap-3 px-5 py-3.5 transition-colors hover:bg-accent/30"
+                >
+                  <div className="col-span-12 flex items-center gap-3 md:col-span-4">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-primary">
+                      {initialsOf(t.name)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-foreground">{t.name}</div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {t.ruc ? `RUC ${t.ruc}` : t.slug}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-span-6 truncate text-xs text-muted-foreground md:col-span-3">
+                    {t.owner?.email ?? "—"}
+                  </div>
+                  <div className="col-span-3 md:col-span-2">
+                    <div className="text-sm font-medium text-foreground">
+                      {t.plan?.name ?? "—"}
+                    </div>
+                    {t.plan?.price_usd != null && (
+                      <div className="text-xs text-muted-foreground tabular-nums">
+                        ${Number(t.plan.price_usd)}/mes
+                      </div>
+                    )}
+                  </div>
+                  <div className="col-span-2 md:col-span-2">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1",
+                        meta.ring,
+                        meta.text,
+                      )}
+                    >
+                      <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
+                      {meta.label}
+                    </span>
+                  </div>
+                  <div className="col-span-1 flex justify-end md:col-span-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          aria-label="Acciones"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
                         {t.status === "suspended" ? (
-                          <Button size="sm" variant="outline" onClick={() => setStatus.mutate({ id: t.id, status: "active" })}>
-                            Reactivar
-                          </Button>
+                          <DropdownMenuItem
+                            onClick={() => setStatus.mutate({ id: t.id, status: "active" })}
+                          >
+                            <Play className="mr-2 h-4 w-4" /> Reactivar
+                          </DropdownMenuItem>
                         ) : (
-                          <Button size="sm" variant="outline" onClick={() => setStatus.mutate({ id: t.id, status: "suspended" })}>
-                            Suspender
-                          </Button>
+                          <DropdownMenuItem
+                            onClick={() => setStatus.mutate({ id: t.id, status: "suspended" })}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Pause className="mr-2 h-4 w-4" /> Suspender
+                          </DropdownMenuItem>
                         )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem disabled>
+                          Ver detalle (próximamente)
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Planes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Plan</TableHead>
-                <TableHead>Precio</TableHead>
-                <TableHead>Productos</TableHead>
-                <TableHead>Cajeros</TableHead>
-                <TableHead>Sucursales</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(plans ?? []).map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.name}</TableCell>
-                  <TableCell>${p.price_usd}/mes</TableCell>
-                  <TableCell>{p.max_products.toLocaleString()}</TableCell>
-                  <TableCell>{p.max_cashiers}</TableCell>
-                  <TableCell>{p.max_branches}</TableCell>
-                  <TableCell>
-                    <Badge variant={p.is_active ? "default" : "secondary"}>
-                      {p.is_active ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
+      {/* Planes */}
+      <Card className="mt-6 border-border/60 bg-card/60 p-6">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <div className="text-sm font-semibold text-foreground">Planes disponibles</div>
+            <div className="text-xs text-muted-foreground">
+              Precios y límites que verán las nuevas tiendas.
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {(plans ?? []).map((p) => (
+            <div
+              key={p.id}
+              className="rounded-xl border border-border/60 bg-background/40 p-4 transition-all hover:border-primary/30"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{p.name}</div>
+                  <div className="text-xs text-muted-foreground">/{p.slug}</div>
+                </div>
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1",
+                    p.is_active
+                      ? "bg-success/5 text-success ring-success/20"
+                      : "bg-muted/40 text-muted-foreground ring-border",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      p.is_active ? "bg-success" : "bg-muted-foreground",
+                    )}
+                  />
+                  {p.is_active ? "Activo" : "Inactivo"}
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+                  ${Number(p.price_usd)}
+                </span>
+                <span className="text-xs text-muted-foreground">/mes</span>
+              </div>
+              <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-border/50 pt-3 text-center">
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Productos
+                  </dt>
+                  <dd className="mt-0.5 text-xs font-semibold text-foreground tabular-nums">
+                    {p.max_products >= 999999 ? "∞" : p.max_products.toLocaleString()}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Cajeros
+                  </dt>
+                  <dd className="mt-0.5 text-xs font-semibold text-foreground tabular-nums">
+                    {p.max_cashiers >= 999 ? "∞" : p.max_cashiers}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Sucursales
+                  </dt>
+                  <dd className="mt-0.5 text-xs font-semibold text-foreground tabular-nums">
+                    {p.max_branches >= 999 ? "∞" : p.max_branches}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          ))}
+        </div>
       </Card>
     </DashboardShell>
   );
