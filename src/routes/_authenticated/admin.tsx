@@ -92,6 +92,7 @@ function AdminPage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
   const [editingPlan, setEditingPlan] = useState<any | null>(null);
+  const [detailTenant, setDetailTenant] = useState<any | null>(null);
 
   const savePlan = useMutation({
     mutationFn: async (p: {
