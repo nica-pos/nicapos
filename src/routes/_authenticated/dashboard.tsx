@@ -81,7 +81,7 @@ function DashboardPage() {
       since.setDate(since.getDate() - 30);
       const { data, error } = await supabase
         .from("sale_items")
-        .select("subtotal_usd, products(category_id, categories(name))")
+        .select("quantity, unit_price_usd, line_total_usd, tax_usd, products(category_id, categories(name))")
         .eq("tenant_id", tenant!.id)
         .gte("created_at", since.toISOString());
       if (error) throw error;
@@ -89,7 +89,7 @@ function DashboardPage() {
       let grand = 0;
       for (const it of (data ?? []) as any[]) {
         const catName = it.products?.categories?.name ?? "Sin categoría";
-        const v = Number(it.subtotal_usd ?? 0);
+        const v = Number(it.line_total_usd ?? 0) - Number(it.tax_usd ?? 0);
         totals.set(catName, (totals.get(catName) ?? 0) + v);
         grand += v;
       }
