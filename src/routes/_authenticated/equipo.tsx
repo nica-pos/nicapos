@@ -63,11 +63,21 @@ function TeamPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_members")
-        .select("*, profile:profiles(email, full_name)")
+        .select("*")
         .eq("tenant_id", tenant!.id)
         .order("created_at");
       if (error) throw error;
-      return data;
+      const userIds = (data ?? []).map((m) => m.user_id);
+      let profilesMap = new Map<string, { email: string | null; full_name: string | null }>();
+      if (userIds.length) {
+        const { data: profs, error: pErr } = await supabase
+          .from("profiles")
+          .select("id, email, full_name")
+          .in("id", userIds);
+        if (pErr) throw pErr;
+        profilesMap = new Map((profs ?? []).map((p) => [p.id, { email: p.email, full_name: p.full_name }]));
+      }
+      return (data ?? []).map((m) => ({ ...m, profile: profilesMap.get(m.user_id) ?? null }));
     },
   });
 
