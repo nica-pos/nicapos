@@ -76,8 +76,17 @@ export function useActiveTenant() {
   const memberships = useMyMemberships();
   const list = memberships.data ?? [];
   const activeId = getActiveTenantId();
+
+  // Membresías REALES (donde el usuario es dueño/miembro efectivo) tienen prioridad
+  // sobre las virtuales que se exponen a los superadmins para "espiar" otras tiendas.
+  const real = list.filter((m) => !String(m.id).startsWith("virtual-"));
+  const savedMatch = list.find((m) => m.tenant_id === activeId);
+  // Si el activeId guardado apunta a una tienda virtual (ajena) pero el usuario tiene
+  // tiendas propias, forzamos su propia tienda para que no vea datos de otro por accidente.
   const active =
-    list.find((m) => m.tenant_id === activeId) ?? list[0] ?? null;
+    savedMatch && (real.length === 0 || !String(savedMatch.id).startsWith("virtual-"))
+      ? savedMatch
+      : real[0] ?? list[0] ?? null;
 
   return {
     ...memberships,
