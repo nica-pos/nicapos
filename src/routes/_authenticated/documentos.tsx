@@ -445,23 +445,45 @@ function InvoiceView({
   rate,
   nio,
   isProforma,
+  logoUrl,
+  primaryColor,
+  docNumber,
 }: any) {
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xl font-bold uppercase">{legalName}</div>
-          {tenantRuc && <div className="text-sm">RUC: {tenantRuc}</div>}
-          {settings?.address && <div className="text-sm">{settings.address}</div>}
-          {settings?.phone && <div className="text-sm">Tel: {settings.phone}</div>}
-          {settings?.email && <div className="text-sm">{settings.email}</div>}
+      <div
+        className="flex items-start justify-between border-b-4 pb-3"
+        style={{ borderColor: primaryColor || "#e5e7eb" }}
+      >
+        <div className="flex items-start gap-4">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Logo"
+              className="h-16 w-16 rounded object-contain"
+              crossOrigin="anonymous"
+            />
+          )}
+          <div>
+            <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>
+              {legalName}
+            </div>
+            {tenantRuc && <div className="text-sm">RUC: {tenantRuc}</div>}
+            {settings?.address && <div className="text-sm">{settings.address}</div>}
+            {settings?.phone && <div className="text-sm">Tel: {settings.phone}</div>}
+            {settings?.email && <div className="text-sm">{settings.email}</div>}
+          </div>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold">{title}</div>
+          <div className="text-lg font-bold" style={{ color: primaryColor }}>
+            {title}
+          </div>
+          {docNumber && <div className="text-sm font-semibold">N° {docNumber}</div>}
           <div className="text-sm">Fecha: {new Date().toLocaleDateString("es-NI")}</div>
           {rate && <div className="text-sm">Tasa: C$ {rate.toFixed(4)}/US$1</div>}
         </div>
       </div>
+
 
       <div className="border-t pt-2 text-sm">
         <div><span className="font-semibold">Cliente:</span> {customer || "—"}</div>
