@@ -30,7 +30,7 @@ import { useIsSuperadmin } from "@/hooks/use-tenant";
 import { saveBankAccount, deleteBankAccount } from "@/lib/transfer-billing.functions";
 import { getFriendlyErrorMessage } from "@/lib/errors";
 
-export const Route = createFileRoute("/_authenticated/admin/bancos")({
+export const Route = createFileRoute("/_authenticated/admin_/bancos")({
   component: BancosPage,
   head: () => ({ meta: [{ title: "Cuentas bancarias — Nica-POS" }] }),
 });
