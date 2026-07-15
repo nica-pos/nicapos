@@ -39,35 +39,7 @@ export function useMyMemberships() {
         .order("created_at", { ascending: true });
       if (error) throw error;
       const real = (data ?? []) as MembershipWithTenant[];
-
-      // Superadmins can operate on any tenant. If they aren't already a
-      // member, expose all tenants as virtual "owner" memberships so the
-      // tenant selector and RLS-scoped screens work for them too.
-      const { data: isSuper } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", uid)
-        .eq("role", "superadmin")
-        .maybeSingle();
-      if (!isSuper) return real;
-
-      const { data: allTenants } = await supabase
-        .from("tenants")
-        .select("*")
-        .order("created_at", { ascending: true });
-      const existingIds = new Set(real.map((m) => m.tenant_id));
-      const virtual: MembershipWithTenant[] = (allTenants ?? [])
-        .filter((t) => !existingIds.has(t.id))
-        .map((t) => ({
-          id: `virtual-${t.id}`,
-          tenant_id: t.id,
-          user_id: uid,
-          role: "owner" as TenantRole,
-          created_at: t.created_at,
-          updated_at: t.updated_at,
-          tenant: t,
-        }) as unknown as MembershipWithTenant);
-      return [...real, ...virtual];
+      return real;
     },
   });
 }
@@ -77,16 +49,8 @@ export function useActiveTenant() {
   const list = memberships.data ?? [];
   const activeId = getActiveTenantId();
 
-  // Membresías REALES (donde el usuario es dueño/miembro efectivo) tienen prioridad
-  // sobre las virtuales que se exponen a los superadmins para "espiar" otras tiendas.
-  const real = list.filter((m) => !String(m.id).startsWith("virtual-"));
   const savedMatch = list.find((m) => m.tenant_id === activeId);
-  // Si el activeId guardado apunta a una tienda virtual (ajena) pero el usuario tiene
-  // tiendas propias, forzamos su propia tienda para que no vea datos de otro por accidente.
-  const active =
-    savedMatch && (real.length === 0 || !String(savedMatch.id).startsWith("virtual-"))
-      ? savedMatch
-      : real[0] ?? list[0] ?? null;
+  const active = savedMatch ?? list[0] ?? null;
 
   return {
     ...memberships,

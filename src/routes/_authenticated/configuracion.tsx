@@ -1,6 +1,6 @@
 import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useEffect, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Palette, Upload, X } from "lucide-react";
@@ -65,10 +65,30 @@ function ConfigPage() {
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
-  if (isLoading || !tenant) {
+  if (isLoading) {
     return (
       <DashboardShell>
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </DashboardShell>
+    );
+  }
+
+  if (!tenant) {
+    return (
+      <DashboardShell>
+        <Card className="max-w-xl border-border/60 bg-card/60">
+          <CardHeader>
+            <CardTitle>Sin negocio propio configurado</CardTitle>
+            <CardDescription>
+              Configuración solo muestra tiendas donde tu cuenta es miembro real.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link to="/onboarding">Crear mi tienda</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </DashboardShell>
     );
   }
