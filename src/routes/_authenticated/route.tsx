@@ -27,10 +27,15 @@ function TenantStatusGate() {
     if (EXEMPT_PATHS.some((p) => path === p || path.startsWith(p + "/"))) return;
 
     const status = tenant.status as string;
-    if (status === "pending_payment") {
+    const trialEnds = tenant.trial_ends_at ? new Date(tenant.trial_ends_at).getTime() : null;
+    const trialExpired = status === "trial" && trialEnds !== null && trialEnds < Date.now();
+
+    if (status === "pending_payment" || trialExpired) {
       navigate({ to: "/pago-pendiente", replace: true });
     } else if (status === "pending_verification") {
       navigate({ to: "/verificacion-pendiente", replace: true });
+    } else if (status === "cancelled" || status === "suspended") {
+      navigate({ to: "/onboarding", replace: true });
     }
   }, [tenant, isLoading, isSuper, location.pathname, navigate]);
 

@@ -123,12 +123,14 @@ function PagoPendientePage() {
   }
 
   if (!tenant) return <Navigate to="/onboarding" />;
-  if (tenant.status === "active" || tenant.status === "trial") {
-    return <Navigate to="/dashboard" />;
-  }
+  const trialEnds = tenant.trial_ends_at ? new Date(tenant.trial_ends_at).getTime() : null;
+  const trialExpired = tenant.status === "trial" && trialEnds !== null && trialEnds < Date.now();
+  if (tenant.status === "active") return <Navigate to="/dashboard" />;
+  if (tenant.status === "trial" && !trialExpired) return <Navigate to="/dashboard" />;
   if ((tenant.status as string) === "pending_verification") {
     return <Navigate to="/verificacion-pendiente" />;
   }
+  if ((tenant.status as string) === "cancelled") return <Navigate to="/onboarding" />;
 
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);

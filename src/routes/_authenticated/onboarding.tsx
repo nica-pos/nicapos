@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Store, Loader2, Check } from "lucide-react";
@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { usePlans, setActiveTenantId } from "@/hooks/use-tenant";
+import {
+  usePlans,
+  setActiveTenantId,
+  useMyMemberships,
+} from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
 
 const PLAN_META: Record<
@@ -74,12 +78,25 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: plans } = usePlans();
+  const { data: memberships, isLoading: loadingMemberships } = useMyMemberships();
   const [name, setName] = useState("");
   const [ruc, setRuc] = useState("");
   const [planId, setPlanId] = useState<string | null>(null);
 
   const selectedPlan = (plans ?? []).find((p) => p.id === planId);
   const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0;
+
+  // Bloqueo: 1 sola tienda activa por usuario
+  const existingActive = (memberships ?? []).find((m) => {
+    const s = m.tenant?.status as string | undefined;
+    return s && ["trial", "active", "pending_payment", "pending_verification"].includes(s);
+  });
+  if (!loadingMemberships && existingActive) {
+    const s = existingActive.tenant.status as string;
+    if (s === "pending_payment") return <Navigate to="/pago-pendiente" replace />;
+    if (s === "pending_verification") return <Navigate to="/verificacion-pendiente" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const createTenant = useMutation({
     mutationFn: async () => {
@@ -105,7 +122,12 @@ function OnboardingPage() {
         })
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === "23505" || /one_active_tenant_per_owner/i.test(error.message)) {
+          throw new Error("Ya tienes una tienda activa o pendiente. Solo se permite una por usuario.");
+        }
+        throw error;
+      }
       return data;
     },
     onSuccess: (tenant) => {
