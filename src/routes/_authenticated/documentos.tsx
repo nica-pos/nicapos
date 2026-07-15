@@ -220,16 +220,62 @@ function DocumentsPage() {
                   </div>
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={() => setItems((prev) => [...prev, newItem()])}>
-                <Plus className="mr-2 h-4 w-4" /> Agregar línea
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => setItems((prev) => [...prev, newItem()])}>
+                  <Plus className="mr-2 h-4 w-4" /> Agregar línea
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setLoadOpen(true)}>
+                  <FileSearch className="mr-2 h-4 w-4" /> Cargar desde venta
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          <Button onClick={() => window.print()} className="w-full">
+          <Button onClick={() => window.print()} className="w-full" disabled={items.length === 0}>
             <Printer className="mr-2 h-4 w-4" /> Imprimir / Guardar PDF
           </Button>
         </div>
+
+        <Dialog open={loadOpen} onOpenChange={setLoadOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Cargar desde venta</DialogTitle>
+              <DialogDescription>
+                Selecciona una venta reciente para reimprimir su comprobante.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {recentSales.isLoading ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">Cargando…</div>
+              ) : (recentSales.data ?? []).length === 0 ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  Todavía no hay ventas registradas.
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {(recentSales.data ?? []).map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => loadSale(s.id)}
+                      className="flex w-full items-center justify-between py-2.5 text-left hover:bg-muted/30"
+                    >
+                      <div>
+                        <div className="text-sm font-medium">Venta #{s.sale_number}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(s.created_at).toLocaleString("es-NI")}
+                        </div>
+                      </div>
+                      <div className="text-sm font-semibold tabular-nums">
+                        {formatUSD(Number(s.total_usd))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
 
         {/* Preview / printable area */}
         <div>
