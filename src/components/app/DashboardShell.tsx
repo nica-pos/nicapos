@@ -59,6 +59,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     items: [
       { to: "/productos", label: "Productos", icon: Package },
       { to: "/inventario", label: "Inventario", icon: Warehouse },
+      { to: "/auditoria", label: "Auditoría física", icon: ClipboardCheck },
       { to: "/proveedores", label: "Proveedores", icon: Truck },
       { to: "/caja", label: "Caja", icon: Wallet },
     ],
