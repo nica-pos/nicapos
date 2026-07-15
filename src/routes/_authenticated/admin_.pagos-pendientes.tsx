@@ -40,7 +40,7 @@ import {
 } from "@/lib/transfer-billing.functions";
 import { getFriendlyErrorMessage } from "@/lib/errors";
 
-export const Route = createFileRoute("/_authenticated/admin/pagos-pendientes")({
+export const Route = createFileRoute("/_authenticated/admin_/pagos-pendientes")({
   component: PagosPendientesPage,
   head: () => ({ meta: [{ title: "Pagos pendientes — Nica-POS" }] }),
 });
