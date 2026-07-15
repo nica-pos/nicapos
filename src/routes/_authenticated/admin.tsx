@@ -95,10 +95,23 @@ function AdminPage() {
   const { data: isSuperadmin, isLoading: checking } = useIsSuperadmin();
   const fetchTenantSummaries = useServerFn(getAdminTenantSummaries);
   const updateTenantStatus = useServerFn(setAdminTenantStatus);
+  const createClientFn = useServerFn(adminCreateClient);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
   const [editingPlan, setEditingPlan] = useState<any | null>(null);
+  const [creatingClient, setCreatingClient] = useState(false);
+
+  const createClient = useMutation({
+    mutationFn: (v: { email: string; password: string; tenantName: string; planId: string; durationDays: number }) =>
+      createClientFn({ data: v }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+      toast.success("Cliente creado. Ya puede iniciar sesión.");
+      setCreatingClient(false);
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
 
   const savePlan = useMutation({
     mutationFn: async (p: {
