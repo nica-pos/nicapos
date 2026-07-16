@@ -15,9 +15,8 @@ async function assertSuperadmin(supabase: any, userId: string) {
   if (!data) throw new Error("Solo el superadmin puede realizar esta acción.");
 }
 
-async function getProviderConfig(provider: "stripe" | "paypal") {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+async function getProviderConfig(supabase: any, provider: "stripe" | "paypal") {
+  const { data, error } = await supabase
     .from("payment_provider_settings")
     .select("*")
     .eq("provider", provider)
