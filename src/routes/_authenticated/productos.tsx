@@ -155,6 +155,7 @@ function ProductsPage() {
         brand: form.brand.trim() || null,
         model: form.model.trim() || null,
         price_usd: Number(priceInUsd.toFixed(4)),
+        price_currency: priceCurrency,
         stock: Number(form.stock) || 0,
         min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
