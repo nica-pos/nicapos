@@ -215,7 +215,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
     const json = (await res.json()) as any;
     if (!res.ok) throw new Error(json.error?.message || "Stripe rechazó la solicitud.");
 
-    await supabaseAdmin.from("tenant_subscriptions").insert({
+    await context.supabase.from("tenant_subscriptions").insert({
       tenant_id: data.tenantId,
       plan_id: data.planId,
       provider: "stripe",
