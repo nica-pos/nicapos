@@ -67,6 +67,8 @@ function PosPage() {
   const { tenant } = useActiveTenant();
   const rate = useLatestRate() ?? 0;
   const createSale = useCreateSale();
+  const { data: customers } = useCustomers();
+  const createReceivable = useCreateReceivable();
 
   const [search, setSearch] = useState("");
   const [highlight, setHighlight] = useState(0);
