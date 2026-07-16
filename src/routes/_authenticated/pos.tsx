@@ -210,10 +210,27 @@ function PosPage() {
       toast.error("El carrito está vacío");
       return;
     }
-    // default: single payment covering the total in NIO
-    setPayments([
-      { method: "cash_nio", amount: Number(totalNio.toFixed(2)), currency: "NIO" },
-    ]);
+    // Determinar moneda nativa dominante del carrito
+    const productsById = new Map((products ?? []).map((p) => [p.id, p]));
+    let usdWeight = 0;
+    let nioWeight = 0;
+    for (const l of cart) {
+      const prod = l.product_id ? productsById.get(l.product_id) : null;
+      const cur = (prod as any)?.price_currency === "NIO" ? "NIO" : "USD";
+      const w = l.unit_price_usd * l.quantity;
+      if (cur === "NIO") nioWeight += w;
+      else usdWeight += w;
+    }
+    const preferUsd = usdWeight >= nioWeight;
+    if (preferUsd) {
+      setPayments([
+        { method: "cash_usd", amount: Number(totals.total.toFixed(2)), currency: "USD" },
+      ]);
+    } else {
+      setPayments([
+        { method: "cash_nio", amount: Number(totalNio.toFixed(2)), currency: "NIO" },
+      ]);
+    }
     setPayOpen(true);
   }
 
@@ -1067,10 +1084,16 @@ function ReceiptDialog({
               <div>{sale.createdAt.toLocaleString("es-NI")}</div>
               <div className="font-semibold">N° {docNumber}</div>
               <div>Venta interna #{sale.saleNumber}</div>
-              <div className="mt-1 font-bold">
-                CONDICIÓN: {sale.isCredit ? "CRÉDITO" : "CONTADO"}
+              <div
+                className={`mx-auto mt-2 inline-block rounded border-2 px-3 py-1 text-sm font-black uppercase tracking-wider ${
+                  sale.isCredit ? "border-black" : "border-black"
+                }`}
+              >
+                {sale.isCredit ? "VENTA A CRÉDITO" : "VENTA DE CONTADO"}
               </div>
-              {sale.customerName && <div>Cliente: {sale.customerName}</div>}
+              {sale.customerName && (
+                <div className="mt-1 text-[11px]">Cliente: {sale.customerName}</div>
+              )}
             </div>
             <div className="my-1 border-t border-dashed border-black" />
             {sale.lines.map((l, i) => (

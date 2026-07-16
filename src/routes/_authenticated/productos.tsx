@@ -115,6 +115,11 @@ function ProductsPage() {
   }
 
   function openEdit(p: Product) {
+    const cur = ((p as any).price_currency === "NIO" ? "NIO" : "USD") as "USD" | "NIO";
+    const displayPrice =
+      cur === "NIO" && rate > 0
+        ? (Number(p.price_usd) * rate).toFixed(2)
+        : String(p.price_usd);
     setForm({
       id: p.id,
       name: p.name,
@@ -122,13 +127,13 @@ function ProductsPage() {
       category: p.category ?? "",
       brand: p.brand ?? "",
       model: p.model ?? "",
-      price_usd: String(p.price_usd),
+      price_usd: displayPrice,
       stock: String(p.stock),
       min_stock: String(p.min_stock),
       is_tax_exempt: p.is_tax_exempt,
       is_combo: p.is_combo,
     });
-    setPriceCurrency("USD");
+    setPriceCurrency(cur);
     setOpen(true);
   }
 
@@ -155,6 +160,7 @@ function ProductsPage() {
         brand: form.brand.trim() || null,
         model: form.model.trim() || null,
         price_usd: Number(priceInUsd.toFixed(4)),
+        price_currency: priceCurrency,
         stock: Number(form.stock) || 0,
         min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
