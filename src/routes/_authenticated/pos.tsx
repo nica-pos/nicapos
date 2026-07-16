@@ -92,6 +92,8 @@ function PosPage() {
     changeNio: number;
     createdAt: Date;
     docFormat: "ticket" | "carta";
+    isCredit: boolean;
+    customerName: string | null;
   } | null>(null);
 
 
