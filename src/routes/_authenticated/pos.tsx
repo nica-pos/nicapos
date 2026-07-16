@@ -823,7 +823,13 @@ function PosPage() {
             <div className="space-y-1 rounded-lg border border-border/60 p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Pagado</span>
-                <span>{formatUSD(paidUsd)}</span>
+                <span>
+                  {changePreferNio
+                    ? formatNIO(paidNioRaw)
+                    : changePreferUsd
+                      ? formatUSD(paidUsdRaw)
+                      : `${formatNIO(paidNioRaw)} · ${formatUSD(paidUsdRaw)}`}
+                </span>
               </div>
               <div className="flex justify-between text-base font-semibold">
                 <span>Vuelto</span>
