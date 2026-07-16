@@ -1,0 +1,10 @@
+# Cloudflare Workers/Pages configuration
+# Public Supabase values (safe to commit — anon/publishable key is designed to be public).
+# The SERVICE_ROLE key must NEVER be added here; set it as a secret in the Cloudflare dashboard.
+
+[vars]
+SUPABASE_URL = "https://hhbcetordirxhkrzybjv.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoYmNldG9yZGlyeGhrcnp5Ymp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5OTM2MzAsImV4cCI6MjA5OTU2OTYzMH0.NC8R6UUD0rLfEYlEKz7PmJPkIKocGzwI0F3IH3VK-jo"
+VITE_SUPABASE_URL = "https://hhbcetordirxhkrzybjv.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoYmNldG9yZGlyeGhrcnp5Ymp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5OTM2MzAsImV4cCI6MjA5OTU2OTYzMH0.NC8R6UUD0rLfEYlEKz7PmJPkIKocGzwI0F3IH3VK-jo"
+VITE_SUPABASE_PROJECT_ID = "hhbcetordirxhkrzybjv"
