@@ -702,6 +702,61 @@ function PosPage() {
               </div>
             </div>
 
+            {/* Cliente + crédito */}
+            <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+              <div className="space-y-1">
+                <Label className="text-xs">Cliente</Label>
+                <Select
+                  value={customerId}
+                  onValueChange={(v) => {
+                    setCustomerId(v);
+                    if (v === "__general__") setIsCredit(false);
+                  }}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__general__">Público en general</SelectItem>
+                    {(customers ?? [])
+                      .filter((c) => c.is_active !== false)
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                          {Number(c.credit_limit_usd ?? 0) > 0
+                            ? ` — crédito ${formatUSD(Number(c.credit_limit_usd))}`
+                            : ""}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant={isCredit ? "default" : "outline"}
+                size="sm"
+                disabled={!creditAvailable}
+                onClick={() => setIsCredit((v) => !v)}
+                title={
+                  !selectedCustomer
+                    ? "Seleccioná un cliente"
+                    : !creditAvailable
+                      ? "El cliente no tiene límite de crédito"
+                      : "Marcar como venta a crédito"
+                }
+              >
+                <CreditCard className="mr-1 h-4 w-4" />
+                {isCredit ? "A crédito" : "Vender a crédito"}
+              </Button>
+            </div>
+            {isCredit && selectedCustomer && (
+              <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs">
+                Esta venta se registrará como <strong>cuenta por cobrar</strong> a{" "}
+                <strong>{selectedCustomer.name}</strong>. Límite de crédito:{" "}
+                <strong>{formatUSD(creditLimit)}</strong>.
+              </div>
+            )}
+
             {effectiveRate <= 0 && (
               <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
