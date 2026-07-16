@@ -92,6 +92,8 @@ function PosPage() {
     changeNio: number;
     createdAt: Date;
     docFormat: "ticket" | "carta";
+    isCredit: boolean;
+    customerName: string | null;
   } | null>(null);
 
 
@@ -354,6 +356,8 @@ function PosPage() {
         changeNio: Math.max(0, snapChangeNio),
         createdAt: new Date(),
         docFormat,
+        isCredit,
+        customerName: selectedCustomer?.name ?? null,
       });
       clearCart();
       setRateOverride(null);
@@ -997,6 +1001,8 @@ function ReceiptDialog({
     changeNio: number;
     createdAt: Date;
     docFormat: "ticket" | "carta";
+    isCredit: boolean;
+    customerName: string | null;
   } | null;
 
   onClose: () => void;
@@ -1061,6 +1067,10 @@ function ReceiptDialog({
               <div>{sale.createdAt.toLocaleString("es-NI")}</div>
               <div className="font-semibold">N° {docNumber}</div>
               <div>Venta interna #{sale.saleNumber}</div>
+              <div className="mt-1 font-bold">
+                CONDICIÓN: {sale.isCredit ? "CRÉDITO" : "CONTADO"}
+              </div>
+              {sale.customerName && <div>Cliente: {sale.customerName}</div>}
             </div>
             <div className="my-1 border-t border-dashed border-black" />
             {sale.lines.map((l, i) => (
@@ -1098,31 +1108,43 @@ function ReceiptDialog({
               </div>
             )}
             <div className="my-1 border-t border-dashed border-black" />
-            {sale.payments.map((p, i) => (
-              <div key={i} className="flex justify-between">
-                <span>{PAYMENT_LABELS[p.method]}</span>
-                <span>
-                  {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
-                </span>
-              </div>
-            ))}
-            {sale.changeUsd > 0 && (() => {
-              const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
-              const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
-              const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
-              return (
-                <div className="flex justify-between font-semibold">
-                  <span>Vuelto</span>
-                  <span>
-                    {sale.rate > 0
-                      ? showNioFirst
-                        ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
-                        : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
-                      : formatUSD(sale.changeUsd)}
-                  </span>
+            {sale.isCredit ? (
+              <div className="text-center font-bold">
+                *** PENDIENTE DE PAGO — CRÉDITO ***
+                <div className="text-[11px] font-normal">
+                  Saldo: {formatUSD(sale.total)}
+                  {sale.rate > 0 && ` · ${formatNIO(sale.total * sale.rate)}`}
                 </div>
-              );
-            })()}
+              </div>
+            ) : (
+              <>
+                {sale.payments.map((p, i) => (
+                  <div key={i} className="flex justify-between">
+                    <span>{PAYMENT_LABELS[p.method]}</span>
+                    <span>
+                      {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
+                    </span>
+                  </div>
+                ))}
+                {sale.changeUsd > 0 && (() => {
+                  const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+                  const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+                  const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+                  return (
+                    <div className="flex justify-between font-semibold">
+                      <span>Vuelto</span>
+                      <span>
+                        {sale.rate > 0
+                          ? showNioFirst
+                            ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                            : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                          : formatUSD(sale.changeUsd)}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </>
+            )}
             {sale.rate > 0 && (
               <div className="mt-1 text-center">
                 Tasa: C$ {sale.rate.toFixed(4)} / US$1
@@ -1152,10 +1174,18 @@ function ReceiptDialog({
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold">FACTURA</div>
+                <div className="text-lg font-bold">
+                  FACTURA {sale.isCredit ? "DE CRÉDITO" : "DE CONTADO"}
+                </div>
                 <div className="text-sm">N° {docNumber}</div>
                 <div className="text-xs">{sale.createdAt.toLocaleString("es-NI")}</div>
                 <div className="text-xs">Venta interna #{sale.saleNumber}</div>
+                <div className="mt-1 text-xs font-semibold">
+                  Condición: {sale.isCredit ? "CRÉDITO" : "CONTADO"}
+                </div>
+                {sale.customerName && (
+                  <div className="text-xs">Cliente: {sale.customerName}</div>
+                )}
               </div>
             </div>
 
@@ -1208,32 +1238,44 @@ function ReceiptDialog({
             </div>
 
             <div className="mt-4 border-t border-black/20 pt-2 text-xs">
-              <div className="font-semibold">Pagos:</div>
-              {sale.payments.map((p, i) => (
-                <div key={i} className="flex justify-between">
-                  <span>{PAYMENT_LABELS[p.method]}</span>
-                  <span>
-                    {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
-                  </span>
-                </div>
-              ))}
-              {sale.changeUsd > 0 && (() => {
-                const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
-                const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
-                const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
-                return (
-                  <div className="flex justify-between font-semibold">
-                    <span>Vuelto</span>
-                    <span>
-                      {sale.rate > 0
-                        ? showNioFirst
-                          ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
-                          : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
-                        : formatUSD(sale.changeUsd)}
-                    </span>
+              {sale.isCredit ? (
+                <div className="rounded border border-black/40 p-2 text-center font-bold">
+                  PENDIENTE DE PAGO — VENTA A CRÉDITO
+                  <div className="text-[11px] font-normal">
+                    Saldo por cobrar: {formatUSD(sale.total)}
+                    {sale.rate > 0 && ` · ${formatNIO(sale.total * sale.rate)}`}
                   </div>
-                );
-              })()}
+                </div>
+              ) : (
+                <>
+                  <div className="font-semibold">Pagos:</div>
+                  {sale.payments.map((p, i) => (
+                    <div key={i} className="flex justify-between">
+                      <span>{PAYMENT_LABELS[p.method]}</span>
+                      <span>
+                        {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
+                      </span>
+                    </div>
+                  ))}
+                  {sale.changeUsd > 0 && (() => {
+                    const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+                    const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+                    const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+                    return (
+                      <div className="flex justify-between font-semibold">
+                        <span>Vuelto</span>
+                        <span>
+                          {sale.rate > 0
+                            ? showNioFirst
+                              ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                              : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                            : formatUSD(sale.changeUsd)}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
               {sale.rate > 0 && (
                 <div className="mt-1">Tasa de cambio: C$ {sale.rate.toFixed(4)} / US$1</div>
               )}
