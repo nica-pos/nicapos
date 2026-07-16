@@ -59,14 +59,13 @@ export const getPaymentProviderSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertSuperadmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("payment_provider_settings")
       .select("provider, is_enabled, mode, client_id, client_secret_ciphertext, updated_at")
       .order("provider");
     if (error) throw new Error(error.message);
     const { maskSecret } = await import("@/lib/paymentCrypto.server");
-    return (data || []).map((r) => ({
+    return (data || []).map((r: any) => ({
       provider: r.provider,
       is_enabled: r.is_enabled,
       mode: r.mode,
