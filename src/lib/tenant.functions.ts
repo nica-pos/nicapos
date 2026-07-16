@@ -18,7 +18,6 @@ const deleteTenantInput = z.object({
   deleteOrphanUsers: z.boolean().default(true),
 });
 
-
 const createClientInput = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -27,74 +26,19 @@ const createClientInput = z.object({
   durationDays: z.number().int().min(1).max(3650),
 });
 
-function slugify(input: string) {
-  return input
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 40) || "tienda";
-}
-
+// NOTE: adminCreateClient requiere Supabase Auth Admin API (service role).
+// Está deshabilitado temporalmente hasta configurar SUPABASE_SERVICE_ROLE_KEY
+// en el entorno de despliegue. Los clientes se crean manualmente por ahora
+// (el usuario se registra normalmente y luego el superadmin le asigna plan/estado).
 export const adminCreateClient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => createClientInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const { data: isSuper, error: roleErr } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "superadmin",
-    });
-    if (roleErr) throw new Error(roleErr.message);
-    if (!isSuper) throw new Error("Solo el superadmin puede crear clientes.");
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    // 1) Crear usuario en Auth (email confirmado)
-    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email: data.email.toLowerCase(),
-      password: data.password,
-      email_confirm: true,
-    });
-    if (createErr || !created?.user) {
-      throw new Error(createErr?.message ?? "No se pudo crear el usuario.");
-    }
-    const newUserId = created.user.id;
-
-    // 2) Crear tenant activo con plan asignado
-    const slug = `${slugify(data.tenantName)}-${Math.random().toString(36).slice(2, 6)}`;
-    const { data: tenant, error: tErr } = await supabaseAdmin
-      .from("tenants")
-      .insert({
-        name: data.tenantName,
-        slug,
-        owner_id: newUserId,
-        plan_id: data.planId,
-        status: "active",
-        trial_ends_at: null,
-      })
-      .select("id")
-      .single();
-    if (tErr || !tenant) {
-      // Rollback: eliminar usuario si falló el tenant
-      await supabaseAdmin.auth.admin.deleteUser(newUserId).catch(() => {});
-      throw new Error(tErr?.message ?? "No se pudo crear la tienda.");
-    }
-
-    // 3) Registrar suscripción manual con duración
-    const endsAt = new Date(Date.now() + data.durationDays * 24 * 60 * 60 * 1000).toISOString();
-    await supabaseAdmin.from("tenant_subscriptions").insert({
-      tenant_id: tenant.id,
-      plan_id: data.planId,
-      provider: "manual",
-      status: "active",
-      current_period_end: endsAt,
-      raw: { created_by: context.userId, duration_days: data.durationDays },
-    });
-
-    return { ok: true, tenantId: tenant.id, userId: newUserId };
+  .handler(async () => {
+    throw new Error(
+      "La creación automática de clientes está temporalmente deshabilitada. " +
+      "Pide al cliente que se registre en /auth y luego asígnale plan y estado desde esta consola.",
+    );
   });
-
 
 export const addTenantMemberByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -114,9 +58,8 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       throw new Error("No tienes permiso para agregar miembros a esta tienda.");
     }
 
-    // Look up the target user by email using privileged access.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profile } = await supabaseAdmin
+    // Look up the target user by email via RLS (profiles has superadmin/self read policy).
+    const { data: profile } = await supabase
       .from("profiles")
       .select("id")
       .eq("email", data.email.toLowerCase())
@@ -137,7 +80,6 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       return { ok: true, invited: true };
     }
 
-    // Insert membership as the authenticated caller so RLS applies.
     const { error } = await supabase.from("tenant_members").insert({
       tenant_id: data.tenantId,
       user_id: profile.id,
@@ -162,8 +104,8 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
     if (roleError) throw new Error(roleError.message);
     if (!isSuper) throw new Error("Solo el superadmin puede ver esta consola.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    // RLS: superadmin puede leer todos los tenants.
+    const { data, error } = await context.supabase
       .from("tenants")
       .select("id, status, created_at, owner_id, plan:plans(name, price_usd)")
       .order("created_at", { ascending: false });
@@ -172,7 +114,7 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
     const ownerIds = Array.from(new Set((data ?? []).map((t) => t.owner_id).filter(Boolean))) as string[];
     let superOwners = new Set<string>();
     if (ownerIds.length > 0) {
-      const { data: roles, error: rolesError } = await supabaseAdmin
+      const { data: roles, error: rolesError } = await context.supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", "superadmin")
@@ -184,7 +126,6 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
     return (data ?? [])
       .filter((t) => !t.owner_id || !superOwners.has(t.owner_id))
       .map(({ owner_id: _o, ...rest }) => rest);
-
   });
 
 export const setAdminTenantStatus = createServerFn({ method: "POST" })
@@ -198,16 +139,14 @@ export const setAdminTenantStatus = createServerFn({ method: "POST" })
     if (roleError) throw new Error(roleError.message);
     if (!isSuper) throw new Error("Solo el superadmin puede cambiar estados de tiendas.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    // RLS: "Owner, tenant admin or superadmin can update tenant" permite este UPDATE.
+    const { error } = await context.supabase
       .from("tenants")
       .update({ status: data.status })
       .eq("id", data.tenantId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-
-
 
 export const adminDeleteTenant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -220,48 +159,16 @@ export const adminDeleteTenant = createServerFn({ method: "POST" })
     if (roleError) throw new Error(roleError.message);
     if (!isSuper) throw new Error("Solo el superadmin puede eliminar tiendas.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    // 1) Recolectar todos los miembros de la tienda ANTES de eliminarla.
-    const { data: members, error: memErr } = await supabaseAdmin
-      .from("tenant_members")
-      .select("user_id")
-      .eq("tenant_id", data.tenantId);
-    if (memErr) throw new Error(memErr.message);
-    const memberIds = Array.from(new Set((members ?? []).map((m) => m.user_id).filter(Boolean))) as string[];
-
-    // 2) Eliminar la tienda (todas las tablas hijas están en CASCADE).
-    const { error: delErr } = await supabaseAdmin
+    // RLS: "Owner or superadmin can delete tenant" permite este DELETE.
+    // Los datos hijos caen en CASCADE.
+    const { error: delErr } = await context.supabase
       .from("tenants")
       .delete()
       .eq("id", data.tenantId);
     if (delErr) throw new Error(delErr.message);
 
-    // 3) Opcional: eliminar de Auth a los usuarios que quedaron huérfanos
-    //    (sin membresía en ninguna otra tienda, y sin ningún rol global).
-    const deletedUserIds: string[] = [];
-    if (data.deleteOrphanUsers && memberIds.length > 0) {
-      const { data: stillMember } = await supabaseAdmin
-        .from("tenant_members")
-        .select("user_id")
-        .in("user_id", memberIds);
-      const stillMemberSet = new Set((stillMember ?? []).map((r) => r.user_id));
-
-      const { data: withRoles } = await supabaseAdmin
-        .from("user_roles")
-        .select("user_id")
-        .in("user_id", memberIds);
-      const withRolesSet = new Set((withRoles ?? []).map((r) => r.user_id));
-
-      const orphanIds = memberIds.filter(
-        (id) => id !== context.userId && !stillMemberSet.has(id) && !withRolesSet.has(id),
-      );
-
-      for (const uid of orphanIds) {
-        const { error: dErr } = await supabaseAdmin.auth.admin.deleteUser(uid);
-        if (!dErr) deletedUserIds.push(uid);
-      }
-    }
-
-    return { ok: true, deletedUserIds };
+    // Nota: el borrado de usuarios huérfanos requiere Supabase Auth Admin API
+    // (service role). Se omite mientras SERVICE_ROLE_KEY no esté configurado.
+    // Los usuarios sin tienda quedan en el sistema de auth pero sin acceso.
+    return { ok: true, deletedUserIds: [] as string[] };
   });
