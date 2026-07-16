@@ -645,15 +645,18 @@ function PosPage() {
       <Dialog open={payOpen} onOpenChange={setPayOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Cobrar — {formatUSD(totals.total)}</DialogTitle>
+            <DialogTitle className="sr-only">Cobrar</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="rounded-lg bg-muted/50 p-3 text-sm">
-              <div className="flex justify-between">
-                <span>Total a pagar</span>
-                <span className="font-semibold">
-                  {formatUSD(totals.total)} · {formatNIO(totalNio)}
-                </span>
+            <div className="rounded-lg bg-muted/50 p-4 text-center">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Total a cobrar
+              </div>
+              <div className="mt-1 text-3xl font-bold">
+                {formatUSD(totals.total)} <span className="text-base font-medium text-muted-foreground">USD</span>
+              </div>
+              <div className="text-lg font-semibold text-muted-foreground">
+                {formatNIO(totalNio)} <span className="text-sm font-medium">NIO</span>
               </div>
             </div>
 
