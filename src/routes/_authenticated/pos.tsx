@@ -650,6 +650,68 @@ function PosPage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Tipo de cambio (opcional)</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">C$/US$</span>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    min="0"
+                    placeholder={rate > 0 ? rate.toFixed(4) : "0"}
+                    value={rateOverride ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") {
+                        setRateOverride(null);
+                      } else {
+                        const n = Number(v);
+                        setRateOverride(isNaN(n) ? null : n);
+                      }
+                      // recompute default NIO payment amount
+                      const newRate = e.target.value === "" ? rate : Number(e.target.value);
+                      if (payments.length === 1 && payments[0].currency === "NIO") {
+                        setPayments([
+                          {
+                            method: "cash_nio",
+                            amount: Number((totals.total * (newRate || 0)).toFixed(2)),
+                            currency: "NIO",
+                          },
+                        ]);
+                      }
+                    }}
+                    className="h-9"
+                  />
+                  {rateOverride != null && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setRateOverride(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Tipo de comprobante</Label>
+                <Select
+                  value={docFormat}
+                  onValueChange={(v) => setDocFormat(v as "ticket" | "carta")}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ticket">Ticket (80mm)</SelectItem>
+                    <SelectItem value="carta">Factura carta</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+
             <div className="space-y-2">
               <Label>Métodos de pago (pago mixto)</Label>
               {payments.map((p, i) => (
