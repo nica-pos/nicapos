@@ -830,6 +830,7 @@ function PosPage() {
 
 
             {!isCredit && (
+            <>
             <div className="space-y-2">
               <Label>Métodos de pago (pago mixto)</Label>
               {payments.map((p, i) => {
