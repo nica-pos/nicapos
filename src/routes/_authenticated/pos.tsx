@@ -831,9 +831,9 @@ function PosPage() {
                   {changeUsd < 0
                     ? `Falta ${formatUSD(-changeUsd)}`
                     : changePreferNio
-                      ? `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`
+                      ? formatNIO(changeNio)
                       : changePreferUsd
-                        ? `${formatUSD(changeUsd)} · ${formatNIO(changeNio)}`
+                        ? formatUSD(changeUsd)
                         : `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`}
                 </span>
               </div>
