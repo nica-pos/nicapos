@@ -1001,6 +1001,8 @@ function ReceiptDialog({
     changeNio: number;
     createdAt: Date;
     docFormat: "ticket" | "carta";
+    isCredit: boolean;
+    customerName: string | null;
   } | null;
 
   onClose: () => void;
