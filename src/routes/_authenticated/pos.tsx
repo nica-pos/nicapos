@@ -417,6 +417,86 @@ function PosPage() {
             )}
           </div>
 
+          {/* Category chips (quick filters) */}
+          {!search && (categories.length > 0 || (products?.length ?? 0) > 0) && (
+            <div className="flex flex-wrap gap-2 border-b border-border/60 px-4 py-2">
+              <button
+                type="button"
+                onClick={() => setActiveCategory("__all__")}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  activeCategory === "__all__"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                Todo
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setActiveCategory(c)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    activeCategory === c
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setActiveCategory("__uncat__")}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  activeCategory === "__uncat__"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                Sin categoría
+              </button>
+            </div>
+          )}
+
+          {/* Quick-add grid by category (hidden while typing a search) */}
+          {!search && categoryProducts.length > 0 && (
+            <div className="max-h-[38%] overflow-auto border-b border-border/60 p-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+                {categoryProducts.map((p) => {
+                  const { price, promo } = applyPromotions(
+                    Number(p.price_usd),
+                    { id: p.id, category_id: p.category_id },
+                    promotions ?? [],
+                  );
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => addProduct(p)}
+                      className="group flex flex-col items-start rounded-lg border border-border/60 bg-card p-2 text-left transition hover:border-primary hover:shadow-sm"
+                    >
+                      <span className="line-clamp-2 text-sm font-medium">{p.name}</span>
+                      <span className="mt-1 text-xs text-muted-foreground">
+                        Stock: {Number(p.stock)}
+                      </span>
+                      <span className="mt-1 text-sm font-semibold text-primary">
+                        {formatUSD(price)}
+                        {promo && (
+                          <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
+                            {formatUSD(Number(p.price_usd))}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+
+
           <div className="flex-1 overflow-auto p-4">
             {cart.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
