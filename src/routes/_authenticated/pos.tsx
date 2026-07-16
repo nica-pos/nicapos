@@ -602,8 +602,9 @@ function PosPage() {
                 </span>
               </div>
               <div className="mt-1 text-right text-lg font-semibold text-muted-foreground">
-                {rate > 0 ? formatNIO(totalNio) : "—"}
+                {effectiveRate > 0 ? formatNIO(totalNio) : "—"}
               </div>
+
             </div>
           </div>
 
