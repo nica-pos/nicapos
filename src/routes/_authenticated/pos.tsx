@@ -290,7 +290,7 @@ function PosPage() {
         sessionId: session?.id ?? null,
         lines: snapLines,
         payments: snapPayments,
-        exchangeRate: rate,
+        exchangeRate: effectiveRate,
         ivaRate,
         ivaEnabled,
       });
@@ -302,13 +302,16 @@ function PosPage() {
         subtotal: snapTotals.subtotal,
         tax: snapTotals.tax,
         total: snapTotals.total,
-        rate,
+        rate: effectiveRate,
         changeUsd: Math.max(0, snapChangeUsd),
         changeNio: Math.max(0, snapChangeNio),
         createdAt: new Date(),
+        docFormat,
       });
       clearCart();
+      setRateOverride(null);
       setPayOpen(false);
+
     } catch (e) {
       toast.error("No se pudo completar la venta", {
         description: getFriendlyErrorMessage(e),
