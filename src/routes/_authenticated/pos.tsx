@@ -1067,6 +1067,10 @@ function ReceiptDialog({
               <div>{sale.createdAt.toLocaleString("es-NI")}</div>
               <div className="font-semibold">N° {docNumber}</div>
               <div>Venta interna #{sale.saleNumber}</div>
+              <div className="mt-1 font-bold">
+                CONDICIÓN: {sale.isCredit ? "CRÉDITO" : "CONTADO"}
+              </div>
+              {sale.customerName && <div>Cliente: {sale.customerName}</div>}
             </div>
             <div className="my-1 border-t border-dashed border-black" />
             {sale.lines.map((l, i) => (
