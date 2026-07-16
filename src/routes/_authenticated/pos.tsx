@@ -1238,32 +1238,44 @@ function ReceiptDialog({
             </div>
 
             <div className="mt-4 border-t border-black/20 pt-2 text-xs">
-              <div className="font-semibold">Pagos:</div>
-              {sale.payments.map((p, i) => (
-                <div key={i} className="flex justify-between">
-                  <span>{PAYMENT_LABELS[p.method]}</span>
-                  <span>
-                    {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
-                  </span>
-                </div>
-              ))}
-              {sale.changeUsd > 0 && (() => {
-                const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
-                const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
-                const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
-                return (
-                  <div className="flex justify-between font-semibold">
-                    <span>Vuelto</span>
-                    <span>
-                      {sale.rate > 0
-                        ? showNioFirst
-                          ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
-                          : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
-                        : formatUSD(sale.changeUsd)}
-                    </span>
+              {sale.isCredit ? (
+                <div className="rounded border border-black/40 p-2 text-center font-bold">
+                  PENDIENTE DE PAGO — VENTA A CRÉDITO
+                  <div className="text-[11px] font-normal">
+                    Saldo por cobrar: {formatUSD(sale.total)}
+                    {sale.rate > 0 && ` · ${formatNIO(sale.total * sale.rate)}`}
                   </div>
-                );
-              })()}
+                </div>
+              ) : (
+                <>
+                  <div className="font-semibold">Pagos:</div>
+                  {sale.payments.map((p, i) => (
+                    <div key={i} className="flex justify-between">
+                      <span>{PAYMENT_LABELS[p.method]}</span>
+                      <span>
+                        {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
+                      </span>
+                    </div>
+                  ))}
+                  {sale.changeUsd > 0 && (() => {
+                    const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+                    const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+                    const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+                    return (
+                      <div className="flex justify-between font-semibold">
+                        <span>Vuelto</span>
+                        <span>
+                          {sale.rate > 0
+                            ? showNioFirst
+                              ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                              : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                            : formatUSD(sale.changeUsd)}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
               {sale.rate > 0 && (
                 <div className="mt-1">Tasa de cambio: C$ {sale.rate.toFixed(4)} / US$1</div>
               )}
