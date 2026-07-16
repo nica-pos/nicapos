@@ -963,6 +963,7 @@ export type Database = {
           model: string | null
           model_id: string | null
           name: string
+          price_currency: string
           price_usd: number
           sku: string | null
           stock: number
@@ -985,6 +986,7 @@ export type Database = {
           model?: string | null
           model_id?: string | null
           name: string
+          price_currency?: string
           price_usd?: number
           sku?: string | null
           stock?: number
@@ -1007,6 +1009,7 @@ export type Database = {
           model?: string | null
           model_id?: string | null
           name?: string
+          price_currency?: string
           price_usd?: number
           sku?: string | null
           stock?: number
