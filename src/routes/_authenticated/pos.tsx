@@ -295,16 +295,27 @@ function PosPage() {
   }
 
   async function confirmSale() {
-    if (!enoughPaid) {
+    if (isCredit) {
+      if (!selectedCustomer) {
+        toast.error("Seleccioná un cliente para vender a crédito");
+        return;
+      }
+      if (creditLimit > 0 && totals.total > creditLimit + 0.001) {
+        toast.error(
+          `El total (${formatUSD(totals.total)}) supera el límite de crédito del cliente (${formatUSD(creditLimit)})`,
+        );
+        return;
+      }
+    } else if (!enoughPaid) {
       toast.error("El pago no cubre el total");
       return;
     }
     try {
       const snapLines = cart;
-      const snapPayments = payments;
+      const snapPayments = isCredit ? [] : payments;
       const snapTotals = totals;
-      const snapChangeUsd = changeUsd;
-      const snapChangeNio = changeNio;
+      const snapChangeUsd = isCredit ? 0 : changeUsd;
+      const snapChangeNio = isCredit ? 0 : changeNio;
       const res = await createSale.mutateAsync({
         sessionId: session?.id ?? null,
         lines: snapLines,
@@ -313,7 +324,24 @@ function PosPage() {
         ivaRate,
         ivaEnabled,
       });
-      toast.success(`Venta #${res.saleNumber} registrada`);
+      if (isCredit && selectedCustomer) {
+        try {
+          await createReceivable.mutateAsync({
+            customer_id: selectedCustomer.id,
+            total_usd: Number(snapTotals.total.toFixed(2)),
+            description: `Venta #${res.saleNumber} a crédito`,
+          });
+        } catch (e) {
+          toast.error("Venta registrada pero no se pudo crear la cuenta por cobrar", {
+            description: getFriendlyErrorMessage(e),
+          });
+        }
+      }
+      toast.success(
+        isCredit
+          ? `Venta #${res.saleNumber} a crédito registrada`
+          : `Venta #${res.saleNumber} registrada`,
+      );
       setLastSale({
         saleNumber: res.saleNumber,
         lines: snapLines,
@@ -329,6 +357,8 @@ function PosPage() {
       });
       clearCart();
       setRateOverride(null);
+      setCustomerId("__general__");
+      setIsCredit(false);
       setPayOpen(false);
 
     } catch (e) {
