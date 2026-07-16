@@ -388,16 +388,44 @@ function ProductsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Precio (USD)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.price_usd}
-                  onChange={(e) =>
-                    setForm({ ...form, price_usd: e.target.value })
-                  }
-                />
+                <Label>Precio de venta</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={priceCurrency}
+                    onValueChange={(v) => setPriceCurrency(v as "USD" | "NIO")}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">US$</SelectItem>
+                      <SelectItem value="NIO">C$</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={form.price_usd}
+                    onChange={(e) =>
+                      setForm({ ...form, price_usd: e.target.value })
+                    }
+                    className="flex-1"
+                  />
+                </div>
+                {(() => {
+                  const v = Number(form.price_usd) || 0;
+                  if (v <= 0 || rate <= 0) return null;
+                  const equiv = priceCurrency === "USD"
+                    ? formatNIO(v * rate)
+                    : formatUSD(v / rate);
+                  return (
+                    <p className="text-xs text-muted-foreground">
+                      Equivale a {equiv} (T/C C${rate.toFixed(2)})
+                    </p>
+                  );
+                })()}
               </div>
+
               <div className="grid gap-2">
                 <Label>Existencias</Label>
                 <Input
