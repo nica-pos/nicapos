@@ -120,7 +120,7 @@ export const testProviderConnection = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ provider: providerEnum }).parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context.supabase, context.userId);
-    const row = await getProviderConfig(data.provider);
+    const row = await getProviderConfig(context.supabase, data.provider);
     if (!row?.client_id) throw new Error("Falta el Client ID.");
     const secret = await decryptStoredSecret(row);
     if (!secret) throw new Error("Falta el Client Secret.");
