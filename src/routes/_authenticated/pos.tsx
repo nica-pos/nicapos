@@ -69,6 +69,7 @@ function PosPage() {
 
   const [search, setSearch] = useState("");
   const [highlight, setHighlight] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<string>("__all__");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [payOpen, setPayOpen] = useState(false);
   const [payments, setPayments] = useState<PaymentLine[]>([]);
@@ -107,6 +108,26 @@ function PosPage() {
       )
       .slice(0, 8);
   }, [search, products]);
+
+  // Categories present in active products (for the chip bar)
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of products ?? []) {
+      if (!p.is_active) continue;
+      const c = (p.category ?? "").trim();
+      if (c) set.add(c);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  // Products in the currently selected category (quick-add grid)
+  const categoryProducts = useMemo(() => {
+    const list = (products ?? []).filter((p) => p.is_active);
+    if (activeCategory === "__all__") return list.slice(0, 60);
+    if (activeCategory === "__uncat__")
+      return list.filter((p) => !(p.category ?? "").trim());
+    return list.filter((p) => (p.category ?? "").trim() === activeCategory);
+  }, [products, activeCategory]);
 
   const totals = useMemo(() => {
     let subtotal = 0;
@@ -395,6 +416,86 @@ function PosPage() {
               </div>
             )}
           </div>
+
+          {/* Category chips (quick filters) */}
+          {!search && (categories.length > 0 || (products?.length ?? 0) > 0) && (
+            <div className="flex flex-wrap gap-2 border-b border-border/60 px-4 py-2">
+              <button
+                type="button"
+                onClick={() => setActiveCategory("__all__")}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  activeCategory === "__all__"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                Todo
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setActiveCategory(c)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    activeCategory === c
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setActiveCategory("__uncat__")}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  activeCategory === "__uncat__"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                Sin categoría
+              </button>
+            </div>
+          )}
+
+          {/* Quick-add grid by category (hidden while typing a search) */}
+          {!search && categoryProducts.length > 0 && (
+            <div className="max-h-[38%] overflow-auto border-b border-border/60 p-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+                {categoryProducts.map((p) => {
+                  const { price, promo } = applyPromotions(
+                    Number(p.price_usd),
+                    { id: p.id, category_id: p.category_id },
+                    promotions ?? [],
+                  );
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => addProduct(p)}
+                      className="group flex flex-col items-start rounded-lg border border-border/60 bg-card p-2 text-left transition hover:border-primary hover:shadow-sm"
+                    >
+                      <span className="line-clamp-2 text-sm font-medium">{p.name}</span>
+                      <span className="mt-1 text-xs text-muted-foreground">
+                        Stock: {Number(p.stock)}
+                      </span>
+                      <span className="mt-1 text-sm font-semibold text-primary">
+                        {formatUSD(price)}
+                        {promo && (
+                          <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
+                            {formatUSD(Number(p.price_usd))}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+
 
           <div className="flex-1 overflow-auto p-4">
             {cart.length === 0 ? (
