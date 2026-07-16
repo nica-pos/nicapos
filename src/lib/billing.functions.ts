@@ -140,17 +140,16 @@ export const testProviderConnection = createServerFn({ method: "POST" })
 
 // ---------- Public: which providers are enabled ----------
 
-export const getEnabledPaymentProviders = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+export const getEnabledPaymentProviders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
       .from("payment_provider_settings")
       .select("provider, is_enabled")
       .eq("is_enabled", true);
     if (error) throw new Error(error.message);
-    return (data || []).map((r) => r.provider);
-  },
-);
+    return (data || []).map((r: any) => r.provider);
+  });
 
 // ---------- Create Stripe Checkout Session ----------
 
