@@ -266,7 +266,14 @@ function PosPage() {
   // Preferred currency to show the "vuelto" in = what the customer actually handed over
   const changePreferNio = hasNioPayment && !hasUsdPayment;
   const changePreferUsd = hasUsdPayment && !hasNioPayment;
-  const enoughPaid = paidUsd + 0.001 >= totals.total;
+  const enoughPaid = isCredit || paidUsd + 0.001 >= totals.total;
+
+  const selectedCustomer = useMemo(
+    () => (customers ?? []).find((c) => c.id === customerId) ?? null,
+    [customers, customerId],
+  );
+  const creditLimit = selectedCustomer ? Number(selectedCustomer.credit_limit_usd ?? 0) : 0;
+  const creditAvailable = !!selectedCustomer && creditLimit > 0;
 
 
   function addPaymentLine() {
