@@ -292,7 +292,7 @@ function PosPage() {
     [customers, customerId],
   );
   const creditLimit = selectedCustomer ? Number(selectedCustomer.credit_limit_usd ?? 0) : 0;
-  const creditAvailable = !!selectedCustomer && creditLimit > 0;
+  const creditAvailable = !!selectedCustomer;
 
 
   function addPaymentLine() {
