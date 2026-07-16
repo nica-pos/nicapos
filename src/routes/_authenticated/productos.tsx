@@ -46,7 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatUSD } from "@/hooks/use-fiscal";
+import { formatUSD, formatNIO, useLatestRate } from "@/hooks/use-fiscal";
 
 export const Route = createFileRoute("/_authenticated/productos")({
   component: ProductsPage,
@@ -74,10 +74,13 @@ function ProductsPage() {
   const createCategory = useCreateLookup("categories");
   const saveProduct = useSaveProduct();
   const deleteProduct = useDeleteProduct();
+  const rate = useLatestRate() ?? 0;
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [priceCurrency, setPriceCurrency] = useState<"USD" | "NIO">("USD");
   const [newCategory, setNewCategory] = useState("");
+
   const [addingCategory, setAddingCategory] = useState(false);
 
   async function handleCreateCategory() {
@@ -107,6 +110,7 @@ function ProductsPage() {
 
   function openNew() {
     setForm(emptyForm);
+    setPriceCurrency("USD");
     setOpen(true);
   }
 
@@ -123,8 +127,8 @@ function ProductsPage() {
       min_stock: String(p.min_stock),
       is_tax_exempt: p.is_tax_exempt,
       is_combo: p.is_combo,
-
     });
+    setPriceCurrency("USD");
     setOpen(true);
   }
 
@@ -132,6 +136,15 @@ function ProductsPage() {
     if (!form.name.trim()) {
       toast.error("El nombre es obligatorio");
       return;
+    }
+    const rawPrice = Number(form.price_usd) || 0;
+    let priceInUsd = rawPrice;
+    if (priceCurrency === "NIO") {
+      if (rate <= 0) {
+        toast.error("Ingresá el tipo de cambio antes de guardar precios en córdobas");
+        return;
+      }
+      priceInUsd = rawPrice / rate;
     }
     try {
       await saveProduct.mutateAsync({
@@ -141,12 +154,11 @@ function ProductsPage() {
         category: form.category.trim() || null,
         brand: form.brand.trim() || null,
         model: form.model.trim() || null,
-        price_usd: Number(form.price_usd) || 0,
+        price_usd: Number(priceInUsd.toFixed(4)),
         stock: Number(form.stock) || 0,
         min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
         is_combo: form.is_combo,
-
       });
       toast.success("Producto guardado");
       setOpen(false);
@@ -154,6 +166,8 @@ function ProductsPage() {
       toast.error("No se pudo guardar", { description: getFriendlyErrorMessage(e) });
     }
   }
+
+
 
   async function handleDelete(id: string) {
     try {
@@ -374,16 +388,53 @@ function ProductsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Precio (USD)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.price_usd}
-                  onChange={(e) =>
-                    setForm({ ...form, price_usd: e.target.value })
-                  }
-                />
+                <Label>Precio de venta</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={priceCurrency}
+                    onValueChange={(v) => {
+                      const next = v as "USD" | "NIO";
+                      const cur = Number(form.price_usd) || 0;
+                      if (cur > 0 && rate > 0 && next !== priceCurrency) {
+                        const converted = next === "NIO" ? cur * rate : cur / rate;
+                        setForm({ ...form, price_usd: converted.toFixed(2) });
+                      }
+                      setPriceCurrency(next);
+                    }}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">US$</SelectItem>
+                      <SelectItem value="NIO">C$</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={form.price_usd}
+                    onChange={(e) =>
+                      setForm({ ...form, price_usd: e.target.value })
+                    }
+                    className="flex-1"
+                  />
+                </div>
+                {(() => {
+                  const v = Number(form.price_usd) || 0;
+                  if (v <= 0 || rate <= 0) return null;
+                  const equiv = priceCurrency === "USD"
+                    ? formatNIO(v * rate)
+                    : formatUSD(v / rate);
+                  return (
+                    <p className="text-xs text-muted-foreground">
+                      Equivale a {equiv} (T/C C${rate.toFixed(2)})
+                    </p>
+                  );
+                })()}
               </div>
+
               <div className="grid gap-2">
                 <Label>Existencias</Label>
                 <Input
