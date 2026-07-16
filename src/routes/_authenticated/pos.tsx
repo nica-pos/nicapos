@@ -292,7 +292,7 @@ function PosPage() {
     [customers, customerId],
   );
   const creditLimit = selectedCustomer ? Number(selectedCustomer.credit_limit_usd ?? 0) : 0;
-  const creditAvailable = !!selectedCustomer && creditLimit > 0;
+  const creditAvailable = !!selectedCustomer;
 
 
   function addPaymentLine() {
@@ -760,10 +760,8 @@ function PosPage() {
                 onClick={() => setIsCredit((v) => !v)}
                 title={
                   !selectedCustomer
-                    ? "Seleccioná un cliente"
-                    : !creditAvailable
-                      ? "El cliente no tiene límite de crédito"
-                      : "Marcar como venta a crédito"
+                    ? "Seleccioná un cliente para vender a crédito"
+                    : "Marcar como venta a crédito"
                 }
               >
                 <CreditCard className="mr-1 h-4 w-4" />
@@ -773,8 +771,10 @@ function PosPage() {
             {isCredit && selectedCustomer && (
               <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs">
                 Esta venta se registrará como <strong>cuenta por cobrar</strong> a{" "}
-                <strong>{selectedCustomer.name}</strong>. Límite de crédito:{" "}
-                <strong>{formatUSD(creditLimit)}</strong>.
+                <strong>{selectedCustomer.name}</strong>.{" "}
+                {creditLimit > 0
+                  ? <>Límite de crédito: <strong>{formatUSD(creditLimit)}</strong>.</>
+                  : <>Este cliente no tiene límite de crédito configurado.</>}
               </div>
             )}
 
