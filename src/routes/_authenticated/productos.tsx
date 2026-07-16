@@ -292,12 +292,72 @@ function ProductsPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Categoría</Label>
-                <Input
-                  value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
-                />
+                {addingCategory ? (
+                  <div className="flex gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Nombre de la categoría"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleCreateCategory}
+                      disabled={createCategory.isPending}
+                    >
+                      {createCategory.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Crear"
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setAddingCategory(false);
+                        setNewCategory("");
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                ) : (
+                  <Select
+                    value={form.category || "__none__"}
+                    onValueChange={(v) => {
+                      if (v === "__new__") {
+                        setAddingCategory(true);
+                        return;
+                      }
+                      setForm({
+                        ...form,
+                        category: v === "__none__" ? "" : v,
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sin categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Sin categoría</SelectItem>
+                      {(categories ?? []).map((c) => (
+                        <SelectItem key={c.id} value={c.name}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__new__">+ Nueva categoría…</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label>Marca</Label>
