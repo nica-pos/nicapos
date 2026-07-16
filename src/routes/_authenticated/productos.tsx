@@ -392,7 +392,15 @@ function ProductsPage() {
                 <div className="flex gap-2">
                   <Select
                     value={priceCurrency}
-                    onValueChange={(v) => setPriceCurrency(v as "USD" | "NIO")}
+                    onValueChange={(v) => {
+                      const next = v as "USD" | "NIO";
+                      const cur = Number(form.price_usd) || 0;
+                      if (cur > 0 && rate > 0 && next !== priceCurrency) {
+                        const converted = next === "NIO" ? cur * rate : cur / rate;
+                        setForm({ ...form, price_usd: converted.toFixed(2) });
+                      }
+                      setPriceCurrency(next);
+                    }}
                   >
                     <SelectTrigger className="w-24">
                       <SelectValue />
@@ -402,6 +410,7 @@ function ProductsPage() {
                       <SelectItem value="NIO">C$</SelectItem>
                     </SelectContent>
                   </Select>
+
                   <Input
                     type="number"
                     step="0.01"
