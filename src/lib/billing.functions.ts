@@ -175,13 +175,12 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
     if (!["owner", "admin"].includes(member.role))
       throw new Error("Solo el dueño o admin puede pagar el plan.");
 
-    const row = await getProviderConfig("stripe");
+    const row = await getProviderConfig(context.supabase, "stripe");
     if (!row?.is_enabled) throw new Error("Stripe no está habilitado.");
     const secret = await decryptStoredSecret(row);
     if (!secret || !row.client_id) throw new Error("Credenciales de Stripe incompletas.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: plan } = await supabaseAdmin
+    const { data: plan } = await context.supabase
       .from("plans")
       .select("id, name, price_usd")
       .eq("id", data.planId)
