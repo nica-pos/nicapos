@@ -319,7 +319,7 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     const sub = (await subRes.json()) as any;
     if (!subRes.ok) throw new Error(sub.message || "Error creando suscripción en PayPal");
 
-    await supabaseAdmin.from("tenant_subscriptions").insert({
+    await context.supabase.from("tenant_subscriptions").insert({
       tenant_id: data.tenantId,
       plan_id: data.planId,
       provider: "paypal",
