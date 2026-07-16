@@ -790,11 +790,20 @@ function PosPage() {
                         </Button>
                       )}
                     </div>
-                    {effectiveRate > 0 && p.amount > 0 && (
+                    {effectiveRate > 0 ? (
                       <div className="pl-40 text-xs text-muted-foreground">
-                        ≈ {formatUSD(equivUsd)} · {formatNIO(equivNio)}
+                        {p.currency === "NIO" ? (
+                          <>Equivale a <span className="font-semibold">{formatUSD(equivUsd)}</span></>
+                        ) : (
+                          <>Equivale a <span className="font-semibold">{formatNIO(equivNio)}</span></>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="pl-40 text-xs text-destructive">
+                        Sin tipo de cambio — no se puede convertir
                       </div>
                     )}
+
                   </div>
                 );
               })}
