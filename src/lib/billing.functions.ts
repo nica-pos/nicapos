@@ -91,7 +91,6 @@ export const savePaymentProviderSettings = createServerFn({ method: "POST" })
   .inputValidator((input) => saveInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let ciphertext: string | undefined;
     if (data.client_secret && data.client_secret.length > 0) {
@@ -99,7 +98,7 @@ export const savePaymentProviderSettings = createServerFn({ method: "POST" })
       ciphertext = encryptSecret(data.client_secret);
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("payment_provider_settings")
       .update({
         is_enabled: data.is_enabled,
