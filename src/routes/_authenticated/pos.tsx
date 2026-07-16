@@ -945,6 +945,8 @@ function PosPage() {
                 </span>
               </div>
             </div>
+            </>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPayOpen(false)}>
