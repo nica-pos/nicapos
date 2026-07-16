@@ -44,6 +44,7 @@ import {
 import { useFiscalSettings, useLatestRate, formatNIO, formatUSD } from "@/hooks/use-fiscal";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
+import { useCustomers, useCreateReceivable } from "@/hooks/use-credit";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   component: PosPage,
@@ -66,6 +67,8 @@ function PosPage() {
   const { tenant } = useActiveTenant();
   const rate = useLatestRate() ?? 0;
   const createSale = useCreateSale();
+  const { data: customers } = useCustomers();
+  const createReceivable = useCreateReceivable();
 
   const [search, setSearch] = useState("");
   const [highlight, setHighlight] = useState(0);
@@ -75,6 +78,8 @@ function PosPage() {
   const [payments, setPayments] = useState<PaymentLine[]>([]);
   const [rateOverride, setRateOverride] = useState<number | null>(null);
   const [docFormat, setDocFormat] = useState<"ticket" | "carta">("ticket");
+  const [customerId, setCustomerId] = useState<string>("__general__");
+  const [isCredit, setIsCredit] = useState(false);
   const [lastSale, setLastSale] = useState<{
     saleNumber: number;
     lines: CartLine[];
@@ -261,7 +266,14 @@ function PosPage() {
   // Preferred currency to show the "vuelto" in = what the customer actually handed over
   const changePreferNio = hasNioPayment && !hasUsdPayment;
   const changePreferUsd = hasUsdPayment && !hasNioPayment;
-  const enoughPaid = paidUsd + 0.001 >= totals.total;
+  const enoughPaid = isCredit || paidUsd + 0.001 >= totals.total;
+
+  const selectedCustomer = useMemo(
+    () => (customers ?? []).find((c) => c.id === customerId) ?? null,
+    [customers, customerId],
+  );
+  const creditLimit = selectedCustomer ? Number(selectedCustomer.credit_limit_usd ?? 0) : 0;
+  const creditAvailable = !!selectedCustomer && creditLimit > 0;
 
 
   function addPaymentLine() {
@@ -283,16 +295,27 @@ function PosPage() {
   }
 
   async function confirmSale() {
-    if (!enoughPaid) {
+    if (isCredit) {
+      if (!selectedCustomer) {
+        toast.error("Seleccioná un cliente para vender a crédito");
+        return;
+      }
+      if (creditLimit > 0 && totals.total > creditLimit + 0.001) {
+        toast.error(
+          `El total (${formatUSD(totals.total)}) supera el límite de crédito del cliente (${formatUSD(creditLimit)})`,
+        );
+        return;
+      }
+    } else if (!enoughPaid) {
       toast.error("El pago no cubre el total");
       return;
     }
     try {
       const snapLines = cart;
-      const snapPayments = payments;
+      const snapPayments = isCredit ? [] : payments;
       const snapTotals = totals;
-      const snapChangeUsd = changeUsd;
-      const snapChangeNio = changeNio;
+      const snapChangeUsd = isCredit ? 0 : changeUsd;
+      const snapChangeNio = isCredit ? 0 : changeNio;
       const res = await createSale.mutateAsync({
         sessionId: session?.id ?? null,
         lines: snapLines,
@@ -301,7 +324,24 @@ function PosPage() {
         ivaRate,
         ivaEnabled,
       });
-      toast.success(`Venta #${res.saleNumber} registrada`);
+      if (isCredit && selectedCustomer) {
+        try {
+          await createReceivable.mutateAsync({
+            customer_id: selectedCustomer.id,
+            total_usd: Number(snapTotals.total.toFixed(2)),
+            description: `Venta #${res.saleNumber} a crédito`,
+          });
+        } catch (e) {
+          toast.error("Venta registrada pero no se pudo crear la cuenta por cobrar", {
+            description: getFriendlyErrorMessage(e),
+          });
+        }
+      }
+      toast.success(
+        isCredit
+          ? `Venta #${res.saleNumber} a crédito registrada`
+          : `Venta #${res.saleNumber} registrada`,
+      );
       setLastSale({
         saleNumber: res.saleNumber,
         lines: snapLines,
@@ -317,6 +357,8 @@ function PosPage() {
       });
       clearCart();
       setRateOverride(null);
+      setCustomerId("__general__");
+      setIsCredit(false);
       setPayOpen(false);
 
     } catch (e) {
@@ -660,6 +702,61 @@ function PosPage() {
               </div>
             </div>
 
+            {/* Cliente + crédito */}
+            <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+              <div className="space-y-1">
+                <Label className="text-xs">Cliente</Label>
+                <Select
+                  value={customerId}
+                  onValueChange={(v) => {
+                    setCustomerId(v);
+                    if (v === "__general__") setIsCredit(false);
+                  }}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__general__">Público en general</SelectItem>
+                    {(customers ?? [])
+                      .filter((c) => c.is_active !== false)
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                          {Number(c.credit_limit_usd ?? 0) > 0
+                            ? ` — crédito ${formatUSD(Number(c.credit_limit_usd))}`
+                            : ""}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant={isCredit ? "default" : "outline"}
+                size="sm"
+                disabled={!creditAvailable}
+                onClick={() => setIsCredit((v) => !v)}
+                title={
+                  !selectedCustomer
+                    ? "Seleccioná un cliente"
+                    : !creditAvailable
+                      ? "El cliente no tiene límite de crédito"
+                      : "Marcar como venta a crédito"
+                }
+              >
+                <CreditCard className="mr-1 h-4 w-4" />
+                {isCredit ? "A crédito" : "Vender a crédito"}
+              </Button>
+            </div>
+            {isCredit && selectedCustomer && (
+              <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs">
+                Esta venta se registrará como <strong>cuenta por cobrar</strong> a{" "}
+                <strong>{selectedCustomer.name}</strong>. Límite de crédito:{" "}
+                <strong>{formatUSD(creditLimit)}</strong>.
+              </div>
+            )}
+
             {effectiveRate <= 0 && (
               <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -732,6 +829,8 @@ function PosPage() {
             </div>
 
 
+            {!isCredit && (
+            <>
             <div className="space-y-2">
               <Label>Métodos de pago (pago mixto)</Label>
               {payments.map((p, i) => {
@@ -847,6 +946,8 @@ function PosPage() {
                 </span>
               </div>
             </div>
+            </>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPayOpen(false)}>
@@ -854,9 +955,9 @@ function PosPage() {
             </Button>
             <Button
               onClick={confirmSale}
-              disabled={!enoughPaid || createSale.isPending}
+              disabled={!enoughPaid || createSale.isPending || createReceivable.isPending}
             >
-              Confirmar venta
+              {isCredit ? "Registrar venta a crédito" : "Confirmar venta"}
             </Button>
           </DialogFooter>
         </DialogContent>
