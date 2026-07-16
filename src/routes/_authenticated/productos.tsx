@@ -46,7 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatUSD } from "@/hooks/use-fiscal";
+import { formatUSD, formatNIO, useLatestRate } from "@/hooks/use-fiscal";
 
 export const Route = createFileRoute("/_authenticated/productos")({
   component: ProductsPage,
