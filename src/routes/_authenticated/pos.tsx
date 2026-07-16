@@ -210,10 +210,27 @@ function PosPage() {
       toast.error("El carrito está vacío");
       return;
     }
-    // default: single payment covering the total in NIO
-    setPayments([
-      { method: "cash_nio", amount: Number(totalNio.toFixed(2)), currency: "NIO" },
-    ]);
+    // Determinar moneda nativa dominante del carrito
+    const productsById = new Map((products ?? []).map((p) => [p.id, p]));
+    let usdWeight = 0;
+    let nioWeight = 0;
+    for (const l of cart) {
+      const prod = l.product_id ? productsById.get(l.product_id) : null;
+      const cur = (prod as any)?.price_currency === "NIO" ? "NIO" : "USD";
+      const w = l.unit_price_usd * l.quantity;
+      if (cur === "NIO") nioWeight += w;
+      else usdWeight += w;
+    }
+    const preferUsd = usdWeight >= nioWeight;
+    if (preferUsd) {
+      setPayments([
+        { method: "cash_usd", amount: Number(totals.total.toFixed(2)), currency: "USD" },
+      ]);
+    } else {
+      setPayments([
+        { method: "cash_nio", amount: Number(totalNio.toFixed(2)), currency: "NIO" },
+      ]);
+    }
     setPayOpen(true);
   }
 
