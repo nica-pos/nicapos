@@ -1100,13 +1100,13 @@ function ReceiptDialog({
               const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
               const onlyNio = hasNio && !hasUsd;
               const onlyUsd = hasUsd && !hasNio;
-              const displayMode: "USD" | "NIO" | "BOTH" = sale.isCredit
+              const displayMode = (sale.isCredit
                 ? "BOTH"
                 : onlyNio && sale.rate > 0
                   ? "NIO"
                   : onlyUsd
                     ? "USD"
-                    : "BOTH";
+                    : "BOTH") as "USD" | "NIO" | "BOTH";
               const fmtLine = (usd: number) => {
                 if (displayMode === "USD") return formatUSD(usd);
                 if (displayMode === "NIO") return formatNIO(usd * sale.rate);
