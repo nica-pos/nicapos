@@ -44,6 +44,7 @@ import {
 import { useFiscalSettings, useLatestRate, formatNIO, formatUSD } from "@/hooks/use-fiscal";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
+import { useCustomers, useCreateReceivable } from "@/hooks/use-credit";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   component: PosPage,
