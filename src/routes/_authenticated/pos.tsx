@@ -955,9 +955,9 @@ function PosPage() {
             </Button>
             <Button
               onClick={confirmSale}
-              disabled={!enoughPaid || createSale.isPending}
+              disabled={!enoughPaid || createSale.isPending || createReceivable.isPending}
             >
-              Confirmar venta
+              {isCredit ? "Registrar venta a crédito" : "Confirmar venta"}
             </Button>
           </DialogFooter>
         </DialogContent>
