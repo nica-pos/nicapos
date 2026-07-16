@@ -145,7 +145,9 @@ function PosPage() {
     return { subtotal, tax, total };
   }, [cart, ivaEnabled, ivaRate]);
 
-  const totalNio = totals.total * rate;
+  const effectiveRate = rateOverride ?? rate;
+  const totalNio = totals.total * effectiveRate;
+
 
   function addProduct(p: Product) {
     setCart((prev) => {
