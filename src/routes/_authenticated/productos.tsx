@@ -74,10 +74,13 @@ function ProductsPage() {
   const createCategory = useCreateLookup("categories");
   const saveProduct = useSaveProduct();
   const deleteProduct = useDeleteProduct();
+  const rate = useLatestRate() ?? 0;
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [priceCurrency, setPriceCurrency] = useState<"USD" | "NIO">("USD");
   const [newCategory, setNewCategory] = useState("");
+
   const [addingCategory, setAddingCategory] = useState(false);
 
   async function handleCreateCategory() {
