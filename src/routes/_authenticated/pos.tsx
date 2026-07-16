@@ -650,6 +650,16 @@ function PosPage() {
               </div>
             </div>
 
+            {effectiveRate <= 0 && (
+              <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>
+                  No hay tipo de cambio. Ingresá uno abajo para ver la conversión a córdobas.
+                </span>
+              </div>
+            )}
+
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Tipo de cambio (opcional)</Label>
