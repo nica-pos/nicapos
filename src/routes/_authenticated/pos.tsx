@@ -252,8 +252,15 @@ function PosPage() {
     return effectiveRate > 0 ? p.amount / effectiveRate : 0;
   }
   const paidUsd = payments.reduce((s, p) => s + paymentInUsd(p), 0);
+  const paidNioRaw = payments.reduce((s, p) => s + (p.currency === "NIO" ? p.amount : 0), 0);
+  const paidUsdRaw = payments.reduce((s, p) => s + (p.currency === "USD" ? p.amount : 0), 0);
   const changeUsd = paidUsd - totals.total;
   const changeNio = changeUsd * effectiveRate;
+  const hasNioPayment = paidNioRaw > 0;
+  const hasUsdPayment = paidUsdRaw > 0;
+  // Preferred currency to show the "vuelto" in = what the customer actually handed over
+  const changePreferNio = hasNioPayment && !hasUsdPayment;
+  const changePreferUsd = hasUsdPayment && !hasNioPayment;
   const enoughPaid = paidUsd + 0.001 >= totals.total;
 
 
