@@ -70,11 +70,29 @@ const emptyForm = {
 
 function ProductsPage() {
   const { data: products, isLoading } = useProducts();
+  const { data: categories } = useCategories();
+  const createCategory = useCreateLookup("categories");
   const saveProduct = useSaveProduct();
   const deleteProduct = useDeleteProduct();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [newCategory, setNewCategory] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+
+  async function handleCreateCategory() {
+    const name = newCategory.trim();
+    if (!name) return;
+    try {
+      await createCategory.mutateAsync({ name });
+      setForm((f) => ({ ...f, category: name }));
+      setNewCategory("");
+      setAddingCategory(false);
+      toast.success("Categoría creada");
+    } catch (e) {
+      toast.error("No se pudo crear", { description: getFriendlyErrorMessage(e) });
+    }
+  }
 
   const filtered = (products ?? []).filter((p) => {
     const q = search.toLowerCase();
