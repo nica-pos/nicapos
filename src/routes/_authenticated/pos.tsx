@@ -1146,12 +1146,8 @@ function ReceiptDialog({
                   </div>
                   {showAlt && (
                     <div className="flex justify-between font-bold">
-                      <span>{displayMode === "USD" ? "TOTAL C$" : "TOTAL $"}</span>
-                      <span>
-                        {displayMode === "USD"
-                          ? formatNIO(sale.total * sale.rate)
-                          : formatUSD(sale.total)}
-                      </span>
+                      <span>TOTAL C$</span>
+                      <span>{formatNIO(sale.total * sale.rate)}</span>
                     </div>
                   )}
                   <div className="my-1 border-t border-dashed border-black" />
