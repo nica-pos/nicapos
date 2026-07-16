@@ -1174,10 +1174,18 @@ function ReceiptDialog({
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold">FACTURA</div>
+                <div className="text-lg font-bold">
+                  FACTURA {sale.isCredit ? "DE CRÉDITO" : "DE CONTADO"}
+                </div>
                 <div className="text-sm">N° {docNumber}</div>
                 <div className="text-xs">{sale.createdAt.toLocaleString("es-NI")}</div>
                 <div className="text-xs">Venta interna #{sale.saleNumber}</div>
+                <div className="mt-1 text-xs font-semibold">
+                  Condición: {sale.isCredit ? "CRÉDITO" : "CONTADO"}
+                </div>
+                {sale.customerName && (
+                  <div className="text-xs">Cliente: {sale.customerName}</div>
+                )}
               </div>
             </div>
 
