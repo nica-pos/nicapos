@@ -109,6 +109,26 @@ function PosPage() {
       .slice(0, 8);
   }, [search, products]);
 
+  // Categories present in active products (for the chip bar)
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of products ?? []) {
+      if (!p.is_active) continue;
+      const c = (p.category ?? "").trim();
+      if (c) set.add(c);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  // Products in the currently selected category (quick-add grid)
+  const categoryProducts = useMemo(() => {
+    const list = (products ?? []).filter((p) => p.is_active);
+    if (activeCategory === "__all__") return list.slice(0, 60);
+    if (activeCategory === "__uncat__")
+      return list.filter((p) => !(p.category ?? "").trim());
+    return list.filter((p) => (p.category ?? "").trim() === activeCategory);
+  }, [products, activeCategory]);
+
   const totals = useMemo(() => {
     let subtotal = 0;
     let tax = 0;
