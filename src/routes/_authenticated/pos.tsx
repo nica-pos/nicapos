@@ -714,48 +714,81 @@ function PosPage() {
 
             <div className="space-y-2">
               <Label>Métodos de pago (pago mixto)</Label>
-              {payments.map((p, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Select
-                    value={p.method}
-                    onValueChange={(v) => updatePayment(i, { method: v as PaymentMethod })}
-                  >
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map((m) => (
-                        <SelectItem key={m} value={m}>
-                          {PAYMENT_LABELS[m]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={p.amount || ""}
-                    onChange={(e) =>
-                      updatePayment(i, { amount: Number(e.target.value) })
-                    }
-                    className="flex-1"
-                  />
-                  <span className="w-10 text-sm text-muted-foreground">
-                    {p.currency === "NIO" ? "C$" : "$"}
-                  </span>
-                  {payments.length > 1 && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() =>
-                        setPayments((prev) => prev.filter((_, idx) => idx !== i))
-                      }
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+              {payments.map((p, i) => {
+                const equivUsd = p.currency === "NIO"
+                  ? (effectiveRate > 0 ? p.amount / effectiveRate : 0)
+                  : p.amount;
+                const equivNio = p.currency === "USD"
+                  ? p.amount * effectiveRate
+                  : p.amount;
+                return (
+                  <div key={i} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={p.method}
+                        onValueChange={(v) => updatePayment(i, { method: v as PaymentMethod })}
+                      >
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map((m) => (
+                            <SelectItem key={m} value={m}>
+                              {PAYMENT_LABELS[m]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {p.method === "card" || p.method === "transfer" ? (
+                        <Select
+                          value={p.currency}
+                          onValueChange={(v) =>
+                            updatePayment(i, { currency: v as "NIO" | "USD" })
+                          }
+                        >
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">$</SelectItem>
+                            <SelectItem value="NIO">C$</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="w-10 text-sm text-muted-foreground">
+                          {p.currency === "NIO" ? "C$" : "$"}
+                        </span>
+                      )}
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={p.amount || ""}
+                        onChange={(e) =>
+                          updatePayment(i, { amount: Number(e.target.value) })
+                        }
+                        className="flex-1"
+                      />
+                      {payments.length > 1 && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() =>
+                            setPayments((prev) => prev.filter((_, idx) => idx !== i))
+                          }
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                    {effectiveRate > 0 && p.amount > 0 && (
+                      <div className="pl-40 text-xs text-muted-foreground">
+                        ≈ {formatUSD(equivUsd)} · {formatNIO(equivNio)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
               <Button variant="outline" size="sm" onClick={addPaymentLine}>
                 <Plus className="mr-1 h-4 w-4" /> Agregar método
               </Button>
