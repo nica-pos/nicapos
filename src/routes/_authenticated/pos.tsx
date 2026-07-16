@@ -252,8 +252,15 @@ function PosPage() {
     return effectiveRate > 0 ? p.amount / effectiveRate : 0;
   }
   const paidUsd = payments.reduce((s, p) => s + paymentInUsd(p), 0);
+  const paidNioRaw = payments.reduce((s, p) => s + (p.currency === "NIO" ? p.amount : 0), 0);
+  const paidUsdRaw = payments.reduce((s, p) => s + (p.currency === "USD" ? p.amount : 0), 0);
   const changeUsd = paidUsd - totals.total;
   const changeNio = changeUsd * effectiveRate;
+  const hasNioPayment = paidNioRaw > 0;
+  const hasUsdPayment = paidUsdRaw > 0;
+  // Preferred currency to show the "vuelto" in = what the customer actually handed over
+  const changePreferNio = hasNioPayment && !hasUsdPayment;
+  const changePreferUsd = hasUsdPayment && !hasNioPayment;
   const enoughPaid = paidUsd + 0.001 >= totals.total;
 
 
@@ -821,9 +828,13 @@ function PosPage() {
               <div className="flex justify-between text-base font-semibold">
                 <span>Vuelto</span>
                 <span className={changeUsd < 0 ? "text-destructive" : "text-primary"}>
-                  {changeUsd >= 0
-                    ? `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`
-                    : `Falta ${formatUSD(-changeUsd)}`}
+                  {changeUsd < 0
+                    ? `Falta ${formatUSD(-changeUsd)}`
+                    : changePreferNio
+                      ? `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`
+                      : changePreferUsd
+                        ? `${formatUSD(changeUsd)} · ${formatNIO(changeNio)}`
+                        : `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`}
                 </span>
               </div>
             </div>
@@ -985,14 +996,23 @@ function ReceiptDialog({
                 </span>
               </div>
             ))}
-            {sale.changeUsd > 0 && (
-              <div className="flex justify-between font-semibold">
-                <span>Vuelto</span>
-                <span>
-                  {sale.rate > 0 ? formatNIO(sale.changeNio) : formatUSD(sale.changeUsd)}
-                </span>
-              </div>
-            )}
+            {sale.changeUsd > 0 && (() => {
+              const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+              const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+              const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+              return (
+                <div className="flex justify-between font-semibold">
+                  <span>Vuelto</span>
+                  <span>
+                    {sale.rate > 0
+                      ? showNioFirst
+                        ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                        : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                      : formatUSD(sale.changeUsd)}
+                  </span>
+                </div>
+              );
+            })()}
             {sale.rate > 0 && (
               <div className="mt-1 text-center">
                 Tasa: C$ {sale.rate.toFixed(4)} / US$1
@@ -1087,14 +1107,23 @@ function ReceiptDialog({
                   </span>
                 </div>
               ))}
-              {sale.changeUsd > 0 && (
-                <div className="flex justify-between font-semibold">
-                  <span>Vuelto</span>
-                  <span>
-                    {sale.rate > 0 ? formatNIO(sale.changeNio) : formatUSD(sale.changeUsd)}
-                  </span>
-                </div>
-              )}
+              {sale.changeUsd > 0 && (() => {
+                const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+                const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+                const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+                return (
+                  <div className="flex justify-between font-semibold">
+                    <span>Vuelto</span>
+                    <span>
+                      {sale.rate > 0
+                        ? showNioFirst
+                          ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                          : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                        : formatUSD(sale.changeUsd)}
+                    </span>
+                  </div>
+                );
+              })()}
               {sale.rate > 0 && (
                 <div className="mt-1">Tasa de cambio: C$ {sale.rate.toFixed(4)} / US$1</div>
               )}
