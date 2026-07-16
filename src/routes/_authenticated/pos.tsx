@@ -78,6 +78,8 @@ function PosPage() {
   const [payments, setPayments] = useState<PaymentLine[]>([]);
   const [rateOverride, setRateOverride] = useState<number | null>(null);
   const [docFormat, setDocFormat] = useState<"ticket" | "carta">("ticket");
+  const [customerId, setCustomerId] = useState<string>("__general__");
+  const [isCredit, setIsCredit] = useState(false);
   const [lastSale, setLastSale] = useState<{
     saleNumber: number;
     lines: CartLine[];
