@@ -334,11 +334,15 @@ function PosPage() {
           </h1>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          {rate > 0 ? (
-            <Badge variant="outline">T/C C${rate.toFixed(2)}</Badge>
+          {effectiveRate > 0 ? (
+            <Badge variant={rateOverride != null ? "default" : "outline"}>
+              T/C C${effectiveRate.toFixed(2)}
+              {rateOverride != null && " *"}
+            </Badge>
           ) : (
             <Badge variant="destructive">Sin tipo de cambio</Badge>
           )}
+
           {session ? (
             <Badge variant="secondary">Caja abierta</Badge>
           ) : (
