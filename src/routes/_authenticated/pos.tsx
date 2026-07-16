@@ -1107,14 +1107,23 @@ function ReceiptDialog({
                   </span>
                 </div>
               ))}
-              {sale.changeUsd > 0 && (
-                <div className="flex justify-between font-semibold">
-                  <span>Vuelto</span>
-                  <span>
-                    {sale.rate > 0 ? formatNIO(sale.changeNio) : formatUSD(sale.changeUsd)}
-                  </span>
-                </div>
-              )}
+              {sale.changeUsd > 0 && (() => {
+                const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+                const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+                const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+                return (
+                  <div className="flex justify-between font-semibold">
+                    <span>Vuelto</span>
+                    <span>
+                      {sale.rate > 0
+                        ? showNioFirst
+                          ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                          : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                        : formatUSD(sale.changeUsd)}
+                    </span>
+                  </div>
+                );
+              })()}
               {sale.rate > 0 && (
                 <div className="mt-1">Tasa de cambio: C$ {sale.rate.toFixed(4)} / US$1</div>
               )}
