@@ -110,6 +110,7 @@ function ProductsPage() {
 
   function openNew() {
     setForm(emptyForm);
+    setPriceCurrency("USD");
     setOpen(true);
   }
 
@@ -126,8 +127,8 @@ function ProductsPage() {
       min_stock: String(p.min_stock),
       is_tax_exempt: p.is_tax_exempt,
       is_combo: p.is_combo,
-
     });
+    setPriceCurrency("USD");
     setOpen(true);
   }
 
@@ -135,6 +136,15 @@ function ProductsPage() {
     if (!form.name.trim()) {
       toast.error("El nombre es obligatorio");
       return;
+    }
+    const rawPrice = Number(form.price_usd) || 0;
+    let priceInUsd = rawPrice;
+    if (priceCurrency === "NIO") {
+      if (rate <= 0) {
+        toast.error("Ingresá el tipo de cambio antes de guardar precios en córdobas");
+        return;
+      }
+      priceInUsd = rawPrice / rate;
     }
     try {
       await saveProduct.mutateAsync({
@@ -144,12 +154,11 @@ function ProductsPage() {
         category: form.category.trim() || null,
         brand: form.brand.trim() || null,
         model: form.model.trim() || null,
-        price_usd: Number(form.price_usd) || 0,
+        price_usd: Number(priceInUsd.toFixed(4)),
         stock: Number(form.stock) || 0,
         min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
         is_combo: form.is_combo,
-
       });
       toast.success("Producto guardado");
       setOpen(false);
@@ -157,6 +166,8 @@ function ProductsPage() {
       toast.error("No se pudo guardar", { description: getFriendlyErrorMessage(e) });
     }
   }
+
+
 
   async function handleDelete(id: string) {
     try {
