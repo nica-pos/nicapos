@@ -38,6 +38,14 @@ import {
   useDeleteProduct,
   type Product,
 } from "@/hooks/use-pos";
+import { useCategories, useCreateLookup } from "@/hooks/use-inventory";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatUSD } from "@/hooks/use-fiscal";
 
 export const Route = createFileRoute("/_authenticated/productos")({
@@ -62,11 +70,29 @@ const emptyForm = {
 
 function ProductsPage() {
   const { data: products, isLoading } = useProducts();
+  const { data: categories } = useCategories();
+  const createCategory = useCreateLookup("categories");
   const saveProduct = useSaveProduct();
   const deleteProduct = useDeleteProduct();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [newCategory, setNewCategory] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+
+  async function handleCreateCategory() {
+    const name = newCategory.trim();
+    if (!name) return;
+    try {
+      await createCategory.mutateAsync({ name });
+      setForm((f) => ({ ...f, category: name }));
+      setNewCategory("");
+      setAddingCategory(false);
+      toast.success("Categoría creada");
+    } catch (e) {
+      toast.error("No se pudo crear", { description: getFriendlyErrorMessage(e) });
+    }
+  }
 
   const filtered = (products ?? []).filter((p) => {
     const q = search.toLowerCase();
@@ -266,12 +292,72 @@ function ProductsPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Categoría</Label>
-                <Input
-                  value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
-                />
+                {addingCategory ? (
+                  <div className="flex gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Nombre de la categoría"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleCreateCategory}
+                      disabled={createCategory.isPending}
+                    >
+                      {createCategory.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Crear"
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setAddingCategory(false);
+                        setNewCategory("");
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                ) : (
+                  <Select
+                    value={form.category || "__none__"}
+                    onValueChange={(v) => {
+                      if (v === "__new__") {
+                        setAddingCategory(true);
+                        return;
+                      }
+                      setForm({
+                        ...form,
+                        category: v === "__none__" ? "" : v,
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sin categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Sin categoría</SelectItem>
+                      {(categories ?? []).map((c) => (
+                        <SelectItem key={c.id} value={c.name}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__new__">+ Nueva categoría…</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label>Marca</Label>
