@@ -847,21 +847,26 @@ function ReceiptDialog({
 
   return (
     <Dialog open={!!sale} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md">
+  const isCarta = sale?.docFormat === "carta";
+
+  return (
+    <Dialog open={!!sale} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className={isCarta ? "max-w-3xl" : "max-w-md"}>
         <style>{`
           @media print {
             body * { visibility: hidden !important; }
             #pos-receipt, #pos-receipt * { visibility: visible !important; }
-            #pos-receipt { position: absolute; left: 0; top: 0; width: 80mm; }
+            #pos-receipt { position: absolute; left: 0; top: 0; ${isCarta ? "width: 100%;" : "width: 80mm;"} }
             .no-print { display: none !important; }
+            @page { size: ${isCarta ? "letter" : "auto"}; margin: ${isCarta ? "12mm" : "4mm"}; }
           }
         `}</style>
         <DialogHeader>
           <DialogTitle className="no-print">
-            Venta #{sale?.saleNumber} — comprobante listo
+            Venta #{sale?.saleNumber} — {isCarta ? "factura" : "ticket"} listo
           </DialogTitle>
         </DialogHeader>
-        {sale && (
+        {sale && !isCarta && (
           <div
             id="pos-receipt"
             className="mx-auto max-h-[60vh] w-full max-w-[320px] overflow-auto rounded border bg-white p-3 font-mono text-[12px] text-black"
@@ -945,6 +950,111 @@ function ReceiptDialog({
             <div className="mt-2 whitespace-pre-line text-center">{thankYou}</div>
           </div>
         )}
+
+        {sale && isCarta && (
+          <div
+            id="pos-receipt"
+            className="mx-auto max-h-[70vh] w-full overflow-auto rounded border bg-white p-8 text-[13px] text-black"
+          >
+            <div className="flex items-start justify-between border-b border-black/20 pb-4">
+              <div className="flex items-center gap-3">
+                {logoUrl && (
+                  <img src={logoUrl} alt="Logo" className="max-h-20 object-contain" />
+                )}
+                <div>
+                  <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>
+                    {legalName}
+                  </div>
+                  {tenantRuc && <div className="text-xs">RUC: {tenantRuc}</div>}
+                  {s.address && <div className="text-xs">{s.address}</div>}
+                  {s.phone && <div className="text-xs">Tel: {s.phone}</div>}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold">FACTURA</div>
+                <div className="text-sm">N° {docNumber}</div>
+                <div className="text-xs">{sale.createdAt.toLocaleString("es-NI")}</div>
+                <div className="text-xs">Venta interna #{sale.saleNumber}</div>
+              </div>
+            </div>
+
+            <table className="mt-4 w-full text-sm">
+              <thead>
+                <tr className="border-b border-black/30 text-left">
+                  <th className="py-2">Cant.</th>
+                  <th className="py-2">Descripción</th>
+                  <th className="py-2 text-right">P. Unit.</th>
+                  <th className="py-2 text-right">Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sale.lines.map((l, i) => (
+                  <tr key={i} className="border-b border-black/10">
+                    <td className="py-2">{l.quantity}</td>
+                    <td className="py-2">{l.name}</td>
+                    <td className="py-2 text-right">{formatUSD(l.unit_price_usd)}</td>
+                    <td className="py-2 text-right">
+                      {formatUSD(l.unit_price_usd * l.quantity)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="mt-4 flex justify-end">
+              <div className="w-64 space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatUSD(sale.subtotal)}</span>
+                </div>
+                {sale.tax > 0 && (
+                  <div className="flex justify-between">
+                    <span>IVA</span>
+                    <span>{formatUSD(sale.tax)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-black/30 pt-1 text-base font-bold">
+                  <span>TOTAL</span>
+                  <span>{formatUSD(sale.total)}</span>
+                </div>
+                {sale.rate > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span>TOTAL C$</span>
+                    <span>{formatNIO(sale.total * sale.rate)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 border-t border-black/20 pt-2 text-xs">
+              <div className="font-semibold">Pagos:</div>
+              {sale.payments.map((p, i) => (
+                <div key={i} className="flex justify-between">
+                  <span>{PAYMENT_LABELS[p.method]}</span>
+                  <span>
+                    {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
+                  </span>
+                </div>
+              ))}
+              {sale.changeUsd > 0 && (
+                <div className="flex justify-between font-semibold">
+                  <span>Vuelto</span>
+                  <span>
+                    {sale.rate > 0 ? formatNIO(sale.changeNio) : formatUSD(sale.changeUsd)}
+                  </span>
+                </div>
+              )}
+              {sale.rate > 0 && (
+                <div className="mt-1">Tasa de cambio: C$ {sale.rate.toFixed(4)} / US$1</div>
+              )}
+            </div>
+
+            <div className="mt-6 whitespace-pre-line text-center text-sm italic">
+              {thankYou}
+            </div>
+          </div>
+        )}
+
         <DialogFooter className="no-print">
           <Button variant="outline" onClick={onClose}>
             Cerrar
@@ -957,3 +1067,4 @@ function ReceiptDialog({
     </Dialog>
   );
 }
+
