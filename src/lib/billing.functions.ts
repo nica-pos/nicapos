@@ -15,9 +15,8 @@ async function assertSuperadmin(supabase: any, userId: string) {
   if (!data) throw new Error("Solo el superadmin puede realizar esta acción.");
 }
 
-async function getProviderConfig(provider: "stripe" | "paypal") {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+async function getProviderConfig(supabase: any, provider: "stripe" | "paypal") {
+  const { data, error } = await supabase
     .from("payment_provider_settings")
     .select("*")
     .eq("provider", provider)
@@ -60,14 +59,13 @@ export const getPaymentProviderSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertSuperadmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("payment_provider_settings")
       .select("provider, is_enabled, mode, client_id, client_secret_ciphertext, updated_at")
       .order("provider");
     if (error) throw new Error(error.message);
     const { maskSecret } = await import("@/lib/paymentCrypto.server");
-    return (data || []).map((r) => ({
+    return (data || []).map((r: any) => ({
       provider: r.provider,
       is_enabled: r.is_enabled,
       mode: r.mode,
@@ -93,7 +91,6 @@ export const savePaymentProviderSettings = createServerFn({ method: "POST" })
   .inputValidator((input) => saveInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let ciphertext: string | undefined;
     if (data.client_secret && data.client_secret.length > 0) {
@@ -101,7 +98,7 @@ export const savePaymentProviderSettings = createServerFn({ method: "POST" })
       ciphertext = encryptSecret(data.client_secret);
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("payment_provider_settings")
       .update({
         is_enabled: data.is_enabled,
@@ -123,7 +120,7 @@ export const testProviderConnection = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ provider: providerEnum }).parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context.supabase, context.userId);
-    const row = await getProviderConfig(data.provider);
+    const row = await getProviderConfig(context.supabase, data.provider);
     if (!row?.client_id) throw new Error("Falta el Client ID.");
     const secret = await decryptStoredSecret(row);
     if (!secret) throw new Error("Falta el Client Secret.");
@@ -143,17 +140,16 @@ export const testProviderConnection = createServerFn({ method: "POST" })
 
 // ---------- Public: which providers are enabled ----------
 
-export const getEnabledPaymentProviders = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+export const getEnabledPaymentProviders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
       .from("payment_provider_settings")
       .select("provider, is_enabled")
       .eq("is_enabled", true);
     if (error) throw new Error(error.message);
-    return (data || []).map((r) => r.provider);
-  },
-);
+    return (data || []).map((r: any) => r.provider);
+  });
 
 // ---------- Create Stripe Checkout Session ----------
 
@@ -179,13 +175,12 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
     if (!["owner", "admin"].includes(member.role))
       throw new Error("Solo el dueño o admin puede pagar el plan.");
 
-    const row = await getProviderConfig("stripe");
+    const row = await getProviderConfig(context.supabase, "stripe");
     if (!row?.is_enabled) throw new Error("Stripe no está habilitado.");
     const secret = await decryptStoredSecret(row);
     if (!secret || !row.client_id) throw new Error("Credenciales de Stripe incompletas.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: plan } = await supabaseAdmin
+    const { data: plan } = await context.supabase
       .from("plans")
       .select("id, name, price_usd")
       .eq("id", data.planId)
@@ -220,7 +215,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
     const json = (await res.json()) as any;
     if (!res.ok) throw new Error(json.error?.message || "Stripe rechazó la solicitud.");
 
-    await supabaseAdmin.from("tenant_subscriptions").insert({
+    await context.supabase.from("tenant_subscriptions").insert({
       tenant_id: data.tenantId,
       plan_id: data.planId,
       provider: "stripe",
@@ -249,13 +244,12 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     if (!["owner", "admin"].includes(member.role))
       throw new Error("Solo el dueño o admin puede pagar el plan.");
 
-    const row = await getProviderConfig("paypal");
+    const row = await getProviderConfig(context.supabase, "paypal");
     if (!row?.is_enabled) throw new Error("PayPal no está habilitado.");
     const secret = await decryptStoredSecret(row);
     if (!secret || !row.client_id) throw new Error("Credenciales de PayPal incompletas.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: plan } = await supabaseAdmin
+    const { data: plan } = await context.supabase
       .from("plans")
       .select("id, name, price_usd")
       .eq("id", data.planId)
@@ -325,7 +319,7 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     const sub = (await subRes.json()) as any;
     if (!subRes.ok) throw new Error(sub.message || "Error creando suscripción en PayPal");
 
-    await supabaseAdmin.from("tenant_subscriptions").insert({
+    await context.supabase.from("tenant_subscriptions").insert({
       tenant_id: data.tenantId,
       plan_id: data.planId,
       provider: "paypal",
