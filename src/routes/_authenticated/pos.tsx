@@ -249,12 +249,13 @@ function PosPage() {
   // Payment helpers
   function paymentInUsd(p: PaymentLine): number {
     if (p.currency === "USD") return p.amount;
-    return rate > 0 ? p.amount / rate : 0;
+    return effectiveRate > 0 ? p.amount / effectiveRate : 0;
   }
   const paidUsd = payments.reduce((s, p) => s + paymentInUsd(p), 0);
   const changeUsd = paidUsd - totals.total;
-  const changeNio = changeUsd * rate;
+  const changeNio = changeUsd * effectiveRate;
   const enoughPaid = paidUsd + 0.001 >= totals.total;
+
 
   function addPaymentLine() {
     setPayments((prev) => [
