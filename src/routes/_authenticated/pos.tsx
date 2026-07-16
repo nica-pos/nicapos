@@ -823,7 +823,9 @@ function ReceiptDialog({
     changeUsd: number;
     changeNio: number;
     createdAt: Date;
+    docFormat: "ticket" | "carta";
   } | null;
+
   onClose: () => void;
   tenantName: string;
   tenantRuc: string | null;
