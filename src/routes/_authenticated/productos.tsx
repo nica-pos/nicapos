@@ -38,6 +38,14 @@ import {
   useDeleteProduct,
   type Product,
 } from "@/hooks/use-pos";
+import { useCategories, useCreateLookup } from "@/hooks/use-inventory";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatUSD } from "@/hooks/use-fiscal";
 
 export const Route = createFileRoute("/_authenticated/productos")({
