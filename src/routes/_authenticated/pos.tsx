@@ -356,6 +356,8 @@ function PosPage() {
         changeNio: Math.max(0, snapChangeNio),
         createdAt: new Date(),
         docFormat,
+        isCredit,
+        customerName: selectedCustomer?.name ?? null,
       });
       clearCart();
       setRateOverride(null);
