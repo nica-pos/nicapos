@@ -845,12 +845,11 @@ function ReceiptDialog({
     window.print();
   }
 
-  return (
-    <Dialog open={!!sale} onOpenChange={(v) => !v && onClose()}>
   const isCarta = sale?.docFormat === "carta";
 
   return (
     <Dialog open={!!sale} onOpenChange={(v) => !v && onClose()}>
+
       <DialogContent className={isCarta ? "max-w-3xl" : "max-w-md"}>
         <style>{`
           @media print {
