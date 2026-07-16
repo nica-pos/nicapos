@@ -828,9 +828,13 @@ function PosPage() {
               <div className="flex justify-between text-base font-semibold">
                 <span>Vuelto</span>
                 <span className={changeUsd < 0 ? "text-destructive" : "text-primary"}>
-                  {changeUsd >= 0
-                    ? `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`
-                    : `Falta ${formatUSD(-changeUsd)}`}
+                  {changeUsd < 0
+                    ? `Falta ${formatUSD(-changeUsd)}`
+                    : changePreferNio
+                      ? `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`
+                      : changePreferUsd
+                        ? `${formatUSD(changeUsd)} · ${formatNIO(changeNio)}`
+                        : `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`}
                 </span>
               </div>
             </div>
