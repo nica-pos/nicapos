@@ -1095,79 +1095,99 @@ function ReceiptDialog({
                 <div className="mt-1 text-[11px]">Cliente: {sale.customerName}</div>
               )}
             </div>
-            <div className="my-1 border-t border-dashed border-black" />
-            {sale.lines.map((l, i) => (
-              <div key={i}>
-                <div className="flex justify-between">
-                  <span className="pr-2">{l.quantity} x {l.name}</span>
-                  <span>{formatUSD(l.unit_price_usd * l.quantity)}</span>
-                </div>
-                {sale.rate > 0 && (
-                  <div className="text-right opacity-70">
-                    {formatNIO(l.unit_price_usd * l.quantity * sale.rate)}
-                  </div>
-                )}
-              </div>
-            ))}
-            <div className="my-1 border-t border-dashed border-black" />
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{formatUSD(sale.subtotal)}</span>
-            </div>
-            {sale.tax > 0 && (
-              <div className="flex justify-between">
-                <span>IVA</span>
-                <span>{formatUSD(sale.tax)}</span>
-              </div>
-            )}
-            <div className="flex justify-between font-bold">
-              <span>TOTAL</span>
-              <span>{formatUSD(sale.total)}</span>
-            </div>
-            {sale.rate > 0 && (
-              <div className="flex justify-between font-bold">
-                <span>TOTAL C$</span>
-                <span>{formatNIO(sale.total * sale.rate)}</span>
-              </div>
-            )}
-            <div className="my-1 border-t border-dashed border-black" />
-            {sale.isCredit ? (
-              <div className="text-center font-bold">
-                *** PENDIENTE DE PAGO — CRÉDITO ***
-                <div className="text-[11px] font-normal">
-                  Saldo: {formatUSD(sale.total)}
-                  {sale.rate > 0 && ` · ${formatNIO(sale.total * sale.rate)}`}
-                </div>
-              </div>
-            ) : (
-              <>
-                {sale.payments.map((p, i) => (
-                  <div key={i} className="flex justify-between">
-                    <span>{PAYMENT_LABELS[p.method]}</span>
-                    <span>
-                      {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
-                    </span>
-                  </div>
-                ))}
-                {sale.changeUsd > 0 && (() => {
-                  const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
-                  const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
-                  const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
-                  return (
-                    <div className="flex justify-between font-semibold">
-                      <span>Vuelto</span>
-                      <span>
-                        {sale.rate > 0
-                          ? showNioFirst
-                            ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
-                            : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
-                          : formatUSD(sale.changeUsd)}
-                      </span>
+            {(() => {
+              const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+              const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+              const onlyNio = hasNio && !hasUsd;
+              const onlyUsd = hasUsd && !hasNio;
+              const displayMode = (sale.isCredit
+                ? "BOTH"
+                : onlyNio && sale.rate > 0
+                  ? "NIO"
+                  : onlyUsd
+                    ? "USD"
+                    : "BOTH") as "USD" | "NIO" | "BOTH";
+              const fmtLine = (usd: number) => {
+                if (displayMode === "USD") return formatUSD(usd);
+                if (displayMode === "NIO") return formatNIO(usd * sale.rate);
+                return formatUSD(usd);
+              };
+              const showAlt = displayMode === "BOTH" && sale.rate > 0;
+              return (
+                <>
+                  <div className="my-1 border-t border-dashed border-black" />
+                  {sale.lines.map((l, i) => (
+                    <div key={i}>
+                      <div className="flex justify-between">
+                        <span className="pr-2">{l.quantity} x {l.name}</span>
+                        <span>{fmtLine(l.unit_price_usd * l.quantity)}</span>
+                      </div>
+                      {showAlt && (
+                        <div className="text-right opacity-70">
+                          {formatNIO(l.unit_price_usd * l.quantity * sale.rate)}
+                        </div>
+                      )}
                     </div>
-                  );
-                })()}
-              </>
-            )}
+                  ))}
+                  <div className="my-1 border-t border-dashed border-black" />
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>{fmtLine(sale.subtotal)}</span>
+                  </div>
+                  {sale.tax > 0 && (
+                    <div className="flex justify-between">
+                      <span>IVA</span>
+                      <span>{fmtLine(sale.tax)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold">
+                    <span>TOTAL</span>
+                    <span>{fmtLine(sale.total)}</span>
+                  </div>
+                  {showAlt && (
+                    <div className="flex justify-between font-bold">
+                      <span>TOTAL C$</span>
+                      <span>{formatNIO(sale.total * sale.rate)}</span>
+                    </div>
+                  )}
+                  <div className="my-1 border-t border-dashed border-black" />
+                  {sale.isCredit ? (
+                    <div className="text-center font-bold">
+                      *** PENDIENTE DE PAGO — CRÉDITO ***
+                      <div className="text-[11px] font-normal">
+                        Saldo: {formatUSD(sale.total)}
+                        {sale.rate > 0 && ` · ${formatNIO(sale.total * sale.rate)}`}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {sale.payments.map((p, i) => (
+                        <div key={i} className="flex justify-between">
+                          <span>{PAYMENT_LABELS[p.method]}</span>
+                          <span>
+                            {p.currency === "USD" ? formatUSD(p.amount) : formatNIO(p.amount)}
+                          </span>
+                        </div>
+                      ))}
+                      {sale.changeUsd > 0 && (
+                        <div className="flex justify-between font-semibold">
+                          <span>Vuelto</span>
+                          <span>
+                            {displayMode === "NIO"
+                              ? formatNIO(sale.changeNio)
+                              : displayMode === "USD"
+                                ? formatUSD(sale.changeUsd)
+                                : sale.rate > 0
+                                  ? `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                                  : formatUSD(sale.changeUsd)}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              );
+            })()}
             {sale.rate > 0 && (
               <div className="mt-1 text-center">
                 Tasa: C$ {sale.rate.toFixed(4)} / US$1
