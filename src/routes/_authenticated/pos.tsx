@@ -524,15 +524,34 @@ function PosPage() {
                     key={i}
                     className="flex items-center gap-3 rounded-lg border border-border/60 p-3"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium">{l.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatUSD(l.unit_price_usd)}
-                        {rate > 0 && ` · ${formatNIO(l.unit_price_usd * rate)}`}
-                        {l.is_tax_exempt && (
-                          <Badge variant="secondary" className="ml-1">Exento</Badge>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{l.name}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">P.U. $</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={l.unit_price_usd}
+                          onChange={(e) => {
+                            const v = Number(e.target.value);
+                            setCart((prev) => {
+                              const next = [...prev];
+                              next[i] = { ...next[i], unit_price_usd: isNaN(v) ? 0 : v };
+                              return next;
+                            });
+                          }}
+                          className="h-7 w-24 text-sm"
+                        />
+                        {effectiveRate > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            {formatNIO(l.unit_price_usd * effectiveRate)}
+                          </span>
                         )}
-                      </p>
+                        {l.is_tax_exempt && (
+                          <Badge variant="secondary">Exento</Badge>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, -1)}>
@@ -545,9 +564,9 @@ function PosPage() {
                     </div>
                     <div className="w-28 text-right">
                       <div className="font-semibold">{formatUSD(l.unit_price_usd * l.quantity)}</div>
-                      {rate > 0 && (
+                      {effectiveRate > 0 && (
                         <div className="text-xs text-muted-foreground">
-                          {formatNIO(l.unit_price_usd * l.quantity * rate)}
+                          {formatNIO(l.unit_price_usd * l.quantity * effectiveRate)}
                         </div>
                       )}
                     </div>
@@ -556,6 +575,7 @@ function PosPage() {
                     </Button>
                   </div>
                 ))}
+
               </div>
             )}
           </div>
