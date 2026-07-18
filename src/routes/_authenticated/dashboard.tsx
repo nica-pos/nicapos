@@ -118,6 +118,29 @@ function DashboardPage() {
     },
   });
 
+  // Historial de aperturas y cierres de caja (owner/admin)
+  const cashHistory = useQuery({
+    queryKey: ["dash-cash-history", tenant?.id],
+    enabled: !!tenant,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cash_sessions")
+        .select("id, status, opened_at, closed_at, opening_nio, opening_usd, counted_nio, counted_usd, opened_by, closed_by")
+        .eq("tenant_id", tenant!.id)
+        .order("opened_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      const rows = data ?? [];
+      const userIds = Array.from(new Set(rows.flatMap((r) => [r.opened_by, r.closed_by]).filter(Boolean))) as string[];
+      let profiles: Record<string, { full_name: string | null; email: string | null }> = {};
+      if (userIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", userIds);
+        profiles = Object.fromEntries((profs ?? []).map((p) => [p.id, { full_name: p.full_name, email: p.email }]));
+      }
+      return { rows, profiles };
+    },
+  });
+
   const heroData = fin?.chart ?? [];
   const heroTotal = useMemo(
     () => heroData.reduce((acc, d) => acc + Number(d.sales || 0), 0),
