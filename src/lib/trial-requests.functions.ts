@@ -48,31 +48,24 @@ export const listTrialRequests = createServerFn({ method: "GET" })
 export const requestTrialForCurrentUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => requestTrialInput.parse(input))
-  .handler(async ({ data, context, request }) => {
-    const headers = (request as Request | undefined)?.headers;
-    const ip =
-      headers?.get("cf-connecting-ip") ??
-      headers?.get("x-forwarded-for")?.split(",")[0].trim() ??
-      headers?.get("x-real-ip") ??
-      null;
-    const ua = headers?.get("user-agent") ?? null;
-
+  .handler(async ({ data, context }) => {
     const { data: tenantId, error } = await context.supabase.rpc(
       "request_trial_for_current_user",
       {
         _tenant_name: data.tenantName,
-        _phone: data.phone ?? null,
-        _city: data.city ?? null,
-        _country: data.country ?? null,
-        _ip_address: ip,
-        _user_agent: ua,
-        _latitude: data.latitude ?? null,
-        _longitude: data.longitude ?? null,
-        _location_accuracy: data.locationAccuracy ?? null,
-        _notes: data.notes ?? null,
+        _phone: data.phone ?? "",
+        _city: data.city ?? "",
+        _country: data.country ?? "",
+        _ip_address: "",
+        _user_agent: "",
+        _latitude: data.latitude ?? (null as unknown as number),
+        _longitude: data.longitude ?? (null as unknown as number),
+        _location_accuracy: data.locationAccuracy ?? (null as unknown as number),
+        _notes: data.notes ?? "",
       },
     );
     if (error) throw new Error(error.message);
+
 
     // Send confirmation email (fire-and-forget)
     try {
