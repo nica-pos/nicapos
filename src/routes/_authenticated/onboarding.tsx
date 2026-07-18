@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Store, Loader2, Check } from "lucide-react";
+import { Store, Loader2, Check, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,10 @@ import {
   setActiveTenantId,
   useMyMemberships,
 } from "@/hooks/use-tenant";
+import { requestTrialForCurrentUser } from "@/lib/trial-requests.functions";
 import { cn } from "@/lib/utils";
+
+const TRIAL_OPTION_ID = "__trial__";
 
 const PLAN_META: Record<
   string,
