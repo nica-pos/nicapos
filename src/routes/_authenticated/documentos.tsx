@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -57,6 +57,23 @@ function DocumentsPage() {
   const [customerRuc, setCustomerRuc] = useState("");
   const [items, setItems] = useState<LineItem[]>([newItem()]);
   const [loadOpen, setLoadOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tipo") === "proforma") setDocType("proforma");
+    const raw = sessionStorage.getItem("pos-proforma-cart");
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as Array<{ description: string; qty: number; unitUsd: number; taxable: boolean }>;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setItems(parsed.map((p) => ({ id: crypto.randomUUID(), ...p })));
+          setDocType("proforma");
+        }
+      } catch {}
+      sessionStorage.removeItem("pos-proforma-cart");
+    }
+  }, []);
 
 
   const recentSales = useQuery({
