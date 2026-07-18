@@ -55,6 +55,8 @@ function TeamPage() {
   const canManage = role === "owner" || role === "admin";
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [newRole, setNewRole] = useState<"admin" | "cashier" | "accountant">("cashier");
 
   const members = useQuery({
@@ -84,12 +86,25 @@ function TeamPage() {
   const invite = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
-      return await addMember({ data: { tenantId: tenant.id, email: email.trim(), role: newRole } });
+      if (password && password.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres.");
+      return await addMember({
+        data: {
+          tenantId: tenant.id,
+          email: email.trim(),
+          role: newRole,
+          password: password.trim() || undefined,
+          fullName: fullName.trim() || undefined,
+        },
+      });
     },
     onSuccess: (res: any) => {
       setEmail("");
+      setPassword("");
+      setFullName("");
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
-      if (res?.invited) {
+      if (res?.created) {
+        toast.success("Cuenta creada. Ya puede iniciar sesión con ese correo y contraseña.");
+      } else if (res?.invited) {
         toast.success("Invitación enviada. Se unirá automáticamente al registrarse con ese correo.");
       } else {
         toast.success("Miembro agregado");
