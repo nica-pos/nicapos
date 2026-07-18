@@ -174,7 +174,8 @@ function ProductsPage() {
         min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
         is_combo: form.is_combo,
-      });
+        image_url: form.image_url || null,
+      } as any);
       toast.success("Producto guardado");
       setOpen(false);
     } catch (e) {
