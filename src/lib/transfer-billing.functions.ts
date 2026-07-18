@@ -30,14 +30,13 @@ export const saveBankAccount = createServerFn({ method: "POST" })
   .inputValidator((input) => bankInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.id) {
       const { id, ...rest } = data;
-      const { error } = await supabaseAdmin.from("bank_accounts").update(rest).eq("id", id);
+      const { error } = await context.supabase.from("bank_accounts").update(rest).eq("id", id);
       if (error) throw new Error(error.message);
     } else {
       const { id: _omit, ...rest } = data;
-      const { error } = await supabaseAdmin.from("bank_accounts").insert(rest);
+      const { error } = await context.supabase.from("bank_accounts").insert(rest);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -48,8 +47,7 @@ export const deleteBankAccount = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("bank_accounts").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("bank_accounts").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -70,45 +68,27 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => submitInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-
-    // Must be a member of the tenant
-    const { data: isMember } = await supabase.rpc("is_tenant_member", {
-      _user_id: userId,
-      _tenant_id: data.tenantId,
-    });
-    if (!isMember) throw new Error("No perteneces a esta tienda.");
-
-    const { error } = await supabase.from("payment_submissions").insert({
-      tenant_id: data.tenantId,
-      plan_id: data.planId,
-      bank_account_id: data.bankAccountId,
-      amount: data.amount,
-      currency: data.currency,
-      reference: data.reference ?? null,
-      receipt_url: data.receiptPath,
-      submitted_by: userId,
-      status: "pending",
-    });
+    const { data: subId, error } = await context.supabase.rpc(
+      "submit_payment_and_mark_pending",
+      {
+        _tenant_id: data.tenantId,
+        _plan_id: data.planId,
+        _bank_account_id: data.bankAccountId,
+        _amount: data.amount,
+        _currency: data.currency,
+        _reference: data.reference ?? null,
+        _receipt_path: data.receiptPath,
+      },
+    );
     if (error) throw new Error(error.message);
-
-    // Move tenant to pending_verification (privileged: enum not writable via typed client easily)
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error: tErr } = await supabaseAdmin
-      .from("tenants")
-      .update({ status: "pending_verification" as any })
-      .eq("id", data.tenantId);
-    if (tErr) throw new Error(tErr.message);
-
-    return { ok: true };
+    return { ok: true, submissionId: subId };
   });
 
 export const listPendingSubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertSuperadmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("payment_submissions")
       .select(
         "id, tenant_id, plan_id, amount, currency, reference, receipt_url, status, created_at, tenant:tenants(name, ruc), plan:plans(name, price_usd), bank:bank_accounts(bank_name, account_number, currency)",
@@ -124,8 +104,7 @@ export const getReceiptSignedUrl = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ path: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error } = await supabaseAdmin.storage
+    const { data: signed, error } = await context.supabase.storage
       .from("payment-receipts")
       .createSignedUrl(data.path, 60 * 10);
     if (error) throw new Error(error.message);
@@ -146,9 +125,8 @@ export const reviewSubmission = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertSuperadmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: sub, error: sErr } = await supabaseAdmin
+    const { data: sub, error: sErr } = await context.supabase
       .from("payment_submissions")
       .select("id, tenant_id, plan_id, status")
       .eq("id", data.submissionId)
@@ -162,8 +140,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
       const periodEnd = new Date();
       periodEnd.setMonth(periodEnd.getMonth() + months);
 
-      // Update submission
-      const { error: uErr } = await supabaseAdmin
+      const { error: uErr } = await context.supabase
         .from("payment_submissions")
         .update({
           status: "approved",
@@ -174,22 +151,20 @@ export const reviewSubmission = createServerFn({ method: "POST" })
         .eq("id", sub.id);
       if (uErr) throw new Error(uErr.message);
 
-      // Activate tenant
-      const { error: tErr } = await supabaseAdmin
+      const { error: tErr } = await context.supabase
         .from("tenants")
         .update({ status: "active" as any, plan_id: sub.plan_id })
         .eq("id", sub.tenant_id);
       if (tErr) throw new Error(tErr.message);
 
-      // Upsert subscription
-      const { data: existing } = await supabaseAdmin
+      const { data: existing } = await context.supabase
         .from("tenant_subscriptions")
         .select("id")
         .eq("tenant_id", sub.tenant_id)
         .maybeSingle();
 
       if (existing) {
-        const { error } = await supabaseAdmin
+        const { error } = await context.supabase
           .from("tenant_subscriptions")
           .update({
             plan_id: sub.plan_id,
@@ -200,7 +175,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
           .eq("id", existing.id);
         if (error) throw new Error(error.message);
       } else {
-        const { error } = await supabaseAdmin.from("tenant_subscriptions").insert({
+        const { error } = await context.supabase.from("tenant_subscriptions").insert({
           tenant_id: sub.tenant_id,
           plan_id: sub.plan_id,
           provider: "bank_transfer",
@@ -210,7 +185,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
         if (error) throw new Error(error.message);
       }
     } else {
-      const { error: uErr } = await supabaseAdmin
+      const { error: uErr } = await context.supabase
         .from("payment_submissions")
         .update({
           status: "rejected",
@@ -221,8 +196,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
         .eq("id", sub.id);
       if (uErr) throw new Error(uErr.message);
 
-      // Cancel tenant so user must re-onboard
-      const { error: tErr } = await supabaseAdmin
+      const { error: tErr } = await context.supabase
         .from("tenants")
         .update({ status: "cancelled" as any })
         .eq("id", sub.tenant_id);
