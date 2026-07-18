@@ -1341,13 +1341,27 @@ function ReceiptDialog({
           </div>
         )}
 
-        <DialogFooter className="no-print">
-          <Button variant="outline" onClick={onClose}>
-            Cerrar
+        <DialogFooter className="no-print gap-2 sm:justify-between">
+          <Button
+            variant="destructive"
+            onClick={handleVoid}
+            disabled={voidSale.isPending}
+          >
+            {voidSale.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <X className="mr-2 h-4 w-4" />
+            )}
+            Anular venta
           </Button>
-          <Button onClick={doPrint}>
-            <CreditCard className="mr-2 h-4 w-4" /> Imprimir
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cerrar
+            </Button>
+            <Button onClick={doPrint}>
+              <CreditCard className="mr-2 h-4 w-4" /> Imprimir
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
