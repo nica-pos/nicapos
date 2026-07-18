@@ -519,3 +519,94 @@ function ProductsPage() {
     </DashboardShell>
   );
 }
+
+function ProductImageField({
+  tenantId,
+  path,
+  onChange,
+}: {
+  tenantId: string | null;
+  path: string;
+  onChange: (path: string | null) => void;
+}) {
+  const { data: url } = useProductImage(path || null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (!tenantId) {
+      toast.error("Sin tienda activa");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("La imagen no puede pesar más de 5 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      // Elimina la anterior si existía en el bucket
+      if (path) await deleteProductImage(path);
+      const newPath = await uploadProductImage(tenantId, file);
+      onChange(newPath);
+      toast.success("Imagen subida");
+    } catch (e) {
+      toast.error("No se pudo subir la imagen", {
+        description: getFriendlyErrorMessage(e),
+      });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleRemove() {
+    if (path) await deleteProductImage(path).catch(() => {});
+    onChange(null);
+  }
+
+  return (
+    <div className="grid gap-2">
+      <Label>Imagen del producto</Label>
+      <div className="flex items-center gap-3">
+        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-muted/40">
+          {url ? (
+            <img src={url} alt="Producto" className="h-full w-full object-cover" />
+          ) : (
+            <ImagePlus className="h-6 w-6 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm hover:bg-muted">
+            {uploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ImagePlus className="h-4 w-4" />
+            )}
+            {path ? "Cambiar imagen" : "Subir imagen"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFile(f);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {path && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleRemove}
+            >
+              <X className="mr-1 h-4 w-4" /> Quitar
+            </Button>
+          )}
+          <p className="text-xs text-muted-foreground">JPG o PNG, hasta 5 MB.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
