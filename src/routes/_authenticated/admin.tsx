@@ -389,7 +389,7 @@ function AdminPage() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar ID interno o plan…"
+                placeholder="Buscar tienda, correo o plan…"
                 className="h-9 w-64 pl-8"
               />
             </div>
