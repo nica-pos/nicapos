@@ -79,6 +79,9 @@ function PosPage() {
   const [activeCategory, setActiveCategory] = useState<string>("__all__");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [payOpen, setPayOpen] = useState(false);
+  const [proformaOpen, setProformaOpen] = useState(false);
+  const [proformaCustomer, setProformaCustomer] = useState("");
+  const [proformaRuc, setProformaRuc] = useState("");
   const [payments, setPayments] = useState<PaymentLine[]>([]);
   const [rateOverride, setRateOverride] = useState<number | null>(null);
   const [docFormat, setDocFormat] = useState<"ticket" | "carta">("ticket");
@@ -676,14 +679,10 @@ function PosPage() {
               className="w-full"
               disabled={cart.length === 0}
               onClick={() => {
-                const payload = cart.map((l) => ({
-                  description: l.name,
-                  qty: l.quantity,
-                  unitUsd: l.unit_price_usd,
-                  taxable: !l.is_tax_exempt,
-                }));
-                sessionStorage.setItem("pos-proforma-cart", JSON.stringify(payload));
-                navigate({ to: "/documentos", search: { tipo: "proforma" } as any });
+                const c = (customers ?? []).find((x) => x.id === customerId);
+                setProformaCustomer(c?.name ?? "");
+                setProformaRuc(c?.ruc ?? "");
+                setProformaOpen(true);
               }}
             >
               Generar cotización / proforma
@@ -997,6 +996,25 @@ function PosPage() {
       <ReceiptDialog
         sale={lastSale}
         onClose={() => setLastSale(null)}
+        tenantName={tenant?.name ?? ""}
+        tenantRuc={tenant?.ruc ?? null}
+        logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
+        primaryColor={tenant?.primary_color ?? "#f59e0b"}
+        settings={fiscal}
+      />
+
+      <ProformaDialog
+        open={proformaOpen}
+        onClose={() => setProformaOpen(false)}
+        cart={cart}
+        subtotal={totals.subtotal}
+        tax={totals.tax}
+        total={totals.total}
+        rate={effectiveRate}
+        customer={proformaCustomer}
+        setCustomer={setProformaCustomer}
+        customerRuc={proformaRuc}
+        setCustomerRuc={setProformaRuc}
         tenantName={tenant?.name ?? ""}
         tenantRuc={tenant?.ruc ?? null}
         logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
@@ -1435,3 +1453,136 @@ function ProductGridCard({
 }
 
 
+
+function ProformaDialog({
+  open,
+  onClose,
+  cart,
+  subtotal,
+  tax,
+  total,
+  rate,
+  customer,
+  setCustomer,
+  customerRuc,
+  setCustomerRuc,
+  tenantName,
+  tenantRuc,
+  logoUrl,
+  primaryColor,
+  settings,
+}: {
+  open: boolean;
+  onClose: () => void;
+  cart: CartLine[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  rate: number;
+  customer: string;
+  setCustomer: (v: string) => void;
+  customerRuc: string;
+  setCustomerRuc: (v: string) => void;
+  tenantName: string;
+  tenantRuc: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  settings: any;
+}) {
+  const s = settings as any;
+  const prefix = s?.proforma_prefix ?? "PRO-";
+  const nextNum = s?.next_proforma_number ?? 1;
+  const docNumber = `${prefix}${String(nextNum).padStart(6, "0")}`;
+  const legalName = s?.legal_name || tenantName || "Mi Negocio";
+  const usableRate = rate || 1;
+  const nio = (usd: number) => usd * usableRate;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <style>{`
+          @media print {
+            body * { visibility: hidden !important; }
+            #proforma-print, #proforma-print * { visibility: visible !important; }
+            #proforma-print { position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+            .no-print { display: none !important; }
+          }
+        `}</style>
+        <DialogHeader className="no-print">
+          <DialogTitle>Cotización / Proforma</DialogTitle>
+        </DialogHeader>
+
+        <div className="grid gap-3 sm:grid-cols-2 no-print">
+          <div className="space-y-1">
+            <Label className="text-xs">Cliente</Label>
+            <Input value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Nombre del cliente" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">RUC / Cédula</Label>
+            <Input value={customerRuc} onChange={(e) => setCustomerRuc(e.target.value)} placeholder="Opcional" />
+          </div>
+        </div>
+
+        <div id="proforma-print" className="bg-white p-6 text-black shadow-sm rounded-md">
+          <div className="flex items-start justify-between border-b-4 pb-3" style={{ borderColor: primaryColor }}>
+            <div className="flex items-start gap-4">
+              {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 w-16 rounded object-contain" crossOrigin="anonymous" />}
+              <div>
+                <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>{legalName}</div>
+                {tenantRuc && <div className="text-sm">RUC: {tenantRuc}</div>}
+                {s?.address && <div className="text-sm">{s.address}</div>}
+                {s?.phone && <div className="text-sm">Tel: {s.phone}</div>}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold" style={{ color: primaryColor }}>PROFORMA / COTIZACIÓN</div>
+              <div className="text-sm font-semibold">N° {docNumber}</div>
+              <div className="text-sm">Fecha: {new Date().toLocaleDateString("es-NI")}</div>
+              {rate > 0 && <div className="text-sm">Tasa: C$ {rate.toFixed(4)}/US$1</div>}
+            </div>
+          </div>
+
+          <div className="border-t pt-2 text-sm mt-3">
+            <div><span className="font-semibold">Cliente:</span> {customer || "—"}</div>
+            <div><span className="font-semibold">RUC/Cédula:</span> {customerRuc || "—"}</div>
+          </div>
+
+          <table className="w-full text-sm mt-3">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="py-1">Descripción</th>
+                <th className="py-1 text-center">Cant.</th>
+                <th className="py-1 text-right">P. Unit</th>
+                <th className="py-1 text-right">Total (C$)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cart.map((l, i) => (
+                <tr key={i} className="border-b">
+                  <td className="py-1">{l.name}{l.is_tax_exempt && <span className="text-xs opacity-60"> (exento)</span>}</td>
+                  <td className="py-1 text-center">{l.quantity}</td>
+                  <td className="py-1 text-right">{formatNIO(nio(l.unit_price_usd))}</td>
+                  <td className="py-1 text-right">{formatNIO(nio(l.unit_price_usd * l.quantity))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="ml-auto w-64 space-y-1 text-sm mt-3">
+            <div className="flex justify-between"><span>Subtotal</span><span>{formatNIO(nio(subtotal))} <span className="opacity-60 ml-1">{formatUSD(subtotal)}</span></span></div>
+            {tax > 0 && <div className="flex justify-between"><span>IVA</span><span>{formatNIO(nio(tax))} <span className="opacity-60 ml-1">{formatUSD(tax)}</span></span></div>}
+            <div className="flex justify-between border-t pt-1 font-bold"><span>TOTAL</span><span>{formatNIO(nio(total))} <span className="opacity-60 ml-1">{formatUSD(total)}</span></span></div>
+          </div>
+
+          <div className="mt-4 text-sm italic">Este documento es una cotización y no tiene validez fiscal. Precios sujetos a cambio.</div>
+          {s?.invoice_footer && <div className="border-t pt-2 text-xs mt-3">{s.invoice_footer}</div>}
+        </div>
+
+        <DialogFooter className="no-print">
+          <Button variant="outline" onClick={onClose}>Cerrar y seguir editando</Button>
+          <Button onClick={() => window.print()}>Imprimir proforma</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
