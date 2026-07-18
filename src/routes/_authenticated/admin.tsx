@@ -106,6 +106,7 @@ function AdminPage() {
   const createClientFn = useServerFn(adminCreateClient);
   const deleteTenantFn = useServerFn(adminDeleteTenant);
   const cleanupOrphansFn = useServerFn(cleanupOrphanAuthUsers);
+  const forceDeleteAuthFn = useServerFn(adminForceDeleteAuthUser);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
