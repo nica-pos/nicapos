@@ -140,6 +140,7 @@ function ProductsPage() {
       min_stock: String(p.min_stock),
       is_tax_exempt: p.is_tax_exempt,
       is_combo: p.is_combo,
+      image_url: (p as any).image_url ?? "",
     });
     setPriceCurrency(cur);
     setOpen(true);
