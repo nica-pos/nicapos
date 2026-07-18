@@ -359,3 +359,22 @@ export function useCreateSale() {
     },
   });
 }
+
+export function useVoidSale() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { saleId: string; reason?: string }) => {
+      const { data, error } = await supabase.rpc("void_sale", {
+        _sale_id: v.saleId,
+        _reason: v.reason ?? null,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["sales"] });
+      qc.invalidateQueries({ queryKey: ["receivables"] });
+    },
+  });
+}
