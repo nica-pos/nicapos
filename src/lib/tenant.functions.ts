@@ -73,18 +73,39 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       throw new Error("No tienes permiso para agregar miembros a esta tienda.");
     }
 
+    const emailLower = data.email.toLowerCase();
+
     // Look up the target user by email via RLS (profiles has superadmin/self read policy).
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
       .from("profiles")
       .select("id")
-      .eq("email", data.email.toLowerCase())
+      .eq("email", emailLower)
       .maybeSingle();
 
+    // Si no existe y el dueño proveyó contraseña, creamos la cuenta directamente.
+    if (!profile && data.password) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email: emailLower,
+        password: data.password,
+        email_confirm: true,
+        user_metadata: data.fullName ? { full_name: data.fullName } : undefined,
+      });
+      if (createErr) {
+        const msg = createErr.message?.toLowerCase() ?? "";
+        if (msg.includes("already") || msg.includes("registered") || msg.includes("exist")) {
+          throw new Error("Ya existe una cuenta con ese correo. Pídele que inicie sesión y quítale la contraseña de este formulario.");
+        }
+        throw new Error(createErr.message);
+      }
+      profile = { id: created.user!.id };
+    }
+
     if (!profile) {
-      // No user with that email yet — create a pending invitation so it auto-joins on signup.
+      // Sin contraseña y usuario no existe → invitación pendiente (auto-acepta al registrarse).
       const { error: invErr } = await supabase.from("tenant_invitations").insert({
         tenant_id: data.tenantId,
-        email: data.email.toLowerCase(),
+        email: emailLower,
         role: data.role,
         invited_by: userId,
       });
@@ -92,7 +113,7 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
         if (invErr.code === "23505") throw new Error("Ya existe una invitación pendiente para ese correo.");
         throw new Error(invErr.message);
       }
-      return { ok: true, invited: true };
+      return { ok: true, invited: true, created: false };
     }
 
     const { error } = await supabase.from("tenant_members").insert({
@@ -106,7 +127,40 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       throw new Error(error.message);
     }
 
-    return { ok: true, invited: false };
+    return { ok: true, invited: false, created: !!data.password };
+  });
+
+export const adminForceDeleteAuthUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => forceDeleteAuthUserInput.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertSuperadmin(context, "Solo el superadmin puede eliminar cuentas de Auth.");
+    if (data.userId === context.userId) {
+      throw new Error("No puedes eliminar tu propia cuenta desde aquí.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Bloqueo: nunca borrar a otro superadmin desde aquí.
+    const { data: isSuper } = await supabaseAdmin.rpc("has_role", {
+      _user_id: data.userId,
+      _role: "superadmin",
+    });
+    if (isSuper) throw new Error("No se puede eliminar la cuenta de otro superadmin.");
+
+    // Borrar membresías, tiendas propias e invitaciones, luego la cuenta Auth.
+    await supabaseAdmin.from("tenant_members").delete().eq("user_id", data.userId);
+    const { data: ownedTenants } = await supabaseAdmin
+      .from("tenants")
+      .select("id")
+      .eq("owner_id", data.userId);
+    for (const t of ownedTenants ?? []) {
+      await removeTenantStorage(supabaseAdmin, t.id);
+      await supabaseAdmin.from("tenants").delete().eq("id", t.id);
+    }
+    await supabaseAdmin.from("profiles").delete().eq("id", data.userId);
+    const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (authErr) throw new Error(`No se pudo eliminar de Auth: ${authErr.message}`);
+    return { ok: true };
   });
 
 export const getAdminTenantSummaries = createServerFn({ method: "GET" })
