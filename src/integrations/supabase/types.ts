@@ -1824,6 +1824,8 @@ export type Database = {
       }
       tenants: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string
           favicon_url: string | null
           id: string
@@ -1839,6 +1841,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           favicon_url?: string | null
           id?: string
@@ -1854,6 +1858,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           favicon_url?: string | null
           id?: string
