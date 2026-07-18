@@ -9,9 +9,11 @@ const EXEMPT_PATHS = [
   "/onboarding",
   "/pago-pendiente",
   "/verificacion-pendiente",
+  "/prueba-en-revision",
   "/admin",
   "/admin/bancos",
   "/admin/pagos-pendientes",
+  "/admin/solicitudes-prueba",
   "/pagos",
 ];
 
