@@ -52,6 +52,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     label: "Ventas",
     items: [
       { to: "/pos", label: "Punto de Venta", icon: ShoppingCart },
+      { to: "/ventas", label: "Historial de ventas", icon: FileText },
       { to: "/promociones", label: "Promociones", icon: Tag },
       { to: "/clientes", label: "Clientes y Créditos", icon: HandCoins },
     ],
