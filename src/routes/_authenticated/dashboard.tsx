@@ -344,6 +344,81 @@ function DashboardPage() {
           )}
         </section>
       </div>
+
+      {/* Aperturas y cierres de caja (histórico) */}
+      <section className="mt-6 rounded-2xl border border-white/5 bg-card p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-white">Aperturas y cierres de caja</h3>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Registro no editable · empleados y administración
+            </p>
+          </div>
+          <Link to="/caja" className="text-[10px] uppercase tracking-widest text-primary hover:underline">
+            Ir a caja
+          </Link>
+        </div>
+        {cashHistory.isLoading ? (
+          <div className="flex h-24 items-center justify-center">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : (cashHistory.data?.rows.length ?? 0) === 0 ? (
+          <p className="py-6 text-center text-xs text-muted-foreground">Sin turnos registrados.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                <tr className="border-b border-white/5">
+                  <th className="py-2 text-left font-medium">Estado</th>
+                  <th className="py-2 text-left font-medium">Abierta</th>
+                  <th className="py-2 text-left font-medium">Abrió</th>
+                  <th className="py-2 text-left font-medium">Cerrada</th>
+                  <th className="py-2 text-left font-medium">Cerró</th>
+                  <th className="py-2 text-right font-medium">Apertura</th>
+                  <th className="py-2 text-right font-medium">Contado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cashHistory.data!.rows.map((s: any) => {
+                  const openBy = s.opened_by ? cashHistory.data!.profiles[s.opened_by] : null;
+                  const closeBy = s.closed_by ? cashHistory.data!.profiles[s.closed_by] : null;
+                  const nameOf = (p: any) => p?.full_name || p?.email || "—";
+                  return (
+                    <tr key={s.id} className="border-b border-white/5 text-white">
+                      <td className="py-2">
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase",
+                            s.status === "open"
+                              ? "bg-emerald-500/15 text-emerald-300"
+                              : "bg-white/5 text-muted-foreground",
+                          )}
+                        >
+                          {s.status === "open" ? "Abierta" : "Cerrada"}
+                        </span>
+                      </td>
+                      <td className="py-2 text-muted-foreground">{new Date(s.opened_at).toLocaleString("es-NI")}</td>
+                      <td className="py-2">{nameOf(openBy)}</td>
+                      <td className="py-2 text-muted-foreground">
+                        {s.closed_at ? new Date(s.closed_at).toLocaleString("es-NI") : "—"}
+                      </td>
+                      <td className="py-2">{s.closed_at ? nameOf(closeBy) : "—"}</td>
+                      <td className="py-2 text-right tabular-nums">
+                        C${Number(s.opening_nio ?? 0).toFixed(0)} · ${Number(s.opening_usd ?? 0).toFixed(0)}
+                      </td>
+                      <td className="py-2 text-right tabular-nums">
+                        {s.closed_at
+                          ? `C$${Number(s.counted_nio ?? 0).toFixed(0)} · $${Number(s.counted_usd ?? 0).toFixed(0)}`
+                          : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </DashboardShell>
   );
 }
