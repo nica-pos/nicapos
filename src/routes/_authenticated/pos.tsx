@@ -679,14 +679,10 @@ function PosPage() {
               className="w-full"
               disabled={cart.length === 0}
               onClick={() => {
-                const payload = cart.map((l) => ({
-                  description: l.name,
-                  qty: l.quantity,
-                  unitUsd: l.unit_price_usd,
-                  taxable: !l.is_tax_exempt,
-                }));
-                sessionStorage.setItem("pos-proforma-cart", JSON.stringify(payload));
-                navigate({ to: "/documentos", search: { tipo: "proforma" } as any });
+                const c = (customers ?? []).find((x) => x.id === customerId);
+                setProformaCustomer(c?.name ?? "");
+                setProformaRuc(c?.ruc ?? c?.document ?? "");
+                setProformaOpen(true);
               }}
             >
               Generar cotización / proforma
