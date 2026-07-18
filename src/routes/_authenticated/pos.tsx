@@ -36,6 +36,7 @@ import {
   useProducts,
   useOpenCashSession,
   useCreateSale,
+  useVoidSale,
   type Product,
   type CartLine,
   type PaymentLine,
