@@ -956,6 +956,7 @@ export type Database = {
           cost_usd: number
           created_at: string
           id: string
+          image_url: string | null
           is_active: boolean
           is_combo: boolean
           is_tax_exempt: boolean
@@ -979,6 +980,7 @@ export type Database = {
           cost_usd?: number
           created_at?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_combo?: boolean
           is_tax_exempt?: boolean
@@ -1002,6 +1004,7 @@ export type Database = {
           cost_usd?: number
           created_at?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_combo?: boolean
           is_tax_exempt?: boolean
