@@ -402,17 +402,20 @@ function SolicitudesPruebaPage() {
                   </Button>
                   <Button
                     disabled={
-                      !planId || !password || password.length < 6 || approveMut.isPending
+                      !planId ||
+                      approveMut.isPending ||
+                      (!viewing?.owner_user_id && (!password || password.length < 6))
                     }
                     onClick={() =>
                       approveMut.mutate({
                         requestId: viewing!.id,
                         planId,
                         trialDays: Number(days) || 7,
-                        password,
+                        password: viewing?.owner_user_id ? undefined : password,
                       })
                     }
                   >
+
                     {approveMut.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
