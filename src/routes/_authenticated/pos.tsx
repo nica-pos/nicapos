@@ -401,7 +401,7 @@ function PosPage() {
       <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/dashboard">
+            <Link to={role === "cashier" ? "/cajero" : "/dashboard"}>
               <ArrowLeft className="mr-1 h-4 w-4" /> Salir
             </Link>
           </Button>
