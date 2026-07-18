@@ -67,6 +67,7 @@ function DocumentsPage() {
         .from("sales")
         .select("id, sale_number, total_usd, created_at")
         .eq("tenant_id", tenant!.id)
+        .is("voided_at", null)
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;
