@@ -71,7 +71,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     label: "Administración",
     items: [
       { to: "/fiscal", label: "Moneda e impuestos", icon: Coins },
-      { to: "/documentos", label: "Documentos", icon: FileText },
+      
       { to: "/bitacora", label: "Bitácora", icon: ShieldCheck },
       { to: "/equipo", label: "Equipo", icon: Users },
       { to: "/configuracion", label: "Configuración", icon: Settings },
