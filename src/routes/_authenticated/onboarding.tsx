@@ -87,14 +87,23 @@ function OnboardingPage() {
   const [ruc, setRuc] = useState("");
   const [planId, setPlanId] = useState<string | null>(null);
 
+  const isTrialOption = planId === TRIAL_OPTION_ID;
   const selectedPlan = (plans ?? []).find((p) => p.id === planId);
   const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0;
+
+  const requestTrial = useServerFn(requestTrialForCurrentUser);
 
   const createTenant = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) throw new Error("Sesión no válida");
+
+      // Trial 7 días → requiere aprobación del superadmin
+      if (isTrialOption) {
+        const res = await requestTrial({ data: { tenantName: name.trim() } });
+        return { id: res.tenantId, __trial: true as const };
+      }
 
       const baseSlug = slugify(name) || "tienda";
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
@@ -122,10 +131,13 @@ function OnboardingPage() {
       }
       return data;
     },
-    onSuccess: (tenant) => {
+    onSuccess: (tenant: any) => {
       setActiveTenantId(tenant.id);
       queryClient.invalidateQueries();
-      if (isPaidPlan) {
+      if (tenant.__trial) {
+        toast.success("Solicitud enviada. Te avisaremos por correo cuando sea aprobada.");
+        navigate({ to: "/prueba-en-revision" });
+      } else if (isPaidPlan) {
         toast.success("Tienda creada. Realiza el pago para activarla.");
         navigate({ to: "/pago-pendiente" });
       } else {
@@ -139,12 +151,13 @@ function OnboardingPage() {
   // Bloqueo: 1 sola tienda activa por usuario — redirige vía efecto
   const existingActive = (memberships ?? []).find((m) => {
     const s = m.tenant?.status as string | undefined;
-    return s && ["trial", "active", "pending_payment", "pending_verification"].includes(s);
+    return s && ["trial", "active", "pending_payment", "pending_verification", "pending_trial_approval"].includes(s);
   });
   useEffect(() => {
     if (loadingMemberships || !existingActive) return;
     const s = existingActive.tenant.status as string;
-    if (s === "pending_payment") navigate({ to: "/pago-pendiente", replace: true });
+    if (s === "pending_trial_approval") navigate({ to: "/prueba-en-revision", replace: true });
+    else if (s === "pending_payment") navigate({ to: "/pago-pendiente", replace: true });
     else if (s === "pending_verification") navigate({ to: "/verificacion-pendiente", replace: true });
     else navigate({ to: "/dashboard", replace: true });
   }, [loadingMemberships, existingActive, navigate]);
