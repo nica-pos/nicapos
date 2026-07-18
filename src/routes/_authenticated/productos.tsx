@@ -72,10 +72,11 @@ const emptyForm = {
   min_stock: "",
   is_tax_exempt: false,
   is_combo: false,
-
+  image_url: "" as string,
 };
 
 function ProductsPage() {
+  const { tenant } = useActiveTenant();
   const { data: products, isLoading } = useProducts();
   const { data: categories } = useCategories();
   const createCategory = useCreateLookup("categories");
