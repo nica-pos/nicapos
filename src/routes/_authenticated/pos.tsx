@@ -603,11 +603,6 @@ function PosPage() {
                           }}
                           className="h-7 w-24 text-sm"
                         />
-                        {effectiveRate > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            {formatNIO(l.unit_price_usd * effectiveRate)}
-                          </span>
-                        )}
                         {l.is_tax_exempt && (
                           <Badge variant="secondary">Exento</Badge>
                         )}
@@ -622,13 +617,8 @@ function PosPage() {
                         <Plus className="h-3 w-3" />
                       </Button>
                     </div>
-                    <div className="w-28 text-right">
+                    <div className="w-24 text-right">
                       <div className="font-semibold">{formatUSD(l.unit_price_usd * l.quantity)}</div>
-                      {effectiveRate > 0 && (
-                        <div className="text-xs text-muted-foreground">
-                          {formatNIO(l.unit_price_usd * l.quantity * effectiveRate)}
-                        </div>
-                      )}
                     </div>
                     <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => removeLine(i)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
