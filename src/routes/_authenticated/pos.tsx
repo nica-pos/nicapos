@@ -554,25 +554,13 @@ function PosPage() {
                     promotions ?? [],
                   );
                   return (
-                    <button
+                    <ProductGridCard
                       key={p.id}
-                      type="button"
-                      onClick={() => addProduct(p)}
-                      className="group flex flex-col items-start rounded-lg border border-border/60 bg-card p-2 text-left transition hover:border-primary hover:shadow-sm"
-                    >
-                      <span className="line-clamp-2 text-sm font-medium">{p.name}</span>
-                      <span className="mt-1 text-xs text-muted-foreground">
-                        Stock: {Number(p.stock)}
-                      </span>
-                      <span className="mt-1 text-sm font-semibold text-primary">
-                        {formatUSD(price)}
-                        {promo && (
-                          <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
-                            {formatUSD(Number(p.price_usd))}
-                          </span>
-                        )}
-                      </span>
-                    </button>
+                      product={p}
+                      price={price}
+                      promo={promo}
+                      onAdd={() => addProduct(p)}
+                    />
                   );
                 })}
               </div>
