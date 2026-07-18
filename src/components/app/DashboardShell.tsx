@@ -149,6 +149,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     };
   }, [faviconUrl]);
 
+  // Guard por rol: si el rol no puede acceder a la ruta actual, lo redirige a su home.
+  useEffect(() => {
+    if (isSuperadmin) return; // superadmin puede entrar a todo
+    if (!role) return;
+    const bypass = ["/onboarding", "/pago-pendiente", "/verificacion-pendiente", "/admin", "/pagos"];
+    if (bypass.some((p) => pathname.startsWith(p))) return;
+    if (!canAccessRoute(pathname, role)) {
+      navigate({ to: defaultHomeForRole(role), replace: true });
+    }
+  }, [pathname, role, isSuperadmin, navigate]);
+
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
