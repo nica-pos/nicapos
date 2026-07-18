@@ -76,7 +76,7 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
         _bank_account_id: data.bankAccountId,
         _amount: data.amount,
         _currency: data.currency,
-        _reference: data.reference ?? null,
+        _reference: data.reference ?? "",
         _receipt_path: data.receiptPath,
       },
     );
