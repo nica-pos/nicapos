@@ -38,6 +38,8 @@ import {
   setActiveTenantId,
 } from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
+import { ROUTE_ROLES, canAccessRoute, defaultHomeForRole } from "@/lib/roles";
+import type { TenantRole } from "@/hooks/use-tenant";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard };
 
@@ -75,6 +77,16 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     ],
   },
 ];
+
+function filterNavByRole(role: TenantRole | null) {
+  if (!role) return navGroups;
+  return navGroups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((i) => (ROUTE_ROLES[i.to] ?? []).includes(role)),
+    }))
+    .filter((g) => g.items.length > 0);
+}
 
 const statusMeta: Record<
   string,
