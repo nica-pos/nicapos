@@ -102,11 +102,14 @@ function SolicitudesPruebaPage() {
       requestId: string;
       planId: string;
       trialDays: number;
-      password: string;
+      password?: string;
     }) => approve({ data: v }),
     onSuccess: (result: any) => {
       toast.success("Prueba aprobada");
-      setCreds({ email: result.email, password: result.password });
+      if (result?.password) {
+        setCreds({ email: result.email, password: result.password });
+      }
+
       setMode(null);
       qc.invalidateQueries({ queryKey: ["admin-trial-requests"] });
       qc.invalidateQueries({ queryKey: ["admin-tenants"] });
