@@ -431,7 +431,7 @@ function AdminPage() {
           <div className="divide-y divide-border/50">
             {filtered.map((t: any, index: number) => {
               const meta = statusMeta[t.status] ?? statusMeta.trial;
-              const label = privateTenantLabel(t.id, index);
+              const label = t.name || privateTenantLabel(t.id, index);
               return (
                 <div
                   key={t.id}
@@ -444,12 +444,19 @@ function AdminPage() {
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-foreground">{label}</div>
                       <div className="truncate text-xs text-muted-foreground">
-                        ID interno {String(t.id).slice(0, 8)}
+                        ID {String(t.id).slice(0, 8)}
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-6 truncate text-xs text-muted-foreground md:col-span-3">
-                    Datos privados del cliente
+                  <div className="col-span-6 min-w-0 md:col-span-3">
+                    <div className="truncate text-sm text-foreground">
+                      {t.owner_email ?? "—"}
+                    </div>
+                    {t.owner_name && (
+                      <div className="truncate text-xs text-muted-foreground">
+                        {t.owner_name}
+                      </div>
+                    )}
                   </div>
                   <div className="col-span-3 md:col-span-2">
                     <div className="text-sm font-medium text-foreground">
