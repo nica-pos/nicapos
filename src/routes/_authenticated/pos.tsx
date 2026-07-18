@@ -79,6 +79,9 @@ function PosPage() {
   const [activeCategory, setActiveCategory] = useState<string>("__all__");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [payOpen, setPayOpen] = useState(false);
+  const [proformaOpen, setProformaOpen] = useState(false);
+  const [proformaCustomer, setProformaCustomer] = useState("");
+  const [proformaRuc, setProformaRuc] = useState("");
   const [payments, setPayments] = useState<PaymentLine[]>([]);
   const [rateOverride, setRateOverride] = useState<number | null>(null);
   const [docFormat, setDocFormat] = useState<"ticket" | "carta">("ticket");
