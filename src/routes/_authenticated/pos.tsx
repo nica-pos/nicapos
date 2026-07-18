@@ -45,6 +45,8 @@ import { useFiscalSettings, useLatestRate, formatNIO, formatUSD } from "@/hooks/
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
 import { useCustomers, useCreateReceivable } from "@/hooks/use-credit";
+import { useProductImage } from "@/hooks/use-product-image";
+import { Package } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   component: PosPage,
@@ -554,25 +556,13 @@ function PosPage() {
                     promotions ?? [],
                   );
                   return (
-                    <button
+                    <ProductGridCard
                       key={p.id}
-                      type="button"
-                      onClick={() => addProduct(p)}
-                      className="group flex flex-col items-start rounded-lg border border-border/60 bg-card p-2 text-left transition hover:border-primary hover:shadow-sm"
-                    >
-                      <span className="line-clamp-2 text-sm font-medium">{p.name}</span>
-                      <span className="mt-1 text-xs text-muted-foreground">
-                        Stock: {Number(p.stock)}
-                      </span>
-                      <span className="mt-1 text-sm font-semibold text-primary">
-                        {formatUSD(price)}
-                        {promo && (
-                          <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
-                            {formatUSD(Number(p.price_usd))}
-                          </span>
-                        )}
-                      </span>
-                    </button>
+                      product={p}
+                      price={price}
+                      promo={!!promo}
+                      onAdd={() => addProduct(p)}
+                    />
                   );
                 })}
               </div>
@@ -1350,4 +1340,53 @@ function ReceiptDialog({
     </Dialog>
   );
 }
+
+function ProductGridCard({
+  product,
+  price,
+  promo,
+  onAdd,
+}: {
+  product: Product;
+  price: number;
+  promo: boolean;
+  onAdd: () => void;
+}) {
+  const imgPath = (product as any).image_url as string | null | undefined;
+  const { data: url } = useProductImage(imgPath);
+  return (
+    <button
+      type="button"
+      onClick={onAdd}
+      className="group flex flex-col items-stretch overflow-hidden rounded-lg border border-border/60 bg-card text-left transition hover:border-primary hover:shadow-sm"
+    >
+      <div className="flex aspect-square items-center justify-center overflow-hidden bg-muted/40">
+        {url ? (
+          <img
+            src={url}
+            alt={product.name}
+            className="h-full w-full object-cover transition group-hover:scale-105"
+          />
+        ) : (
+          <Package className="h-8 w-8 text-muted-foreground/50" />
+        )}
+      </div>
+      <div className="flex flex-col p-2">
+        <span className="line-clamp-2 text-sm font-medium">{product.name}</span>
+        <span className="mt-1 text-xs text-muted-foreground">
+          Stock: {Number(product.stock)}
+        </span>
+        <span className="mt-1 text-sm font-semibold text-primary">
+          {formatUSD(price)}
+          {promo && (
+            <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
+              {formatUSD(Number(product.price_usd))}
+            </span>
+          )}
+        </span>
+      </div>
+    </button>
+  );
+}
+
 
