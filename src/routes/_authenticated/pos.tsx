@@ -68,7 +68,7 @@ function PosPage() {
   const { data: promotions } = usePromotions();
   const { data: session } = useOpenCashSession();
   const { data: fiscal } = useFiscalSettings();
-  const { tenant } = useActiveTenant();
+  const { tenant, role } = useActiveTenant();
   const rate = useLatestRate() ?? 0;
   const createSale = useCreateSale();
   const { data: customers } = useCustomers();
