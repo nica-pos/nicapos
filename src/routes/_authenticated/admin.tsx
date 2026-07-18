@@ -48,6 +48,7 @@ import {
   adminCreateClient,
   adminDeleteTenant,
   cleanupOrphanAuthUsers,
+  adminForceDeleteAuthUser,
 } from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
