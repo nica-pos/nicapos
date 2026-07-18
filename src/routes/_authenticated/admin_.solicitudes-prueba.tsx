@@ -340,23 +340,31 @@ function SolicitudesPruebaPage() {
                         onChange={(e) => setDays(e.target.value)}
                       />
                     </div>
-                    <div>
-                      <Label>Contraseña inicial</Label>
-                      <div className="flex gap-1">
-                        <Input
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setPassword(randomPassword())}
-                        >
-                          ↻
-                        </Button>
+                    {!viewing.owner_user_id && (
+                      <div>
+                        <Label>Contraseña inicial</Label>
+                        <div className="flex gap-1">
+                          <Input
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setPassword(randomPassword())}
+                          >
+                            ↻
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    {viewing.owner_user_id && (
+                      <div className="col-span-1 rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">
+                        El usuario ya se registró. Solo se activará su tienda.
+                      </div>
+                    )}
+
                   </div>
                 </div>
               )}
