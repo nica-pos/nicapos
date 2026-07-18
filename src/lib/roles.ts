@@ -4,6 +4,7 @@ import type { TenantRole } from "@/hooks/use-tenant";
 // cashier = solo operación de mostrador. accountant = lectura financiera + inventario.
 export const ROUTE_ROLES: Record<string, TenantRole[]> = {
   "/dashboard": ["owner", "admin", "accountant"],
+  "/cajero": ["owner", "admin", "cashier"],
   "/pos": ["owner", "admin", "cashier"],
   "/promociones": ["owner", "admin"],
   "/clientes": ["owner", "admin", "cashier", "accountant"],
@@ -21,7 +22,7 @@ export const ROUTE_ROLES: Record<string, TenantRole[]> = {
 
 // Ruta por defecto tras iniciar sesión según rol.
 export function defaultHomeForRole(role: TenantRole | null): string {
-  if (role === "cashier") return "/pos";
+  if (role === "cashier") return "/cajero";
   if (role === "accountant") return "/dashboard";
   return "/dashboard";
 }

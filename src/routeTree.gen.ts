@@ -29,6 +29,7 @@ import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
+import { Route as AuthenticatedCajeroRouteImport } from './routes/_authenticated/cajero'
 import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/caja'
 import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
@@ -142,6 +143,11 @@ const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCajeroRoute = AuthenticatedCajeroRouteImport.update({
+  id: '/cajero',
+  path: '/cajero',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCajaRoute = AuthenticatedCajaRouteImport.update({
   id: '/caja',
   path: '/caja',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
+  '/cajero': typeof AuthenticatedCajeroRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/bitacora': typeof AuthenticatedBitacoraRoute
   '/caja': typeof AuthenticatedCajaRoute
+  '/cajero': typeof AuthenticatedCajeroRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/bitacora': typeof AuthenticatedBitacoraRoute
   '/_authenticated/caja': typeof AuthenticatedCajaRoute
+  '/_authenticated/cajero': typeof AuthenticatedCajeroRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/auditoria'
     | '/bitacora'
     | '/caja'
+    | '/cajero'
     | '/clientes'
     | '/configuracion'
     | '/dashboard'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/auditoria'
     | '/bitacora'
     | '/caja'
+    | '/cajero'
     | '/clientes'
     | '/configuracion'
     | '/dashboard'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/_authenticated/auditoria'
     | '/_authenticated/bitacora'
     | '/_authenticated/caja'
+    | '/_authenticated/cajero'
     | '/_authenticated/clientes'
     | '/_authenticated/configuracion'
     | '/_authenticated/dashboard'
@@ -517,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cajero': {
+      id: '/_authenticated/cajero'
+      path: '/cajero'
+      fullPath: '/cajero'
+      preLoaderRoute: typeof AuthenticatedCajeroRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/caja': {
       id: '/_authenticated/caja'
       path: '/caja'
@@ -581,6 +600,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedBitacoraRoute: typeof AuthenticatedBitacoraRoute
   AuthenticatedCajaRoute: typeof AuthenticatedCajaRoute
+  AuthenticatedCajeroRoute: typeof AuthenticatedCajeroRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -605,6 +625,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedBitacoraRoute: AuthenticatedBitacoraRoute,
   AuthenticatedCajaRoute: AuthenticatedCajaRoute,
+  AuthenticatedCajeroRoute: AuthenticatedCajeroRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
