@@ -1893,6 +1893,8 @@ export type Database = {
           location_accuracy: number | null
           longitude: number | null
           notes: string | null
+          owner_user_id: string | null
+          pending_tenant_id: string | null
           phone: string | null
           rejection_reason: string | null
           reviewed_at: string | null
@@ -1915,6 +1917,8 @@ export type Database = {
           location_accuracy?: number | null
           longitude?: number | null
           notes?: string | null
+          owner_user_id?: string | null
+          pending_tenant_id?: string | null
           phone?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -1937,6 +1941,8 @@ export type Database = {
           location_accuracy?: number | null
           longitude?: number | null
           notes?: string | null
+          owner_user_id?: string | null
+          pending_tenant_id?: string | null
           phone?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -1949,6 +1955,13 @@ export type Database = {
           {
             foreignKeyName: "trial_requests_approved_tenant_id_fkey"
             columns: ["approved_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_requests_pending_tenant_id_fkey"
+            columns: ["pending_tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
@@ -2146,6 +2159,25 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      reject_trial_request: {
+        Args: { _reason: string; _request_id: string }
+        Returns: undefined
+      }
+      request_trial_for_current_user: {
+        Args: {
+          _city: string
+          _country: string
+          _ip_address: string
+          _latitude: number
+          _location_accuracy: number
+          _longitude: number
+          _notes: string
+          _phone: string
+          _tenant_name: string
+          _user_agent: string
+        }
+        Returns: string
       }
       shares_tenant: { Args: { _a: string; _b: string }; Returns: boolean }
       submit_payment_and_mark_pending: {
