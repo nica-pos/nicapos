@@ -48,6 +48,7 @@ import {
   adminCreateClient,
   adminDeleteTenant,
   cleanupOrphanAuthUsers,
+  adminForceDeleteAuthUser,
 } from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,7 @@ function AdminPage() {
   const createClientFn = useServerFn(adminCreateClient);
   const deleteTenantFn = useServerFn(adminDeleteTenant);
   const cleanupOrphansFn = useServerFn(cleanupOrphanAuthUsers);
+  const forceDeleteAuthFn = useServerFn(adminForceDeleteAuthUser);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
@@ -198,6 +200,15 @@ function AdminPage() {
             ? `Se eliminaron ${n} usuario(s) sin tienda.`
             : "No había usuarios fantasma por eliminar.",
       );
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
+  const forceDeleteAuth = useMutation({
+    mutationFn: (userId: string) => forceDeleteAuthFn({ data: { userId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+      toast.success("Cuenta de autenticación eliminada por completo.");
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
@@ -520,6 +531,20 @@ function AdminPage() {
                         >
                           <Trash2 className="mr-2 h-4 w-4" /> Eliminar por completo
                         </DropdownMenuItem>
+                        {t.owner_id && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const msg =
+                                `¿Eliminar FORZADAMENTE la cuenta de "${t.owner_email ?? "este dueño"}" del sistema de autenticación?\n\n` +
+                                "Esto borra el usuario y todas sus tiendas/membresías. Úsalo si el correo quedó fantasma y no se pudo borrar antes.\n\n" +
+                                "NO se puede deshacer.";
+                              if (window.confirm(msg)) forceDeleteAuth.mutate(t.owner_id!);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Forzar borrado del correo
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

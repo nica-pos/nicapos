@@ -55,6 +55,8 @@ function TeamPage() {
   const canManage = role === "owner" || role === "admin";
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [newRole, setNewRole] = useState<"admin" | "cashier" | "accountant">("cashier");
 
   const members = useQuery({
@@ -84,12 +86,25 @@ function TeamPage() {
   const invite = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
-      return await addMember({ data: { tenantId: tenant.id, email: email.trim(), role: newRole } });
+      if (password && password.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres.");
+      return await addMember({
+        data: {
+          tenantId: tenant.id,
+          email: email.trim(),
+          role: newRole,
+          password: password.trim() || undefined,
+          fullName: fullName.trim() || undefined,
+        },
+      });
     },
     onSuccess: (res: any) => {
       setEmail("");
+      setPassword("");
+      setFullName("");
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
-      if (res?.invited) {
+      if (res?.created) {
+        toast.success("Cuenta creada. Ya puede iniciar sesión con ese correo y contraseña.");
+      } else if (res?.invited) {
         toast.success("Invitación enviada. Se unirá automáticamente al registrarse con ese correo.");
       } else {
         toast.success("Miembro agregado");
@@ -138,11 +153,13 @@ function TeamPage() {
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-primary" /> Agregar miembro
             </CardTitle>
-            <CardDescription>El usuario debe tener una cuenta registrada en Nica-POS.</CardDescription>
+            <CardDescription>
+              Creá la cuenta del miembro con correo y contraseña. Podrá iniciar sesión inmediatamente con el rol asignado. Si dejás la contraseña vacía y el correo aún no existe, se guarda como invitación pendiente.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div className="flex-1 space-y-2">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
                 <Label htmlFor="email">Correo</Label>
                 <Input
                   id="email"
@@ -153,9 +170,31 @@ function TeamPage() {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="fullName">Nombre (opcional)</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Ej: Juan Pérez"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="text"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Escribila y pasásela al miembro. Podrá cambiarla luego.
+                </p>
+              </div>
+              <div className="space-y-2">
                 <Label>Rol</Label>
                 <Select value={newRole} onValueChange={(v) => setNewRole(v as typeof newRole)}>
-                  <SelectTrigger className="w-full sm:w-40">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -165,9 +204,11 @@ function TeamPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="mt-4 flex justify-end">
               <Button onClick={() => invite.mutate()} disabled={!email.trim() || invite.isPending}>
                 {invite.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Agregar
+                <UserPlus className="mr-2 h-4 w-4" /> Crear cuenta y agregar
               </Button>
             </div>
           </CardContent>
