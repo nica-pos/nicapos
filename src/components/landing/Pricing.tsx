@@ -109,6 +109,27 @@ export function Pricing() {
             </div>
           ))}
         </div>
+
+        {/* Trial request CTA */}
+        <div className="mt-10 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-6 md:p-8">
+          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> ¿Aún no te decides?
+              </span>
+              <h3 className="mt-3 text-xl font-semibold text-foreground sm:text-2xl">
+                Solicita tu prueba gratis de 7 días
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Sin tarjeta y sin pago. Nuestro equipo revisa tu solicitud manualmente y
+                te envía tus credenciales de acceso.
+              </p>
+            </div>
+            <Button asChild size="lg">
+              <Link to="/prueba-gratis">Solicita ahora</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );
