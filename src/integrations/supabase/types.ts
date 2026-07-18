@@ -1878,6 +1878,83 @@ export type Database = {
           },
         ]
       }
+      trial_requests: {
+        Row: {
+          approved_tenant_id: string | null
+          business_name: string
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          ip_address: string | null
+          latitude: number | null
+          location_accuracy: number | null
+          longitude: number | null
+          notes: string | null
+          phone: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          approved_tenant_id?: string | null
+          business_name: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          ip_address?: string | null
+          latitude?: number | null
+          location_accuracy?: number | null
+          longitude?: number | null
+          notes?: string | null
+          phone?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          approved_tenant_id?: string | null
+          business_name?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          ip_address?: string | null
+          latitude?: number | null
+          location_accuracy?: number | null
+          longitude?: number | null
+          notes?: string | null
+          phone?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_requests_approved_tenant_id_fkey"
+            columns: ["approved_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1904,6 +1981,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_trial_request: {
+        Args: {
+          _owner_user_id: string
+          _plan_id: string
+          _request_id: string
+          _tenant_name: string
+          _trial_days: number
+        }
+        Returns: string
+      }
       cleanup_stale_tenants: { Args: never; Returns: undefined }
       has_role: {
         Args: {
@@ -2070,6 +2157,23 @@ export type Database = {
           _receipt_path: string
           _reference: string
           _tenant_id: string
+        }
+        Returns: string
+      }
+      submit_trial_request: {
+        Args: {
+          _business_name: string
+          _city: string
+          _country: string
+          _email: string
+          _full_name: string
+          _ip_address: string
+          _latitude: number
+          _location_accuracy: number
+          _longitude: number
+          _notes: string
+          _phone: string
+          _user_agent: string
         }
         Returns: string
       }
