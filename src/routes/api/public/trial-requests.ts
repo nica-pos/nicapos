@@ -85,7 +85,7 @@ export const Route = createFileRoute("/api/public/trial-requests")({
           _longitude: data.longitude ?? null,
           _location_accuracy: data.locationAccuracy ?? null,
           _notes: data.notes ?? null,
-        });
+        } as any);
 
         if (error) {
           return new Response(JSON.stringify({ error: error.message }), {
