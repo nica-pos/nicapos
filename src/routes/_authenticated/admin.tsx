@@ -345,6 +345,12 @@ function AdminPage() {
               Pagos pendientes
             </Link>
           </Button>
+          <Button asChild variant="secondary">
+            <Link to="/admin/solicitudes-prueba">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Solicitudes de prueba
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link to="/admin/bancos">
               <Building2 className="mr-2 h-4 w-4" />
