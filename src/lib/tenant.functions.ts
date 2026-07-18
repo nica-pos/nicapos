@@ -11,6 +11,12 @@ const addMemberInput = z.object({
   tenantId: z.string().uuid(),
   email: z.string().email(),
   role: z.enum(["admin", "cashier", "accountant"]),
+  password: z.string().min(6).max(72).optional(),
+  fullName: z.string().max(80).optional(),
+});
+
+const forceDeleteAuthUserInput = z.object({
+  userId: z.string().uuid(),
 });
 
 const tenantStatusInput = z.object({
