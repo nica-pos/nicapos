@@ -281,8 +281,37 @@ function OnboardingPage() {
                     </button>
                   );
                 })}
+                {/* Opción prueba gratis (requiere aprobación) */}
+                <button
+                  type="button"
+                  onClick={() => setPlanId(TRIAL_OPTION_ID)}
+                  className={cn(
+                    "relative rounded-xl border-2 border-dashed p-4 text-left transition-all",
+                    isTrialOption
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                      : "border-primary/40 hover:border-primary/70",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 font-semibold text-foreground">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Prueba gratis 7 días
+                        {isTrialOption && <Check className="h-4 w-4 text-primary" />}
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        Sin tarjeta ni pago. Requiere aprobación del equipo (te avisamos por correo).
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-foreground">$0</div>
+                      <div className="text-xs text-muted-foreground">/7 días</div>
+                    </div>
+                  </div>
+                </button>
               </div>
             </div>
+
 
             <Button
               className="w-full"
