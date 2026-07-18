@@ -65,6 +65,7 @@ type Row = {
   status: string;
   rejection_reason: string | null;
   created_at: string;
+  owner_user_id: string | null;
 };
 
 function randomPassword() {
