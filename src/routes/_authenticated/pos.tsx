@@ -1002,6 +1002,25 @@ function PosPage() {
         primaryColor={tenant?.primary_color ?? "#f59e0b"}
         settings={fiscal}
       />
+
+      <ProformaDialog
+        open={proformaOpen}
+        onClose={() => setProformaOpen(false)}
+        cart={cart}
+        subtotal={totals.subtotal}
+        tax={totals.tax}
+        total={totals.total}
+        rate={effectiveRate}
+        customer={proformaCustomer}
+        setCustomer={setProformaCustomer}
+        customerRuc={proformaRuc}
+        setCustomerRuc={setProformaRuc}
+        tenantName={tenant?.name ?? ""}
+        tenantRuc={tenant?.ruc ?? null}
+        logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
+        primaryColor={tenant?.primary_color ?? "#f59e0b"}
+        settings={fiscal}
+      />
     </div>
   );
 }
