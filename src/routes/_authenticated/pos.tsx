@@ -681,7 +681,7 @@ function PosPage() {
               onClick={() => {
                 const c = (customers ?? []).find((x) => x.id === customerId);
                 setProformaCustomer(c?.name ?? "");
-                setProformaRuc(c?.ruc ?? c?.document ?? "");
+                setProformaRuc(c?.ruc ?? "");
                 setProformaOpen(true);
               }}
             >
