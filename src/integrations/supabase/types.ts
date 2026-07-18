@@ -2211,6 +2211,7 @@ export type Database = {
         | "cancelled"
         | "pending_payment"
         | "pending_verification"
+        | "pending_trial_approval"
       tenant_role: "owner" | "admin" | "cashier" | "accountant"
     }
     CompositeTypes: {
@@ -2347,6 +2348,7 @@ export const Constants = {
         "cancelled",
         "pending_payment",
         "pending_verification",
+        "pending_trial_approval",
       ],
       tenant_role: ["owner", "admin", "cashier", "accountant"],
     },
