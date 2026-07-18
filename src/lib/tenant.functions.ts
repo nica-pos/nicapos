@@ -111,25 +111,50 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
     // RLS: superadmin puede leer todos los tenants.
     const { data, error } = await context.supabase
       .from("tenants")
-      .select("id, status, created_at, owner_id, plan:plans(name, price_usd)")
+      .select("id, name, status, created_at, owner_id, plan:plans(name, price_usd)")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
     const ownerIds = Array.from(new Set((data ?? []).map((t) => t.owner_id).filter(Boolean))) as string[];
     let superOwners = new Set<string>();
+    const ownerInfo = new Map<string, { email: string | null; full_name: string | null }>();
     if (ownerIds.length > 0) {
-      const { data: roles, error: rolesError } = await context.supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "superadmin")
-        .in("user_id", ownerIds);
-      if (rolesError) throw new Error(rolesError.message);
-      superOwners = new Set((roles ?? []).map((r) => r.user_id));
+      const [rolesRes, profRes] = await Promise.all([
+        context.supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "superadmin")
+          .in("user_id", ownerIds),
+        context.supabase
+          .from("profiles")
+          .select("id, email, full_name")
+          .in("id", ownerIds),
+      ]);
+      if (rolesRes.error) throw new Error(rolesRes.error.message);
+      if (profRes.error) throw new Error(profRes.error.message);
+      superOwners = new Set((rolesRes.data ?? []).map((r: any) => r.user_id));
+      for (const p of profRes.data ?? []) {
+        ownerInfo.set((p as any).id, {
+          email: (p as any).email ?? null,
+          full_name: (p as any).full_name ?? null,
+        });
+      }
     }
 
     return (data ?? [])
       .filter((t) => !t.owner_id || !superOwners.has(t.owner_id))
-      .map(({ owner_id: _o, ...rest }) => rest);
+      .map((t) => {
+        const info = t.owner_id ? ownerInfo.get(t.owner_id) : undefined;
+        return {
+          id: t.id,
+          name: t.name,
+          status: t.status,
+          created_at: t.created_at,
+          plan: t.plan,
+          owner_email: info?.email ?? null,
+          owner_name: info?.full_name ?? null,
+        };
+      });
   });
 
 export const setAdminTenantStatus = createServerFn({ method: "POST" })
