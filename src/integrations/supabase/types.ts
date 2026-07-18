@@ -2061,6 +2061,18 @@ export type Database = {
         }
       }
       shares_tenant: { Args: { _a: string; _b: string }; Returns: boolean }
+      submit_payment_and_mark_pending: {
+        Args: {
+          _amount: number
+          _bank_account_id: string
+          _currency: string
+          _plan_id: string
+          _receipt_path: string
+          _reference: string
+          _tenant_id: string
+        }
+        Returns: string
+      }
       void_sale: {
         Args: { _reason?: string; _sale_id: string }
         Returns: {
