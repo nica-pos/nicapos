@@ -204,6 +204,15 @@ function AdminPage() {
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
 
+  const forceDeleteAuth = useMutation({
+    mutationFn: (userId: string) => forceDeleteAuthFn({ data: { userId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+      toast.success("Cuenta de autenticación eliminada por completo.");
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
   const list = tenants.data ?? [];
 
   const filtered = useMemo(() => {
