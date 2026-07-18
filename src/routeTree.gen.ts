@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PruebaGratisRouteImport } from './routes/prueba-gratis'
 import { Route as PreciosRouteImport } from './routes/precios'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -34,6 +35,8 @@ import { Route as AuthenticatedCajaRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticated/bitacora'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicTrialRequestsRouteImport } from './routes/api/public/trial-requests'
+import { Route as AuthenticatedAdminSolicitudesPruebaRouteImport } from './routes/_authenticated/admin_.solicitudes-prueba'
 import { Route as AuthenticatedAdminPagosPendientesRouteImport } from './routes/_authenticated/admin_.pagos-pendientes'
 import { Route as AuthenticatedAdminBancosRouteImport } from './routes/_authenticated/admin_.bancos'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
@@ -42,6 +45,11 @@ import { Route as ApiPublicWebhooksPaypalRouteImport } from './routes/api/public
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PruebaGratisRoute = PruebaGratisRouteImport.update({
+  id: '/prueba-gratis',
+  path: '/prueba-gratis',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PreciosRoute = PreciosRouteImport.update({
@@ -168,6 +176,17 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicTrialRequestsRoute = ApiPublicTrialRequestsRouteImport.update({
+  id: '/api/public/trial-requests',
+  path: '/api/public/trial-requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminSolicitudesPruebaRoute =
+  AuthenticatedAdminSolicitudesPruebaRouteImport.update({
+    id: '/admin_/solicitudes-prueba',
+    path: '/admin/solicitudes-prueba',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPagosPendientesRoute =
   AuthenticatedAdminPagosPendientesRouteImport.update({
     id: '/admin_/pagos-pendientes',
@@ -195,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
+  '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
@@ -218,6 +238,8 @@ export interface FileRoutesByFullPath {
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
+  '/admin/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
+  '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -225,6 +247,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
+  '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
@@ -248,6 +271,8 @@ export interface FileRoutesByTo {
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
+  '/admin/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
+  '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -257,6 +282,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
+  '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
@@ -280,6 +306,8 @@ export interface FileRoutesById {
   '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/_authenticated/admin_/bancos': typeof AuthenticatedAdminBancosRoute
   '/_authenticated/admin_/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
+  '/_authenticated/admin_/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
+  '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
@@ -289,6 +317,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/precios'
+    | '/prueba-gratis'
     | '/sitemap.xml'
     | '/admin'
     | '/auditoria'
@@ -312,6 +341,8 @@ export interface FileRouteTypes {
     | '/verificacion-pendiente'
     | '/admin/bancos'
     | '/admin/pagos-pendientes'
+    | '/admin/solicitudes-prueba'
+    | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
@@ -319,6 +350,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/precios'
+    | '/prueba-gratis'
     | '/sitemap.xml'
     | '/admin'
     | '/auditoria'
@@ -342,6 +374,8 @@ export interface FileRouteTypes {
     | '/verificacion-pendiente'
     | '/admin/bancos'
     | '/admin/pagos-pendientes'
+    | '/admin/solicitudes-prueba'
+    | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   id:
@@ -350,6 +384,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/precios'
+    | '/prueba-gratis'
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/auditoria'
@@ -373,6 +408,8 @@ export interface FileRouteTypes {
     | '/_authenticated/verificacion-pendiente'
     | '/_authenticated/admin_/bancos'
     | '/_authenticated/admin_/pagos-pendientes'
+    | '/_authenticated/admin_/solicitudes-prueba'
+    | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
@@ -382,7 +419,9 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PreciosRoute: typeof PreciosRoute
+  PruebaGratisRoute: typeof PruebaGratisRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicTrialRequestsRoute: typeof ApiPublicTrialRequestsRoute
   ApiPublicWebhooksPaypalRoute: typeof ApiPublicWebhooksPaypalRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
 }
@@ -394,6 +433,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prueba-gratis': {
+      id: '/prueba-gratis'
+      path: '/prueba-gratis'
+      fullPath: '/prueba-gratis'
+      preLoaderRoute: typeof PruebaGratisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/precios': {
@@ -564,6 +610,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/trial-requests': {
+      id: '/api/public/trial-requests'
+      path: '/api/public/trial-requests'
+      fullPath: '/api/public/trial-requests'
+      preLoaderRoute: typeof ApiPublicTrialRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin_/solicitudes-prueba': {
+      id: '/_authenticated/admin_/solicitudes-prueba'
+      path: '/admin/solicitudes-prueba'
+      fullPath: '/admin/solicitudes-prueba'
+      preLoaderRoute: typeof AuthenticatedAdminSolicitudesPruebaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin_/pagos-pendientes': {
       id: '/_authenticated/admin_/pagos-pendientes'
       path: '/admin/pagos-pendientes'
@@ -618,6 +678,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVerificacionPendienteRoute: typeof AuthenticatedVerificacionPendienteRoute
   AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
   AuthenticatedAdminPagosPendientesRoute: typeof AuthenticatedAdminPagosPendientesRoute
+  AuthenticatedAdminSolicitudesPruebaRoute: typeof AuthenticatedAdminSolicitudesPruebaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -645,6 +706,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBancosRoute: AuthenticatedAdminBancosRoute,
   AuthenticatedAdminPagosPendientesRoute:
     AuthenticatedAdminPagosPendientesRoute,
+  AuthenticatedAdminSolicitudesPruebaRoute:
+    AuthenticatedAdminSolicitudesPruebaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -655,7 +718,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PreciosRoute: PreciosRoute,
+  PruebaGratisRoute: PruebaGratisRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicTrialRequestsRoute: ApiPublicTrialRequestsRoute,
   ApiPublicWebhooksPaypalRoute: ApiPublicWebhooksPaypalRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
 }
