@@ -211,6 +211,7 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
           status: t.status,
           created_at: t.created_at,
           plan: t.plan,
+          owner_id: t.owner_id ?? null,
           owner_email: info?.email ?? null,
           owner_name: info?.full_name ?? null,
         };
