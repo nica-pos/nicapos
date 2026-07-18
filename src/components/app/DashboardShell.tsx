@@ -38,6 +38,8 @@ import {
   setActiveTenantId,
 } from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
+import { ROUTE_ROLES, canAccessRoute, defaultHomeForRole } from "@/lib/roles";
+import type { TenantRole } from "@/hooks/use-tenant";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard };
 
@@ -76,6 +78,16 @@ const navGroups: { label: string; items: NavItem[] }[] = [
   },
 ];
 
+function filterNavByRole(role: TenantRole | null) {
+  if (!role) return navGroups;
+  return navGroups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((i) => (ROUTE_ROLES[i.to] ?? []).includes(role)),
+    }))
+    .filter((g) => g.items.length > 0);
+}
+
 const statusMeta: Record<
   string,
   { label: string; dot: string; text: string }
@@ -97,7 +109,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { tenant, memberships } = useActiveTenant();
+  const { tenant, memberships, role } = useActiveTenant();
   const { data: isSuperadmin } = useIsSuperadmin();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -136,6 +148,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       if (link) link.href = prev;
     };
   }, [faviconUrl]);
+
+  // Guard por rol: si el rol no puede acceder a la ruta actual, lo redirige a su home.
+  useEffect(() => {
+    if (isSuperadmin) return; // superadmin puede entrar a todo
+    if (!role) return;
+    const bypass = ["/onboarding", "/pago-pendiente", "/verificacion-pendiente", "/admin", "/pagos"];
+    if (bypass.some((p) => pathname.startsWith(p))) return;
+    if (!canAccessRoute(pathname, role)) {
+      navigate({ to: defaultHomeForRole(role), replace: true });
+    }
+  }, [pathname, role, isSuperadmin, navigate]);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -222,7 +245,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
       {/* Navegación agrupada */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {navGroups.map((group) => (
+        {filterNavByRole(role).map((group) => (
           <div key={group.label} className="mb-5 last:mb-0">
             <div className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
               {group.label}
