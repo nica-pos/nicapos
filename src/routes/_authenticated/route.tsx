@@ -10,12 +10,14 @@ const EXEMPT_PATHS = [
   "/pago-pendiente",
   "/verificacion-pendiente",
   "/prueba-en-revision",
+  "/prueba-rechazada",
   "/admin",
   "/admin/bancos",
   "/admin/pagos-pendientes",
   "/admin/solicitudes-prueba",
   "/pagos",
 ];
+
 
 function TenantStatusGate() {
   const location = useLocation();
@@ -39,7 +41,7 @@ function TenantStatusGate() {
     } else if (status === "pending_verification") {
       navigate({ to: "/verificacion-pendiente", replace: true });
     } else if (status === "cancelled" || status === "suspended") {
-      navigate({ to: "/onboarding", replace: true });
+      navigate({ to: "/prueba-rechazada", replace: true });
     }
   }, [tenant, isLoading, isSuper, location.pathname, navigate]);
 
