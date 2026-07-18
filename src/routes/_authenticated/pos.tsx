@@ -672,6 +672,23 @@ function PosPage() {
               <CreditCard className="mr-2 h-5 w-5" /> Cobrar (F4)
             </Button>
             <Button
+              variant="secondary"
+              className="w-full"
+              disabled={cart.length === 0}
+              onClick={() => {
+                const payload = cart.map((l) => ({
+                  description: l.name,
+                  qty: l.quantity,
+                  unitUsd: l.unitPriceUsd,
+                  taxable: (l.taxRate ?? 0) > 0,
+                }));
+                sessionStorage.setItem("pos-proforma-cart", JSON.stringify(payload));
+                navigate({ to: "/documentos", search: { tipo: "proforma" } as any });
+              }}
+            >
+              Generar cotización / proforma
+            </Button>
+            <Button
               variant="outline"
               className="w-full"
               onClick={clearCart}
