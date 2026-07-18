@@ -560,7 +560,7 @@ function PosPage() {
                       key={p.id}
                       product={p}
                       price={price}
-                      promo={promo}
+                      promo={!!promo}
                       onAdd={() => addProduct(p)}
                     />
                   );
