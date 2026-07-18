@@ -679,8 +679,8 @@ function PosPage() {
                 const payload = cart.map((l) => ({
                   description: l.name,
                   qty: l.quantity,
-                  unitUsd: l.unitPriceUsd,
-                  taxable: (l.taxRate ?? 0) > 0,
+                  unitUsd: l.unit_price_usd,
+                  taxable: !l.is_tax_exempt,
                 }));
                 sessionStorage.setItem("pos-proforma-cart", JSON.stringify(payload));
                 navigate({ to: "/documentos", search: { tipo: "proforma" } as any });
