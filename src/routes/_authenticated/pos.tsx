@@ -83,6 +83,7 @@ function PosPage() {
   const [customerId, setCustomerId] = useState<string>("__general__");
   const [isCredit, setIsCredit] = useState(false);
   const [lastSale, setLastSale] = useState<{
+    saleId: string;
     saleNumber: number;
     lines: CartLine[];
     payments: PaymentLine[];
