@@ -17,6 +17,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVerificacionPendienteRouteImport } from './routes/_authenticated/verificacion-pendiente'
 import { Route as AuthenticatedVentasRouteImport } from './routes/_authenticated/ventas'
+import { Route as AuthenticatedPruebaEnRevisionRouteImport } from './routes/_authenticated/prueba-en-revision'
 import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenticated/proveedores'
 import { Route as AuthenticatedPromocionesRouteImport } from './routes/_authenticated/promociones'
 import { Route as AuthenticatedProductosRouteImport } from './routes/_authenticated/productos'
@@ -82,6 +83,12 @@ const AuthenticatedVentasRoute = AuthenticatedVentasRouteImport.update({
   path: '/ventas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPruebaEnRevisionRoute =
+  AuthenticatedPruebaEnRevisionRouteImport.update({
+    id: '/prueba-en-revision',
+    path: '/prueba-en-revision',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProveedoresRoute =
   AuthenticatedProveedoresRouteImport.update({
     id: '/proveedores',
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/productos': typeof AuthenticatedProductosRoute
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
+  '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/ventas': typeof AuthenticatedVentasRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
@@ -267,6 +275,7 @@ export interface FileRoutesByTo {
   '/productos': typeof AuthenticatedProductosRoute
   '/promociones': typeof AuthenticatedPromocionesRoute
   '/proveedores': typeof AuthenticatedProveedoresRoute
+  '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/ventas': typeof AuthenticatedVentasRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
@@ -302,6 +311,7 @@ export interface FileRoutesById {
   '/_authenticated/productos': typeof AuthenticatedProductosRoute
   '/_authenticated/promociones': typeof AuthenticatedPromocionesRoute
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
+  '/_authenticated/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/_authenticated/ventas': typeof AuthenticatedVentasRoute
   '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/_authenticated/admin_/bancos': typeof AuthenticatedAdminBancosRoute
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/productos'
     | '/promociones'
     | '/proveedores'
+    | '/prueba-en-revision'
     | '/ventas'
     | '/verificacion-pendiente'
     | '/admin/bancos'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/productos'
     | '/promociones'
     | '/proveedores'
+    | '/prueba-en-revision'
     | '/ventas'
     | '/verificacion-pendiente'
     | '/admin/bancos'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/productos'
     | '/_authenticated/promociones'
     | '/_authenticated/proveedores'
+    | '/_authenticated/prueba-en-revision'
     | '/_authenticated/ventas'
     | '/_authenticated/verificacion-pendiente'
     | '/_authenticated/admin_/bancos'
@@ -482,6 +495,13 @@ declare module '@tanstack/react-router' {
       path: '/ventas'
       fullPath: '/ventas'
       preLoaderRoute: typeof AuthenticatedVentasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/prueba-en-revision': {
+      id: '/_authenticated/prueba-en-revision'
+      path: '/prueba-en-revision'
+      fullPath: '/prueba-en-revision'
+      preLoaderRoute: typeof AuthenticatedPruebaEnRevisionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/proveedores': {
@@ -674,6 +694,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProductosRoute: typeof AuthenticatedProductosRoute
   AuthenticatedPromocionesRoute: typeof AuthenticatedPromocionesRoute
   AuthenticatedProveedoresRoute: typeof AuthenticatedProveedoresRoute
+  AuthenticatedPruebaEnRevisionRoute: typeof AuthenticatedPruebaEnRevisionRoute
   AuthenticatedVentasRoute: typeof AuthenticatedVentasRoute
   AuthenticatedVerificacionPendienteRoute: typeof AuthenticatedVerificacionPendienteRoute
   AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
@@ -700,6 +721,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProductosRoute: AuthenticatedProductosRoute,
   AuthenticatedPromocionesRoute: AuthenticatedPromocionesRoute,
   AuthenticatedProveedoresRoute: AuthenticatedProveedoresRoute,
+  AuthenticatedPruebaEnRevisionRoute: AuthenticatedPruebaEnRevisionRoute,
   AuthenticatedVentasRoute: AuthenticatedVentasRoute,
   AuthenticatedVerificacionPendienteRoute:
     AuthenticatedVerificacionPendienteRoute,

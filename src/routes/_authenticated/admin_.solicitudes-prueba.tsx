@@ -65,6 +65,7 @@ type Row = {
   status: string;
   rejection_reason: string | null;
   created_at: string;
+  owner_user_id: string | null;
 };
 
 function randomPassword() {
@@ -101,11 +102,14 @@ function SolicitudesPruebaPage() {
       requestId: string;
       planId: string;
       trialDays: number;
-      password: string;
+      password?: string;
     }) => approve({ data: v }),
     onSuccess: (result: any) => {
       toast.success("Prueba aprobada");
-      setCreds({ email: result.email, password: result.password });
+      if (result?.password) {
+        setCreds({ email: result.email, password: result.password });
+      }
+
       setMode(null);
       qc.invalidateQueries({ queryKey: ["admin-trial-requests"] });
       qc.invalidateQueries({ queryKey: ["admin-tenants"] });
@@ -336,23 +340,31 @@ function SolicitudesPruebaPage() {
                         onChange={(e) => setDays(e.target.value)}
                       />
                     </div>
-                    <div>
-                      <Label>Contraseña inicial</Label>
-                      <div className="flex gap-1">
-                        <Input
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setPassword(randomPassword())}
-                        >
-                          ↻
-                        </Button>
+                    {!viewing.owner_user_id && (
+                      <div>
+                        <Label>Contraseña inicial</Label>
+                        <div className="flex gap-1">
+                          <Input
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setPassword(randomPassword())}
+                          >
+                            ↻
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    {viewing.owner_user_id && (
+                      <div className="col-span-1 rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">
+                        El usuario ya se registró. Solo se activará su tienda.
+                      </div>
+                    )}
+
                   </div>
                 </div>
               )}
@@ -390,17 +402,20 @@ function SolicitudesPruebaPage() {
                   </Button>
                   <Button
                     disabled={
-                      !planId || !password || password.length < 6 || approveMut.isPending
+                      !planId ||
+                      approveMut.isPending ||
+                      (!viewing?.owner_user_id && (!password || password.length < 6))
                     }
                     onClick={() =>
                       approveMut.mutate({
                         requestId: viewing!.id,
                         planId,
                         trialDays: Number(days) || 7,
-                        password,
+                        password: viewing?.owner_user_id ? undefined : password,
                       })
                     }
                   >
+
                     {approveMut.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}

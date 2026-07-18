@@ -9,9 +9,11 @@ const EXEMPT_PATHS = [
   "/onboarding",
   "/pago-pendiente",
   "/verificacion-pendiente",
+  "/prueba-en-revision",
   "/admin",
   "/admin/bancos",
   "/admin/pagos-pendientes",
+  "/admin/solicitudes-prueba",
   "/pagos",
 ];
 
@@ -30,7 +32,9 @@ function TenantStatusGate() {
     const trialEnds = tenant.trial_ends_at ? new Date(tenant.trial_ends_at).getTime() : null;
     const trialExpired = status === "trial" && trialEnds !== null && trialEnds < Date.now();
 
-    if (status === "pending_payment" || trialExpired) {
+    if (status === "pending_trial_approval") {
+      navigate({ to: "/prueba-en-revision", replace: true });
+    } else if (status === "pending_payment" || trialExpired) {
       navigate({ to: "/pago-pendiente", replace: true });
     } else if (status === "pending_verification") {
       navigate({ to: "/verificacion-pendiente", replace: true });

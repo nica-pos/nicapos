@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Store, Loader2, Check } from "lucide-react";
+import { Store, Loader2, Check, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,10 @@ import {
   setActiveTenantId,
   useMyMemberships,
 } from "@/hooks/use-tenant";
+import { requestTrialForCurrentUser } from "@/lib/trial-requests.functions";
 import { cn } from "@/lib/utils";
+
+const TRIAL_OPTION_ID = "__trial__";
 
 const PLAN_META: Record<
   string,
@@ -83,14 +87,23 @@ function OnboardingPage() {
   const [ruc, setRuc] = useState("");
   const [planId, setPlanId] = useState<string | null>(null);
 
+  const isTrialOption = planId === TRIAL_OPTION_ID;
   const selectedPlan = (plans ?? []).find((p) => p.id === planId);
   const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0;
+
+  const requestTrial = useServerFn(requestTrialForCurrentUser);
 
   const createTenant = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) throw new Error("Sesión no válida");
+
+      // Trial 7 días → requiere aprobación del superadmin
+      if (isTrialOption) {
+        const res = await requestTrial({ data: { tenantName: name.trim() } });
+        return { id: res.tenantId, __trial: true as const };
+      }
 
       const baseSlug = slugify(name) || "tienda";
       const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
@@ -118,10 +131,13 @@ function OnboardingPage() {
       }
       return data;
     },
-    onSuccess: (tenant) => {
+    onSuccess: (tenant: any) => {
       setActiveTenantId(tenant.id);
       queryClient.invalidateQueries();
-      if (isPaidPlan) {
+      if (tenant.__trial) {
+        toast.success("Solicitud enviada. Te avisaremos por correo cuando sea aprobada.");
+        navigate({ to: "/prueba-en-revision" });
+      } else if (isPaidPlan) {
         toast.success("Tienda creada. Realiza el pago para activarla.");
         navigate({ to: "/pago-pendiente" });
       } else {
@@ -135,12 +151,13 @@ function OnboardingPage() {
   // Bloqueo: 1 sola tienda activa por usuario — redirige vía efecto
   const existingActive = (memberships ?? []).find((m) => {
     const s = m.tenant?.status as string | undefined;
-    return s && ["trial", "active", "pending_payment", "pending_verification"].includes(s);
+    return s && ["trial", "active", "pending_payment", "pending_verification", "pending_trial_approval"].includes(s);
   });
   useEffect(() => {
     if (loadingMemberships || !existingActive) return;
     const s = existingActive.tenant.status as string;
-    if (s === "pending_payment") navigate({ to: "/pago-pendiente", replace: true });
+    if (s === "pending_trial_approval") navigate({ to: "/prueba-en-revision", replace: true });
+    else if (s === "pending_payment") navigate({ to: "/pago-pendiente", replace: true });
     else if (s === "pending_verification") navigate({ to: "/verificacion-pendiente", replace: true });
     else navigate({ to: "/dashboard", replace: true });
   }, [loadingMemberships, existingActive, navigate]);
@@ -264,8 +281,37 @@ function OnboardingPage() {
                     </button>
                   );
                 })}
+                {/* Opción prueba gratis (requiere aprobación) */}
+                <button
+                  type="button"
+                  onClick={() => setPlanId(TRIAL_OPTION_ID)}
+                  className={cn(
+                    "relative rounded-xl border-2 border-dashed p-4 text-left transition-all",
+                    isTrialOption
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                      : "border-primary/40 hover:border-primary/70",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 font-semibold text-foreground">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Prueba gratis 7 días
+                        {isTrialOption && <Check className="h-4 w-4 text-primary" />}
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        Sin tarjeta ni pago. Requiere aprobación del equipo (te avisamos por correo).
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-foreground">$0</div>
+                      <div className="text-xs text-muted-foreground">/7 días</div>
+                    </div>
+                  </div>
+                </button>
               </div>
             </div>
+
 
             <Button
               className="w-full"
