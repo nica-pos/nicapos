@@ -153,11 +153,13 @@ function TeamPage() {
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-primary" /> Agregar miembro
             </CardTitle>
-            <CardDescription>El usuario debe tener una cuenta registrada en Nica-POS.</CardDescription>
+            <CardDescription>
+              Creá la cuenta del miembro con correo y contraseña. Podrá iniciar sesión inmediatamente con el rol asignado. Si dejás la contraseña vacía y el correo aún no existe, se guarda como invitación pendiente.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div className="flex-1 space-y-2">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
                 <Label htmlFor="email">Correo</Label>
                 <Input
                   id="email"
@@ -168,9 +170,31 @@ function TeamPage() {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="fullName">Nombre (opcional)</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Ej: Juan Pérez"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="text"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Escribila y pasásela al miembro. Podrá cambiarla luego.
+                </p>
+              </div>
+              <div className="space-y-2">
                 <Label>Rol</Label>
                 <Select value={newRole} onValueChange={(v) => setNewRole(v as typeof newRole)}>
-                  <SelectTrigger className="w-full sm:w-40">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -180,9 +204,11 @@ function TeamPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="mt-4 flex justify-end">
               <Button onClick={() => invite.mutate()} disabled={!email.trim() || invite.isPending}>
                 {invite.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Agregar
+                <UserPlus className="mr-2 h-4 w-4" /> Crear cuenta y agregar
               </Button>
             </div>
           </CardContent>
