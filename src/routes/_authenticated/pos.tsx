@@ -45,6 +45,8 @@ import { useFiscalSettings, useLatestRate, formatNIO, formatUSD } from "@/hooks/
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
 import { useCustomers, useCreateReceivable } from "@/hooks/use-credit";
+import { useProductImage } from "@/hooks/use-product-image";
+import { Package } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   component: PosPage,
