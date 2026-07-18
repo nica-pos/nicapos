@@ -305,6 +305,11 @@ function ProductsPage() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
+            <ProductImageField
+              tenantId={tenant?.id ?? null}
+              path={form.image_url}
+              onChange={(p) => setForm({ ...form, image_url: p ?? "" })}
+            />
             <div className="grid gap-2">
               <Label>Nombre *</Label>
               <Input
