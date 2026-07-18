@@ -211,6 +211,9 @@ function AdminPage() {
       const okQuery =
         !q ||
         t.id?.toLowerCase().includes(q) ||
+        t.name?.toLowerCase().includes(q) ||
+        t.owner_email?.toLowerCase().includes(q) ||
+        t.owner_name?.toLowerCase().includes(q) ||
         t.plan?.name?.toLowerCase().includes(q);
       return okFilter && okQuery;
     });
