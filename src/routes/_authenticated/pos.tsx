@@ -998,6 +998,7 @@ function ReceiptDialog({
   settings,
 }: {
   sale: {
+    saleId: string;
     saleNumber: number;
     lines: CartLine[];
     payments: PaymentLine[];
@@ -1020,6 +1021,24 @@ function ReceiptDialog({
   primaryColor: string;
   settings: any;
 }) {
+  const voidSale = useVoidSale();
+  async function handleVoid() {
+    if (!sale) return;
+    const reason = window.prompt(
+      "¿Anular esta venta?\n\nSe devolverá el stock al inventario y (si era a crédito) se eliminará la cuenta por cobrar.\n\nMotivo (opcional):",
+      "",
+    );
+    if (reason === null) return; // cancelado
+    try {
+      await voidSale.mutateAsync({ saleId: sale.saleId, reason: reason || undefined });
+      toast.success(`Venta #${sale.saleNumber} anulada`);
+      onClose();
+    } catch (e) {
+      toast.error("No se pudo anular la venta", {
+        description: getFriendlyErrorMessage(e),
+      });
+    }
+  }
   const s = settings ?? {};
   const legalName = s.legal_name || tenantName;
   const prefix = s.ticket_prefix ?? "TKT-";
