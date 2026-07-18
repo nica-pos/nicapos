@@ -1495,6 +1495,9 @@ export type Database = {
           tax_usd: number
           tenant_id: string
           total_usd: number
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           created_at?: string
@@ -1507,6 +1510,9 @@ export type Database = {
           tax_usd?: number
           tenant_id: string
           total_usd?: number
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           created_at?: string
@@ -1519,6 +1525,9 @@ export type Database = {
           tax_usd?: number
           tenant_id?: string
           total_usd?: number
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -2052,6 +2061,30 @@ export type Database = {
         }
       }
       shares_tenant: { Args: { _a: string; _b: string }; Returns: boolean }
+      void_sale: {
+        Args: { _reason?: string; _sale_id: string }
+        Returns: {
+          created_at: string
+          exchange_rate: number
+          id: string
+          sale_number: number
+          session_id: string | null
+          sold_by: string
+          subtotal_usd: number
+          tax_usd: number
+          tenant_id: string
+          total_usd: number
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sales"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "superadmin" | "user"

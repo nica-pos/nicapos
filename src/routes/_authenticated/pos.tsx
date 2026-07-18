@@ -13,6 +13,7 @@ import {
   X,
   Keyboard,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ import {
   useProducts,
   useOpenCashSession,
   useCreateSale,
+  useVoidSale,
   type Product,
   type CartLine,
   type PaymentLine,
@@ -83,6 +85,7 @@ function PosPage() {
   const [customerId, setCustomerId] = useState<string>("__general__");
   const [isCredit, setIsCredit] = useState(false);
   const [lastSale, setLastSale] = useState<{
+    saleId: string;
     saleNumber: number;
     lines: CartLine[];
     payments: PaymentLine[];
@@ -364,6 +367,7 @@ function PosPage() {
           : `Venta #${res.saleNumber} registrada`,
       );
       setLastSale({
+        saleId: res.sale.id,
         saleNumber: res.saleNumber,
         lines: snapLines,
         payments: snapPayments,
@@ -996,6 +1000,7 @@ function ReceiptDialog({
   settings,
 }: {
   sale: {
+    saleId: string;
     saleNumber: number;
     lines: CartLine[];
     payments: PaymentLine[];
@@ -1018,6 +1023,24 @@ function ReceiptDialog({
   primaryColor: string;
   settings: any;
 }) {
+  const voidSale = useVoidSale();
+  async function handleVoid() {
+    if (!sale) return;
+    const reason = window.prompt(
+      "¿Anular esta venta?\n\nSe devolverá el stock al inventario y (si era a crédito) se eliminará la cuenta por cobrar.\n\nMotivo (opcional):",
+      "",
+    );
+    if (reason === null) return; // cancelado
+    try {
+      await voidSale.mutateAsync({ saleId: sale.saleId, reason: reason || undefined });
+      toast.success(`Venta #${sale.saleNumber} anulada`);
+      onClose();
+    } catch (e) {
+      toast.error("No se pudo anular la venta", {
+        description: getFriendlyErrorMessage(e),
+      });
+    }
+  }
   const s = settings ?? {};
   const legalName = s.legal_name || tenantName;
   const prefix = s.ticket_prefix ?? "TKT-";
@@ -1319,13 +1342,27 @@ function ReceiptDialog({
           </div>
         )}
 
-        <DialogFooter className="no-print">
-          <Button variant="outline" onClick={onClose}>
-            Cerrar
+        <DialogFooter className="no-print gap-2 sm:justify-between">
+          <Button
+            variant="destructive"
+            onClick={handleVoid}
+            disabled={voidSale.isPending}
+          >
+            {voidSale.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <X className="mr-2 h-4 w-4" />
+            )}
+            Anular venta
           </Button>
-          <Button onClick={doPrint}>
-            <CreditCard className="mr-2 h-4 w-4" /> Imprimir
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cerrar
+            </Button>
+            <Button onClick={doPrint}>
+              <CreditCard className="mr-2 h-4 w-4" /> Imprimir
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

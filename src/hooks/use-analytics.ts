@@ -38,6 +38,7 @@ export function useFinancials() {
             .from("sales")
             .select("id, total_usd, subtotal_usd, created_at")
             .eq("tenant_id", tenant!.id)
+            .is("voided_at", null)
             .gte("created_at", sinceIso),
           supabase
             .from("sale_items")
