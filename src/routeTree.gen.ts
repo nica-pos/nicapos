@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PruebaGratisRouteImport } from './routes/prueba-gratis'
 import { Route as PreciosRouteImport } from './routes/precios'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -43,6 +44,11 @@ import { Route as ApiPublicWebhooksPaypalRouteImport } from './routes/api/public
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PruebaGratisRoute = PruebaGratisRouteImport.update({
+  id: '/prueba-gratis',
+  path: '/prueba-gratis',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PreciosRoute = PreciosRouteImport.update({
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
+  '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
+  '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/precios': typeof PreciosRoute
+  '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/precios'
+    | '/prueba-gratis'
     | '/sitemap.xml'
     | '/admin'
     | '/auditoria'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/precios'
+    | '/prueba-gratis'
     | '/sitemap.xml'
     | '/admin'
     | '/auditoria'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/precios'
+    | '/prueba-gratis'
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/auditoria'
@@ -394,6 +406,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PreciosRoute: typeof PreciosRoute
+  PruebaGratisRoute: typeof PruebaGratisRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicTrialRequestsRoute: typeof ApiPublicTrialRequestsRoute
   ApiPublicWebhooksPaypalRoute: typeof ApiPublicWebhooksPaypalRoute
@@ -407,6 +420,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prueba-gratis': {
+      id: '/prueba-gratis'
+      path: '/prueba-gratis'
+      fullPath: '/prueba-gratis'
+      preLoaderRoute: typeof PruebaGratisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/precios': {
@@ -675,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PreciosRoute: PreciosRoute,
+  PruebaGratisRoute: PruebaGratisRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicTrialRequestsRoute: ApiPublicTrialRequestsRoute,
   ApiPublicWebhooksPaypalRoute: ApiPublicWebhooksPaypalRoute,
