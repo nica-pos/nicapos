@@ -109,7 +109,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { tenant, memberships } = useActiveTenant();
+  const { tenant, memberships, role } = useActiveTenant();
   const { data: isSuperadmin } = useIsSuperadmin();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
