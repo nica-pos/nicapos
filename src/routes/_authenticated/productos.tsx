@@ -47,6 +47,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatUSD, formatNIO, useLatestRate } from "@/hooks/use-fiscal";
+import {
+  useProductImage,
+  uploadProductImage,
+  deleteProductImage,
+} from "@/hooks/use-product-image";
+import { useActiveTenant } from "@/hooks/use-tenant";
+import { ImagePlus, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/productos")({
   component: ProductsPage,
