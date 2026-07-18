@@ -365,6 +365,7 @@ function PosPage() {
           : `Venta #${res.saleNumber} registrada`,
       );
       setLastSale({
+        saleId: res.sale.id,
         saleNumber: res.saleNumber,
         lines: snapLines,
         payments: snapPayments,
