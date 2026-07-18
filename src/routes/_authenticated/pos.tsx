@@ -1341,3 +1341,52 @@ function ReceiptDialog({
   );
 }
 
+function ProductGridCard({
+  product,
+  price,
+  promo,
+  onAdd,
+}: {
+  product: Product;
+  price: number;
+  promo: boolean;
+  onAdd: () => void;
+}) {
+  const imgPath = (product as any).image_url as string | null | undefined;
+  const { data: url } = useProductImage(imgPath);
+  return (
+    <button
+      type="button"
+      onClick={onAdd}
+      className="group flex flex-col items-stretch overflow-hidden rounded-lg border border-border/60 bg-card text-left transition hover:border-primary hover:shadow-sm"
+    >
+      <div className="flex aspect-square items-center justify-center overflow-hidden bg-muted/40">
+        {url ? (
+          <img
+            src={url}
+            alt={product.name}
+            className="h-full w-full object-cover transition group-hover:scale-105"
+          />
+        ) : (
+          <Package className="h-8 w-8 text-muted-foreground/50" />
+        )}
+      </div>
+      <div className="flex flex-col p-2">
+        <span className="line-clamp-2 text-sm font-medium">{product.name}</span>
+        <span className="mt-1 text-xs text-muted-foreground">
+          Stock: {Number(product.stock)}
+        </span>
+        <span className="mt-1 text-sm font-semibold text-primary">
+          {formatUSD(price)}
+          {promo && (
+            <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
+              {formatUSD(Number(product.price_usd))}
+            </span>
+          )}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+
