@@ -42,7 +42,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useIsSuperadmin, usePlans } from "@/hooks/use-tenant";
-import { getAdminTenantSummaries, setAdminTenantStatus, adminCreateClient, adminDeleteTenant } from "@/lib/tenant.functions";
+import {
+  getAdminTenantSummaries,
+  setAdminTenantStatus,
+  adminCreateClient,
+  adminDeleteTenant,
+  cleanupOrphanAuthUsers,
+} from "@/lib/tenant.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -98,6 +104,7 @@ function AdminPage() {
   const updateTenantStatus = useServerFn(setAdminTenantStatus);
   const createClientFn = useServerFn(adminCreateClient);
   const deleteTenantFn = useServerFn(adminDeleteTenant);
+  const cleanupOrphansFn = useServerFn(cleanupOrphanAuthUsers);
   const { data: plans } = usePlans(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "trial" | "active" | "suspended">("all");
@@ -167,10 +174,29 @@ function AdminPage() {
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
       const n = res?.deletedUserIds?.length ?? 0;
+      const failed = res?.failedUserDeletes?.length ?? 0;
       toast.success(
-        n > 0
-          ? `Tienda eliminada. Se eliminaron ${n} usuario(s) huérfano(s).`
-          : "Tienda eliminada por completo.",
+        failed > 0
+          ? `Tienda eliminada. ${n} usuario(s) borrado(s), ${failed} no se pudieron borrar.`
+          : n > 0
+            ? `Tienda eliminada. Se eliminaron ${n} usuario(s) de autenticación.`
+            : "Tienda eliminada por completo.",
+      );
+    },
+    onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
+  });
+
+  const cleanupOrphans = useMutation({
+    mutationFn: () => cleanupOrphansFn({ data: { confirm: true } }),
+    onSuccess: (res: any) => {
+      const n = res?.deletedUserIds?.length ?? 0;
+      const failed = res?.failedUserDeletes?.length ?? 0;
+      toast.success(
+        failed > 0
+          ? `Limpieza terminada: ${n} usuario(s) borrado(s), ${failed} no se pudieron borrar.`
+          : n > 0
+            ? `Se eliminaron ${n} usuario(s) sin tienda.`
+            : "No había usuarios fantasma por eliminar.",
       );
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
@@ -280,6 +306,24 @@ function AdminPage() {
           <Button variant="default" onClick={() => setCreatingClient(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
             Crear cliente
+          </Button>
+          <Button
+            variant="outline"
+            disabled={cleanupOrphans.isPending}
+            onClick={() => {
+              const confirmMsg =
+                "¿Eliminar usuarios fantasma?\n\n" +
+                "Se borrarán del sistema de autenticación los usuarios que ya no pertenecen a ninguna tienda. " +
+                "No se eliminan superadmins ni usuarios con tiendas activas.";
+              if (window.confirm(confirmMsg)) cleanupOrphans.mutate();
+            }}
+          >
+            {cleanupOrphans.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 h-4 w-4" />
+            )}
+            Limpiar usuarios fantasma
           </Button>
           <Button asChild variant="default">
             <Link to="/admin/pagos-pendientes">

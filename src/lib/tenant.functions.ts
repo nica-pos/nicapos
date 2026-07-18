@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  assertSuperadmin,
+  deleteAuthUserIfOrphan,
+  removeTenantStorage,
+} from "@/lib/tenant-admin.server";
 
 const addMemberInput = z.object({
   tenantId: z.string().uuid(),
@@ -24,6 +29,10 @@ const createClientInput = z.object({
   tenantName: z.string().min(2).max(80),
   planId: z.string().uuid(),
   durationDays: z.number().int().min(1).max(3650),
+});
+
+const cleanupOrphanUsersInput = z.object({
+  confirm: z.literal(true),
 });
 
 // NOTE: adminCreateClient requiere Supabase Auth Admin API (service role).
@@ -97,12 +106,7 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
 export const getAdminTenantSummaries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isSuper, error: roleError } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "superadmin",
-    });
-    if (roleError) throw new Error(roleError.message);
-    if (!isSuper) throw new Error("Solo el superadmin puede ver esta consola.");
+    await assertSuperadmin(context, "Solo el superadmin puede ver esta consola.");
 
     // RLS: superadmin puede leer todos los tenants.
     const { data, error } = await context.supabase
@@ -132,12 +136,7 @@ export const setAdminTenantStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => tenantStatusInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: isSuper, error: roleError } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "superadmin",
-    });
-    if (roleError) throw new Error(roleError.message);
-    if (!isSuper) throw new Error("Solo el superadmin puede cambiar estados de tiendas.");
+    await assertSuperadmin(context, "Solo el superadmin puede cambiar estados de tiendas.");
 
     // RLS: "Owner, tenant admin or superadmin can update tenant" permite este UPDATE.
     const { error } = await context.supabase
@@ -152,23 +151,78 @@ export const adminDeleteTenant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => deleteTenantInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: isSuper, error: roleError } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "superadmin",
-    });
-    if (roleError) throw new Error(roleError.message);
-    if (!isSuper) throw new Error("Solo el superadmin puede eliminar tiendas.");
+    await assertSuperadmin(context, "Solo el superadmin puede eliminar tiendas.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // RLS: "Owner or superadmin can delete tenant" permite este DELETE.
-    // Los datos hijos caen en CASCADE.
-    const { error: delErr } = await context.supabase
+    const { data: tenant, error: tenantError } = await supabaseAdmin
+      .from("tenants")
+      .select("id, owner_id")
+      .eq("id", data.tenantId)
+      .maybeSingle();
+    if (tenantError) throw new Error(tenantError.message);
+    if (!tenant) throw new Error("La tienda ya no existe.");
+
+    const { data: members, error: membersError } = await supabaseAdmin
+      .from("tenant_members")
+      .select("user_id")
+      .eq("tenant_id", data.tenantId);
+    if (membersError) throw new Error(membersError.message);
+
+    const candidateUserIds = Array.from(
+      new Set([tenant.owner_id, ...(members ?? []).map((m: any) => m.user_id)].filter(Boolean)),
+    ) as string[];
+
+    const storage = await removeTenantStorage(supabaseAdmin, data.tenantId);
+
+    // Borrado real de la tienda con cliente administrativo: los datos hijos caen en CASCADE.
+    const { error: delErr } = await supabaseAdmin
       .from("tenants")
       .delete()
       .eq("id", data.tenantId);
     if (delErr) throw new Error(delErr.message);
 
-    // Nota: el borrado de usuarios huérfanos requiere Supabase Auth Admin API
-    // (service role). Se omite mientras SERVICE_ROLE_KEY no esté configurado.
-    // Los usuarios sin tienda quedan en el sistema de auth pero sin acceso.
-    return { ok: true, deletedUserIds: [] as string[] };
+    const deletedUserIds: string[] = [];
+    const skippedUserIds: string[] = [];
+    const failedUserDeletes: { userId: string; reason: string }[] = [];
+
+    if (data.deleteOrphanUsers) {
+      for (const userId of candidateUserIds) {
+        const result = await deleteAuthUserIfOrphan(supabaseAdmin, userId, context.userId);
+        if (result.status === "deleted") deletedUserIds.push(userId);
+        else if (result.status === "failed") failedUserDeletes.push({ userId, reason: result.reason });
+        else skippedUserIds.push(userId);
+      }
+    }
+
+    return { ok: true, deletedUserIds, skippedUserIds, failedUserDeletes, storage };
+  });
+
+export const cleanupOrphanAuthUsers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => cleanupOrphanUsersInput.parse(input))
+  .handler(async ({ context }) => {
+    await assertSuperadmin(context, "Solo el superadmin puede limpiar usuarios sin tienda.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const deletedUserIds: string[] = [];
+    const skippedUserIds: string[] = [];
+    const failedUserDeletes: { userId: string; reason: string }[] = [];
+
+    for (let page = 1; page <= 20; page += 1) {
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) throw new Error(error.message);
+      const users = data?.users ?? [];
+
+      for (const user of users) {
+        const userId = user.id;
+        const result = await deleteAuthUserIfOrphan(supabaseAdmin, userId, context.userId);
+        if (result.status === "deleted") deletedUserIds.push(userId);
+        else if (result.status === "failed") failedUserDeletes.push({ userId, reason: result.reason });
+        else skippedUserIds.push(userId);
+      }
+
+      if (users.length < 1000) break;
+    }
+
+    return { ok: true, deletedUserIds, skippedUserIds, failedUserDeletes };
   });
