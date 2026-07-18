@@ -234,7 +234,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
       {/* Navegación agrupada */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {navGroups.map((group) => (
+        {filterNavByRole(role).map((group) => (
           <div key={group.label} className="mb-5 last:mb-0">
             <div className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
               {group.label}
