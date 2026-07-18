@@ -36,6 +36,7 @@ import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicTrialRequestsRouteImport } from './routes/api/public/trial-requests'
+import { Route as AuthenticatedAdminSolicitudesPruebaRouteImport } from './routes/_authenticated/admin_.solicitudes-prueba'
 import { Route as AuthenticatedAdminPagosPendientesRouteImport } from './routes/_authenticated/admin_.pagos-pendientes'
 import { Route as AuthenticatedAdminBancosRouteImport } from './routes/_authenticated/admin_.bancos'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
@@ -180,6 +181,12 @@ const ApiPublicTrialRequestsRoute = ApiPublicTrialRequestsRouteImport.update({
   path: '/api/public/trial-requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminSolicitudesPruebaRoute =
+  AuthenticatedAdminSolicitudesPruebaRouteImport.update({
+    id: '/admin_/solicitudes-prueba',
+    path: '/admin/solicitudes-prueba',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPagosPendientesRoute =
   AuthenticatedAdminPagosPendientesRouteImport.update({
     id: '/admin_/pagos-pendientes',
@@ -231,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
+  '/admin/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
   '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -263,6 +271,7 @@ export interface FileRoutesByTo {
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
+  '/admin/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
   '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -297,6 +306,7 @@ export interface FileRoutesById {
   '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/_authenticated/admin_/bancos': typeof AuthenticatedAdminBancosRoute
   '/_authenticated/admin_/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
+  '/_authenticated/admin_/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
   '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/verificacion-pendiente'
     | '/admin/bancos'
     | '/admin/pagos-pendientes'
+    | '/admin/solicitudes-prueba'
     | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
@@ -363,6 +374,7 @@ export interface FileRouteTypes {
     | '/verificacion-pendiente'
     | '/admin/bancos'
     | '/admin/pagos-pendientes'
+    | '/admin/solicitudes-prueba'
     | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
@@ -396,6 +408,7 @@ export interface FileRouteTypes {
     | '/_authenticated/verificacion-pendiente'
     | '/_authenticated/admin_/bancos'
     | '/_authenticated/admin_/pagos-pendientes'
+    | '/_authenticated/admin_/solicitudes-prueba'
     | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTrialRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin_/solicitudes-prueba': {
+      id: '/_authenticated/admin_/solicitudes-prueba'
+      path: '/admin/solicitudes-prueba'
+      fullPath: '/admin/solicitudes-prueba'
+      preLoaderRoute: typeof AuthenticatedAdminSolicitudesPruebaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin_/pagos-pendientes': {
       id: '/_authenticated/admin_/pagos-pendientes'
       path: '/admin/pagos-pendientes'
@@ -658,6 +678,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVerificacionPendienteRoute: typeof AuthenticatedVerificacionPendienteRoute
   AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
   AuthenticatedAdminPagosPendientesRoute: typeof AuthenticatedAdminPagosPendientesRoute
+  AuthenticatedAdminSolicitudesPruebaRoute: typeof AuthenticatedAdminSolicitudesPruebaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -685,6 +706,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBancosRoute: AuthenticatedAdminBancosRoute,
   AuthenticatedAdminPagosPendientesRoute:
     AuthenticatedAdminPagosPendientesRoute,
+  AuthenticatedAdminSolicitudesPruebaRoute:
+    AuthenticatedAdminSolicitudesPruebaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
