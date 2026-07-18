@@ -433,7 +433,7 @@ function PosPage() {
       )}
 
       <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[1fr_400px]">
-        {/* Left: search + cart */}
+        {/* Left: search + product catalog */}
         <div className="flex flex-col overflow-hidden border-r border-border/60">
           <div className="relative border-b border-border/60 p-4">
             <Search className="absolute left-7 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
@@ -547,7 +547,7 @@ function PosPage() {
 
           {/* Quick-add grid by category (hidden while typing a search) */}
           {!search && categoryProducts.length > 0 && (
-            <div className="max-h-[38%] overflow-auto border-b border-border/60 p-3">
+            <div className="flex-1 overflow-auto p-3">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
                 {categoryProducts.map((p) => {
                   const { price, promo } = applyPromotions(
@@ -568,72 +568,73 @@ function PosPage() {
               </div>
             </div>
           )}
-
-
-
-          <div className="flex-1 overflow-auto p-4">
-            {cart.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
-                <ShoppingCart className="mb-3 h-12 w-12 opacity-30" />
-                <p>Busca un producto para empezar la venta.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {cart.map((l, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 rounded-lg border border-border/60 p-3"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{l.name}</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">P.U. $</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={l.unit_price_usd}
-                          onChange={(e) => {
-                            const v = Number(e.target.value);
-                            setCart((prev) => {
-                              const next = [...prev];
-                              next[i] = { ...next[i], unit_price_usd: isNaN(v) ? 0 : v };
-                              return next;
-                            });
-                          }}
-                          className="h-7 w-24 text-sm"
-                        />
-                        {l.is_tax_exempt && (
-                          <Badge variant="secondary">Exento</Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, -1)}>
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="w-8 text-center font-semibold">{l.quantity}</span>
-                      <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, 1)}>
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    <div className="w-24 text-right">
-                      <div className="font-semibold">{formatUSD(l.unit_price_usd * l.quantity)}</div>
-                    </div>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => removeLine(i)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                ))}
-
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Right: totals + actions */}
         <div className="flex flex-col justify-between overflow-auto p-4">
-          <div className="space-y-3">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold">Venta actual</h2>
+                <Badge variant="secondary">{cart.length} ítem{cart.length === 1 ? "" : "s"}</Badge>
+              </div>
+              {cart.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
+                  Seleccioná productos del catálogo.
+                </div>
+              ) : (
+                <div className="max-h-[42vh] space-y-2 overflow-auto pr-1">
+                  {cart.map((l, i) => (
+                    <div key={i} className="rounded-lg border border-border/60 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{l.name}</p>
+                          {l.is_tax_exempt && (
+                            <Badge variant="secondary" className="mt-1">Exento</Badge>
+                          )}
+                        </div>
+                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeLine(i)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1">
+                          <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, -1)}>
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center font-semibold">{l.quantity}</span>
+                          <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, 1)}>
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">P.U. $</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={l.unit_price_usd}
+                            onChange={(e) => {
+                              const v = Number(e.target.value);
+                              setCart((prev) => {
+                                const next = [...prev];
+                                next[i] = { ...next[i], unit_price_usd: isNaN(v) ? 0 : v };
+                                return next;
+                              });
+                            }}
+                            className="h-8 w-20 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-2 text-right font-semibold">
+                        {formatUSD(l.unit_price_usd * l.quantity)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span>{formatUSD(totals.subtotal)}</span>
