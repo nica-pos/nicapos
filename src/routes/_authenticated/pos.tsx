@@ -731,7 +731,15 @@ function PosPage() {
                   value={customerId}
                   onValueChange={(v) => {
                     setCustomerId(v);
-                    if (v === "__general__") setIsCredit(false);
+                    if (v === "__general__") {
+                      setIsCredit(false);
+                    } else {
+                      const c = (customers ?? []).find((x) => x.id === v);
+                      // Auto-marca como crédito si el cliente tiene límite configurado
+                      if (c && Number(c.credit_limit_usd ?? 0) > 0) {
+                        setIsCredit(true);
+                      }
+                    }
                   }}
                 >
                   <SelectTrigger className="h-9">
