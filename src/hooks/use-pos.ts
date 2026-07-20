@@ -216,6 +216,7 @@ export interface PaymentLine {
 
 export function useCreateSale() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -226,6 +227,7 @@ export function useCreateSale() {
       ivaRate: number;
       ivaEnabled: boolean;
     }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user!.id;
       // Sale number is assigned inside a retry loop below to avoid
