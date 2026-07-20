@@ -159,13 +159,12 @@ function BranchDialog({
   const [phone, setPhone] = useState(branch?.phone ?? "");
   const [isActive, setIsActive] = useState(branch?.is_active ?? true);
 
-  // reset when branch changes
-  useState(() => {
+  useEffect(() => {
     setName(branch?.name ?? "");
     setAddress(branch?.address ?? "");
     setPhone(branch?.phone ?? "");
     setIsActive(branch?.is_active ?? true);
-  });
+  }, [branch]);
 
   function handleSave() {
     if (!name.trim()) {
