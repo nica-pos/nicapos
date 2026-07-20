@@ -102,6 +102,9 @@ const statusMeta: Record<
   active: { label: "Activa", dot: "bg-success", text: "text-success" },
   suspended: { label: "Suspendida", dot: "bg-destructive", text: "text-destructive" },
   cancelled: { label: "Cancelada", dot: "bg-muted-foreground", text: "text-muted-foreground" },
+  pending_payment: { label: "Pago pendiente", dot: "bg-warning", text: "text-warning" },
+  pending_verification: { label: "En verificación", dot: "bg-warning", text: "text-warning" },
+  pending_trial_approval: { label: "En revisión", dot: "bg-warning", text: "text-warning" },
 };
 
 function initialsOf(name?: string | null, email?: string | null) {
