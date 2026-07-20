@@ -76,6 +76,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       
       { to: "/bitacora", label: "Bitácora", icon: ShieldCheck },
       { to: "/equipo", label: "Equipo", icon: Users },
+      { to: "/sucursales", label: "Sucursales", icon: Building2 },
       { to: "/configuracion", label: "Configuración", icon: Settings },
     ],
   },
