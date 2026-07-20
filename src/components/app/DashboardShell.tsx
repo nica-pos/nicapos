@@ -392,6 +392,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 {currentTitle}
               </span>
             </div>
+            <BranchSelector />
           </div>
         </header>
 
