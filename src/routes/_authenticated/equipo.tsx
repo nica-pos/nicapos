@@ -52,6 +52,7 @@ function TeamPage() {
   const queryClient = useQueryClient();
   const { tenant, role } = useActiveTenant();
   const addMember = useServerFn(addTenantMemberByEmail);
+  const removeMemberFn = useServerFn(removeTenantMember);
   const canManage = role === "owner" || role === "admin";
 
   const [email, setEmail] = useState("");
