@@ -19,6 +19,12 @@ const forceDeleteAuthUserInput = z.object({
   userId: z.string().uuid(),
 });
 
+const removeMemberInput = z.object({
+  tenantId: z.string().uuid(),
+  memberId: z.string().uuid(),
+  deleteAuthIfOrphan: z.boolean().default(true),
+});
+
 const tenantStatusInput = z.object({
   tenantId: z.string().uuid(),
   status: z.enum(["trial", "active", "suspended", "cancelled"]),
