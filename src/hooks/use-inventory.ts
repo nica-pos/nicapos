@@ -98,6 +98,7 @@ export function useKardex(productId?: string) {
 }
 
 export function useRecordMovement() {
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -111,13 +112,17 @@ export function useRecordMovement() {
       quantity: number;
       unit_cost?: number;
       reference?: string;
+      branch_id?: string;
     }) => {
+      const bId = v.branch_id ?? branchId;
+      if (!bId) throw new Error("Selecciona una sucursal primero");
       const { data, error } = await supabase.rpc("record_inventory_movement", {
         _product_id: v.product_id,
         _movement_type: v.movement_type,
         _quantity: v.quantity,
         _unit_cost: v.unit_cost ?? 0,
         _reference: v.reference ?? undefined,
+        _branch_id: bId,
       });
       if (error) throw error;
       return data;
