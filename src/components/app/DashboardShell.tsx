@@ -212,7 +212,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   <div className="truncate text-sm font-semibold text-foreground">
                     {tenant.name}
                   </div>
-                  {status && (
+                  {status && !isSuperadmin && (
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                       <span className={status.text}>{status.label}</span>
