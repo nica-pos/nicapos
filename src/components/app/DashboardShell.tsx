@@ -18,10 +18,12 @@ import {
   Truck,
   Tag,
   ClipboardCheck,
+  Building2,
   ChevronDown,
   Menu,
   X,
 } from "lucide-react";
+import { BranchSelector } from "@/components/app/BranchSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
