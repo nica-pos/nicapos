@@ -17,6 +17,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVerificacionPendienteRouteImport } from './routes/_authenticated/verificacion-pendiente'
 import { Route as AuthenticatedVentasRouteImport } from './routes/_authenticated/ventas'
+import { Route as AuthenticatedSucursalesRouteImport } from './routes/_authenticated/sucursales'
 import { Route as AuthenticatedPruebaRechazadaRouteImport } from './routes/_authenticated/prueba-rechazada'
 import { Route as AuthenticatedPruebaEnRevisionRouteImport } from './routes/_authenticated/prueba-en-revision'
 import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenticated/proveedores'
@@ -82,6 +83,11 @@ const AuthenticatedVerificacionPendienteRoute =
 const AuthenticatedVentasRoute = AuthenticatedVentasRouteImport.update({
   id: '/ventas',
   path: '/ventas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSucursalesRoute = AuthenticatedSucursalesRouteImport.update({
+  id: '/sucursales',
+  path: '/sucursales',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPruebaRechazadaRoute =
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/sucursales': typeof AuthenticatedSucursalesRoute
   '/ventas': typeof AuthenticatedVentasRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/sucursales': typeof AuthenticatedSucursalesRoute
   '/ventas': typeof AuthenticatedVentasRoute
   '/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
   '/_authenticated/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/_authenticated/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/_authenticated/sucursales': typeof AuthenticatedSucursalesRoute
   '/_authenticated/ventas': typeof AuthenticatedVentasRoute
   '/_authenticated/verificacion-pendiente': typeof AuthenticatedVerificacionPendienteRoute
   '/_authenticated/admin_/bancos': typeof AuthenticatedAdminBancosRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/prueba-en-revision'
     | '/prueba-rechazada'
+    | '/sucursales'
     | '/ventas'
     | '/verificacion-pendiente'
     | '/admin/bancos'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/prueba-en-revision'
     | '/prueba-rechazada'
+    | '/sucursales'
     | '/ventas'
     | '/verificacion-pendiente'
     | '/admin/bancos'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/_authenticated/proveedores'
     | '/_authenticated/prueba-en-revision'
     | '/_authenticated/prueba-rechazada'
+    | '/_authenticated/sucursales'
     | '/_authenticated/ventas'
     | '/_authenticated/verificacion-pendiente'
     | '/_authenticated/admin_/bancos'
@@ -508,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/ventas'
       fullPath: '/ventas'
       preLoaderRoute: typeof AuthenticatedVentasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sucursales': {
+      id: '/_authenticated/sucursales'
+      path: '/sucursales'
+      fullPath: '/sucursales'
+      preLoaderRoute: typeof AuthenticatedSucursalesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/prueba-rechazada': {
@@ -716,6 +735,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProveedoresRoute: typeof AuthenticatedProveedoresRoute
   AuthenticatedPruebaEnRevisionRoute: typeof AuthenticatedPruebaEnRevisionRoute
   AuthenticatedPruebaRechazadaRoute: typeof AuthenticatedPruebaRechazadaRoute
+  AuthenticatedSucursalesRoute: typeof AuthenticatedSucursalesRoute
   AuthenticatedVentasRoute: typeof AuthenticatedVentasRoute
   AuthenticatedVerificacionPendienteRoute: typeof AuthenticatedVerificacionPendienteRoute
   AuthenticatedAdminBancosRoute: typeof AuthenticatedAdminBancosRoute
@@ -744,6 +764,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProveedoresRoute: AuthenticatedProveedoresRoute,
   AuthenticatedPruebaEnRevisionRoute: AuthenticatedPruebaEnRevisionRoute,
   AuthenticatedPruebaRechazadaRoute: AuthenticatedPruebaRechazadaRoute,
+  AuthenticatedSucursalesRoute: AuthenticatedSucursalesRoute,
   AuthenticatedVentasRoute: AuthenticatedVentasRoute,
   AuthenticatedVerificacionPendienteRoute:
     AuthenticatedVerificacionPendienteRoute,

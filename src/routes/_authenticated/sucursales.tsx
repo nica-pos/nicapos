@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { Button } from "@/components/ui/button";
