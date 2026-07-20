@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
 
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type CashSession = Database["public"]["Tables"]["cash_sessions"]["Row"];
