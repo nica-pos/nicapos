@@ -116,7 +116,7 @@ function TrasladosPage() {
         _from_branch: fromBranch,
         _to_branch: toBranch,
         _quantity: qtyNum,
-        _note: note.trim() || null,
+        _note: note.trim() || undefined,
       });
       if (error) throw error;
     },
