@@ -31,7 +31,7 @@ import {
   useCanCreateBranch,
   type Branch,
 } from "@/hooks/use-branch";
-import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/sucursales")({
@@ -40,12 +40,14 @@ export const Route = createFileRoute("/_authenticated/sucursales")({
 
 function SucursalesPage() {
   const { role } = useActiveTenant();
+  const { data: isSuper } = useIsSuperadmin();
   const branches = useBranches();
   const canCreate = useCanCreateBranch();
   const [editing, setEditing] = useState<Branch | null>(null);
   const [openNew, setOpenNew] = useState(false);
 
-  const canManage = role === "owner" || role === "admin";
+  const canManage = isSuper || role === "owner" || role === "admin";
+  const canAddMore = isSuper || canCreate.data !== false;
 
   return (
     <DashboardShell>
@@ -63,15 +65,15 @@ function SucursalesPage() {
           {canManage && (
             <Button
               onClick={() => setOpenNew(true)}
-              disabled={canCreate.data === false}
-              title={canCreate.data === false ? "Alcanzaste el límite de tu plan" : ""}
+              disabled={!canAddMore}
+              title={!canAddMore ? "Alcanzaste el límite de tu plan" : ""}
             >
               <Plus className="mr-2 h-4 w-4" /> Nueva sucursal
             </Button>
           )}
         </div>
 
-        {canCreate.data === false && (
+        {!canAddMore && (
           <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
             Alcanzaste el máximo de sucursales de tu plan. Actualiza tu plan para agregar más.
           </div>
