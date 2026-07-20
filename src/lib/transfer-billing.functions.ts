@@ -185,20 +185,26 @@ export const reviewSubmission = createServerFn({ method: "POST" })
         if (error) throw new Error(error.message);
       }
     } else {
+      const reason = data.rejectionReason ?? "Comprobante no válido.";
       const { error: uErr } = await context.supabase
         .from("payment_submissions")
         .update({
           status: "rejected",
-          rejection_reason: data.rejectionReason ?? "Comprobante no válido.",
+          rejection_reason: reason,
           reviewed_by: context.userId,
           reviewed_at: new Date().toISOString(),
         })
         .eq("id", sub.id);
       if (uErr) throw new Error(uErr.message);
 
+      // Volver a pending_payment (no cancelar) para que el usuario pueda
+      // reenviar un nuevo comprobante. Guardamos el motivo visible.
       const { error: tErr } = await context.supabase
         .from("tenants")
-        .update({ status: "cancelled" as any })
+        .update({
+          status: "pending_payment" as any,
+          cancellation_reason: reason,
+        })
         .eq("id", sub.tenant_id);
       if (tErr) throw new Error(tErr.message);
     }

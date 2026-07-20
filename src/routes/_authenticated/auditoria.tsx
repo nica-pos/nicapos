@@ -156,9 +156,14 @@ function AuditDetail({
 
   async function finish() {
     if (!items) return;
+    if (!audit?.branch_id) {
+      toast.error("Esta auditoría no tiene sucursal asociada");
+      return;
+    }
     try {
       await complete.mutateAsync({
         auditId,
+        branchId: audit.branch_id,
         items: items.map((it) => ({
           id: it.id,
           product_id: it.product_id,

@@ -73,15 +73,17 @@ export function useDeleteProduct() {
 // ---------------- Cash sessions ----------------
 export function useOpenCashSession() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useQuery({
-    queryKey: ["cash-session-open", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["cash-session-open", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async (): Promise<CashSession | null> => {
       const { data, error } = await supabase
         .from("cash_sessions")
         .select("*")
         .eq("tenant_id", tenant!.id)
+        .eq("branch_id", branchId!)
         .eq("status", "open")
         .order("opened_at", { ascending: false })
         .limit(1)
@@ -347,6 +349,7 @@ export function useCreateSale() {
               _quantity: Number(c.quantity) * l.quantity,
               _unit_cost: 0,
               _reference: `Venta #${saleNumber} (combo)`,
+              _branch_id: branchId,
             });
           }
         } else {
@@ -356,6 +359,7 @@ export function useCreateSale() {
             _quantity: l.quantity,
             _unit_cost: 0,
             _reference: `Venta #${saleNumber}`,
+            _branch_id: branchId,
           });
         }
       }

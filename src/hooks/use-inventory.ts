@@ -98,6 +98,7 @@ export function useKardex(productId?: string) {
 }
 
 export function useRecordMovement() {
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -111,13 +112,17 @@ export function useRecordMovement() {
       quantity: number;
       unit_cost?: number;
       reference?: string;
+      branch_id?: string;
     }) => {
+      const bId = v.branch_id ?? branchId;
+      if (!bId) throw new Error("Selecciona una sucursal primero");
       const { data, error } = await supabase.rpc("record_inventory_movement", {
         _product_id: v.product_id,
         _movement_type: v.movement_type,
         _quantity: v.quantity,
         _unit_cost: v.unit_cost ?? 0,
         _reference: v.reference ?? undefined,
+        _branch_id: bId,
       });
       if (error) throw error;
       return data;
@@ -233,20 +238,23 @@ export function useCreateAudit() {
         .single();
       if (error) throw error;
 
-      // snapshot all products
-      const { data: products } = await supabase
-        .from("products")
-        .select("id,stock")
+      // snapshot stock for the selected branch (per-branch inventory)
+      const { data: stockRows } = await supabase
+        .from("product_stock")
+        .select("product_id, stock, product:products!inner(id,is_active,tenant_id)")
         .eq("tenant_id", tenant!.id)
-        .eq("is_active", true);
-      if (products && products.length > 0) {
+        .eq("branch_id", branchId);
+      const rows = (stockRows ?? []).filter(
+        (r: any) => r.product?.is_active !== false,
+      );
+      if (rows.length > 0) {
         await supabase.from("stock_audit_items").insert(
-          products.map((p) => ({
+          rows.map((r: any) => ({
             tenant_id: tenant!.id,
             audit_id: audit.id,
-            product_id: p.id,
-            system_qty: Number(p.stock),
-            counted_qty: Number(p.stock),
+            product_id: r.product_id,
+            system_qty: Number(r.stock),
+            counted_qty: Number(r.stock),
           })),
         );
       }
@@ -284,6 +292,7 @@ function useMutation_completeAudit(
   return useMutation({
     mutationFn: async (v: {
       auditId: string;
+      branchId: string;
       items: { id: string; product_id: string; system_qty: number; counted_qty: number }[];
     }) => {
       // apply adjustments for each mismatch through the CPP function
@@ -295,6 +304,7 @@ function useMutation_completeAudit(
             movement_type: diff > 0 ? "adjustment_in" : "adjustment_out",
             quantity: Math.abs(diff),
             reference: `Auditoría ${v.auditId.slice(0, 8)}`,
+            branch_id: v.branchId,
           });
         }
       }
