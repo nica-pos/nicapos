@@ -238,20 +238,23 @@ export function useCreateAudit() {
         .single();
       if (error) throw error;
 
-      // snapshot all products
-      const { data: products } = await supabase
-        .from("products")
-        .select("id,stock")
+      // snapshot stock for the selected branch (per-branch inventory)
+      const { data: stockRows } = await supabase
+        .from("product_stock")
+        .select("product_id, stock, product:products!inner(id,is_active,tenant_id)")
         .eq("tenant_id", tenant!.id)
-        .eq("is_active", true);
-      if (products && products.length > 0) {
+        .eq("branch_id", branchId);
+      const rows = (stockRows ?? []).filter(
+        (r: any) => r.product?.is_active !== false,
+      );
+      if (rows.length > 0) {
         await supabase.from("stock_audit_items").insert(
-          products.map((p) => ({
+          rows.map((r: any) => ({
             tenant_id: tenant!.id,
             audit_id: audit.id,
-            product_id: p.id,
-            system_qty: Number(p.stock),
-            counted_qty: Number(p.stock),
+            product_id: r.product_id,
+            system_qty: Number(r.stock),
+            counted_qty: Number(r.stock),
           })),
         );
       }
