@@ -131,12 +131,18 @@ function TeamPage() {
 
   const removeMember = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("tenant_members").delete().eq("id", id);
-      if (error) throw error;
+      if (!tenant) throw new Error("Sin tienda activa");
+      return await removeMemberFn({
+        data: { tenantId: tenant.id, memberId: id, deleteAuthIfOrphan: true },
+      });
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
-      toast.success("Miembro eliminado");
+      if (res?.authDeleted) {
+        toast.success("Miembro eliminado y su cuenta borrada por completo.");
+      } else {
+        toast.success("Miembro eliminado. Su cuenta sigue activa en otras tiendas.");
+      }
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
