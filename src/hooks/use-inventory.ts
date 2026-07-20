@@ -292,6 +292,7 @@ function useMutation_completeAudit(
   return useMutation({
     mutationFn: async (v: {
       auditId: string;
+      branchId: string;
       items: { id: string; product_id: string; system_qty: number; counted_qty: number }[];
     }) => {
       // apply adjustments for each mismatch through the CPP function
@@ -303,6 +304,7 @@ function useMutation_completeAudit(
             movement_type: diff > 0 ? "adjustment_in" : "adjustment_out",
             quantity: Math.abs(diff),
             reference: `Auditoría ${v.auditId.slice(0, 8)}`,
+            branch_id: v.branchId,
           });
         }
       }
