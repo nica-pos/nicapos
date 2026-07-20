@@ -287,6 +287,7 @@ export function useCreateSale() {
           .from("sales")
           .insert({
             tenant_id: tenant!.id,
+            branch_id: branchId,
             session_id: v.sessionId,
             sale_number: saleNumber,
             subtotal_usd: Number(subtotal.toFixed(2)),
