@@ -31,7 +31,7 @@ import {
   useCanCreateBranch,
   type Branch,
 } from "@/hooks/use-branch";
-import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/sucursales")({
