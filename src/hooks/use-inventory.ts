@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
 
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export type Brand = Database["public"]["Tables"]["brands"]["Row"];
@@ -214,14 +215,17 @@ export function useAuditItems(auditId?: string) {
 
 export function useCreateAudit() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (notes?: string) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const { data: audit, error } = await supabase
         .from("stock_audits")
         .insert({
           tenant_id: tenant!.id,
+          branch_id: branchId,
           created_by: userData.user!.id,
           notes: notes ?? null,
         })

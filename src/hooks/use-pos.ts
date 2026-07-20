@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
 
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type CashSession = Database["public"]["Tables"]["cash_sessions"]["Row"];
@@ -94,14 +95,17 @@ export function useOpenCashSession() {
 
 export function useOpenSessionMutation() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: { opening_nio: number; opening_usd: number }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const { data, error } = await supabase
         .from("cash_sessions")
         .insert({
           tenant_id: tenant!.id,
+          branch_id: branchId,
           opened_by: userData.user!.id,
           opening_nio: v.opening_nio,
           opening_usd: v.opening_usd,
@@ -167,6 +171,7 @@ export function useCashMovements(sessionId?: string) {
 
 export function useAddMovement() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -176,9 +181,11 @@ export function useAddMovement() {
       currency: "NIO" | "USD";
       reason: string;
     }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase.from("cash_movements").insert({
         tenant_id: tenant!.id,
+        branch_id: branchId,
         session_id: v.session_id,
         type: v.type,
         amount: v.amount,
@@ -209,6 +216,7 @@ export interface PaymentLine {
 
 export function useCreateSale() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -219,6 +227,7 @@ export function useCreateSale() {
       ivaRate: number;
       ivaEnabled: boolean;
     }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user!.id;
       // Sale number is assigned inside a retry loop below to avoid
@@ -278,6 +287,7 @@ export function useCreateSale() {
           .from("sales")
           .insert({
             tenant_id: tenant!.id,
+            branch_id: branchId,
             session_id: v.sessionId,
             sale_number: saleNumber,
             subtotal_usd: Number(subtotal.toFixed(2)),

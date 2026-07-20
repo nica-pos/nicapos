@@ -18,10 +18,12 @@ import {
   Truck,
   Tag,
   ClipboardCheck,
+  Building2,
   ChevronDown,
   Menu,
   X,
 } from "lucide-react";
+import { BranchSelector } from "@/components/app/BranchSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,6 +76,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       
       { to: "/bitacora", label: "Bitácora", icon: ShieldCheck },
       { to: "/equipo", label: "Equipo", icon: Users },
+      { to: "/sucursales", label: "Sucursales", icon: Building2 },
       { to: "/configuracion", label: "Configuración", icon: Settings },
     ],
   },
@@ -389,6 +392,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 {currentTitle}
               </span>
             </div>
+            <BranchSelector />
           </div>
         </header>
 
