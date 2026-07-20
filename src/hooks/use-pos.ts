@@ -171,6 +171,7 @@ export function useCashMovements(sessionId?: string) {
 
 export function useAddMovement() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -180,9 +181,11 @@ export function useAddMovement() {
       currency: "NIO" | "USD";
       reason: string;
     }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase.from("cash_movements").insert({
         tenant_id: tenant!.id,
+        branch_id: branchId,
         session_id: v.session_id,
         type: v.type,
         amount: v.amount,
