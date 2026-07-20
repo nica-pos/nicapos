@@ -19,6 +19,7 @@ export const ROUTE_ROLES: Record<string, TenantRole[]> = {
   "/bitacora": ["owner", "admin", "accountant"],
   "/equipo": ["owner", "admin"],
   "/sucursales": ["owner", "admin"],
+  "/traslados": ["owner", "admin"],
   "/configuracion": ["owner", "admin"],
 };
 
