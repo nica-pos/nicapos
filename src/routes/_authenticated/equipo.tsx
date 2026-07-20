@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/table";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant } from "@/hooks/use-tenant";
-import { addTenantMemberByEmail } from "@/lib/tenant.functions";
+import { addTenantMemberByEmail, removeTenantMember } from "@/lib/tenant.functions";
 
 export const Route = createFileRoute("/_authenticated/equipo")({
   component: TeamPage,
