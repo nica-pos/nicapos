@@ -349,6 +349,7 @@ export function useCreateSale() {
               _quantity: Number(c.quantity) * l.quantity,
               _unit_cost: 0,
               _reference: `Venta #${saleNumber} (combo)`,
+              _branch_id: branchId,
             });
           }
         } else {
@@ -358,6 +359,7 @@ export function useCreateSale() {
             _quantity: l.quantity,
             _unit_cost: 0,
             _reference: `Venta #${saleNumber}`,
+            _branch_id: branchId,
           });
         }
       }
