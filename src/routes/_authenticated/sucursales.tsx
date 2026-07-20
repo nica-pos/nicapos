@@ -40,12 +40,14 @@ export const Route = createFileRoute("/_authenticated/sucursales")({
 
 function SucursalesPage() {
   const { role } = useActiveTenant();
+  const { data: isSuper } = useIsSuperadmin();
   const branches = useBranches();
   const canCreate = useCanCreateBranch();
   const [editing, setEditing] = useState<Branch | null>(null);
   const [openNew, setOpenNew] = useState(false);
 
-  const canManage = role === "owner" || role === "admin";
+  const canManage = isSuper || role === "owner" || role === "admin";
+  const canAddMore = isSuper || canCreate.data !== false;
 
   return (
     <DashboardShell>
