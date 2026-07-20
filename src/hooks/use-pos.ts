@@ -95,14 +95,17 @@ export function useOpenCashSession() {
 
 export function useOpenSessionMutation() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: { opening_nio: number; opening_usd: number }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const { data: userData } = await supabase.auth.getUser();
       const { data, error } = await supabase
         .from("cash_sessions")
         .insert({
           tenant_id: tenant!.id,
+          branch_id: branchId,
           opened_by: userData.user!.id,
           opening_nio: v.opening_nio,
           opening_usd: v.opening_usd,
