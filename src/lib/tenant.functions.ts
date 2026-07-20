@@ -19,6 +19,12 @@ const forceDeleteAuthUserInput = z.object({
   userId: z.string().uuid(),
 });
 
+const removeMemberInput = z.object({
+  tenantId: z.string().uuid(),
+  memberId: z.string().uuid(),
+  deleteAuthIfOrphan: z.boolean().default(true),
+});
+
 const tenantStatusInput = z.object({
   tenantId: z.string().uuid(),
   status: z.enum(["trial", "active", "suspended", "cancelled"]),
@@ -312,3 +318,76 @@ export const cleanupOrphanAuthUsers = createServerFn({ method: "POST" })
 
     return { ok: true, deletedUserIds, skippedUserIds, failedUserDeletes };
   });
+
+export const removeTenantMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => removeMemberInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // Caller must be owner/admin of the tenant, OR superadmin.
+    const { data: caller } = await supabase
+      .from("tenant_members")
+      .select("role")
+      .eq("tenant_id", data.tenantId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const { data: isSuper } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "superadmin",
+    });
+
+    const canManage =
+      isSuper || (caller && (caller.role === "owner" || caller.role === "admin"));
+    if (!canManage) {
+      throw new Error("No tienes permiso para eliminar miembros de esta tienda.");
+    }
+
+    // Fetch the target member to know which user we're removing.
+    const { data: member, error: mErr } = await supabase
+      .from("tenant_members")
+      .select("id, user_id, role, tenant_id")
+      .eq("id", data.memberId)
+      .maybeSingle();
+    if (mErr) throw new Error(mErr.message);
+    if (!member || member.tenant_id !== data.tenantId) {
+      throw new Error("Miembro no encontrado.");
+    }
+    if (member.role === "owner") {
+      throw new Error("No se puede eliminar al dueño de la tienda.");
+    }
+    if (member.user_id === userId) {
+      throw new Error("No puedes eliminarte a ti mismo desde aquí.");
+    }
+
+    // Remove membership via RLS.
+    const { error: delErr } = await supabase
+      .from("tenant_members")
+      .delete()
+      .eq("id", data.memberId);
+    if (delErr) throw new Error(delErr.message);
+
+    let authDeleted = false;
+    let authSkippedReason: string | null = null;
+
+    if (data.deleteAuthIfOrphan) {
+      // Use admin client to fully wipe the auth user if they have no other access.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const result = await deleteAuthUserIfOrphan(
+        supabaseAdmin,
+        member.user_id,
+        userId,
+      );
+      if (result.status === "deleted") {
+        // Also drop the profile row so no residual email lingers.
+        await supabaseAdmin.from("profiles").delete().eq("id", member.user_id);
+        authDeleted = true;
+      } else {
+        authSkippedReason = result.reason;
+      }
+    }
+
+    return { ok: true, authDeleted, authSkippedReason };
+  });
+
