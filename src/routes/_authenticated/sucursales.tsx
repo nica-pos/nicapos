@@ -73,7 +73,7 @@ function SucursalesPage() {
           )}
         </div>
 
-        {canCreate.data === false && (
+        {!canAddMore && (
           <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
             Alcanzaste el máximo de sucursales de tu plan. Actualiza tu plan para agregar más.
           </div>
