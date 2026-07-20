@@ -331,37 +331,52 @@ export function useCreateSale() {
       );
       if (payErr) throw payErr;
 
-      // record inventory movements (Kardex). Combos auto-decrement components.
+      // Kardex: batch combo lookup (evita N+1) y agrega cantidades por producto
+      // real antes de invocar el RPC — reduce viajes de red y evita bloqueos
+      // repetidos sobre la misma fila de product_stock.
+      const comboMap = new Map<string, { component_id: string; quantity: number }[]>();
+      if (productIds.length) {
+        const { data: comboRows } = await supabase
+          .from("combo_components")
+          .select("combo_id, component_id, quantity")
+          .in("combo_id", productIds);
+        for (const r of comboRows ?? []) {
+          const arr = comboMap.get(r.combo_id) ?? [];
+          arr.push({ component_id: r.component_id, quantity: Number(r.quantity) });
+          comboMap.set(r.combo_id, arr);
+        }
+      }
+
+      const aggregated = new Map<string, { qty: number; isCombo: boolean }>();
       for (const l of v.lines) {
         if (!l.product_id) continue;
-
-        const { data: components } = await supabase
-          .from("combo_components")
-          .select("component_id, quantity")
-          .eq("combo_id", l.product_id);
-
+        const components = comboMap.get(l.product_id);
         if (components && components.length > 0) {
-          // Combo: decrement each component, not the combo itself
           for (const c of components) {
-            await supabase.rpc("record_inventory_movement", {
-              _product_id: c.component_id,
-              _movement_type: "sale",
-              _quantity: Number(c.quantity) * l.quantity,
-              _unit_cost: 0,
-              _reference: `Venta #${saleNumber} (combo)`,
-              _branch_id: branchId,
+            const prev = aggregated.get(c.component_id);
+            aggregated.set(c.component_id, {
+              qty: (prev?.qty ?? 0) + c.quantity * l.quantity,
+              isCombo: true,
             });
           }
         } else {
-          await supabase.rpc("record_inventory_movement", {
-            _product_id: l.product_id,
-            _movement_type: "sale",
-            _quantity: l.quantity,
-            _unit_cost: 0,
-            _reference: `Venta #${saleNumber}`,
-            _branch_id: branchId,
+          const prev = aggregated.get(l.product_id);
+          aggregated.set(l.product_id, {
+            qty: (prev?.qty ?? 0) + l.quantity,
+            isCombo: false,
           });
         }
+      }
+
+      for (const [productId, info] of aggregated) {
+        await supabase.rpc("record_inventory_movement", {
+          _product_id: productId,
+          _movement_type: "sale",
+          _quantity: info.qty,
+          _unit_cost: 0,
+          _reference: `Venta #${saleNumber}${info.isCombo ? " (combo)" : ""}`,
+          _branch_id: branchId,
+        });
       }
 
 
