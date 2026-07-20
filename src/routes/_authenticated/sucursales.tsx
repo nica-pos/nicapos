@@ -65,8 +65,8 @@ function SucursalesPage() {
           {canManage && (
             <Button
               onClick={() => setOpenNew(true)}
-              disabled={canCreate.data === false}
-              title={canCreate.data === false ? "Alcanzaste el límite de tu plan" : ""}
+              disabled={!canAddMore}
+              title={!canAddMore ? "Alcanzaste el límite de tu plan" : ""}
             >
               <Plus className="mr-2 h-4 w-4" /> Nueva sucursal
             </Button>
