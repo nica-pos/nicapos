@@ -191,7 +191,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     return "";
   }, [pathname]);
 
-  const status = tenant ? statusMeta[tenant.status] ?? statusMeta.trial : null;
+  const status = tenant ? statusMeta[tenant.status] ?? null : null;
   const initials = initialsOf(tenant?.name, userEmail);
 
   const Sidebar = (
