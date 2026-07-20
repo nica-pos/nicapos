@@ -248,6 +248,7 @@ export function useLayawayItems(layawayId: string | null) {
 
 export function useCreateLayaway() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
@@ -256,6 +257,7 @@ export function useCreateLayaway() {
       deposit: number;
       items: { name: string; quantity: number; unit_price_usd: number; product_id?: string | null }[];
     }) => {
+      if (!branchId) throw new Error("Selecciona una sucursal primero");
       const total = v.items.reduce(
         (s, i) => s + i.quantity * i.unit_price_usd,
         0,
@@ -265,6 +267,7 @@ export function useCreateLayaway() {
         .from("layaways")
         .insert({
           tenant_id: tenant!.id,
+          branch_id: branchId,
           customer_id: v.customer_id,
           total_usd: total,
           expires_at: v.expires_at || null,
