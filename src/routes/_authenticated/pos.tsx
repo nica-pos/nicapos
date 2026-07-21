@@ -49,6 +49,7 @@ import { usePromotions, applyPromotions } from "@/hooks/use-inventory";
 import { useCustomers, useCreateReceivable } from "@/hooks/use-credit";
 import { useProductImage } from "@/hooks/use-product-image";
 import { Package } from "lucide-react";
+import { printDocument } from "@/lib/desktop-print";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   component: PosPage,
@@ -1085,7 +1086,8 @@ function ReceiptDialog({
   const ticketHeader = s.ticket_header || "";
 
   function doPrint() {
-    window.print();
+    // Usa impresora configurada (silenciosa) en escritorio, o diálogo del navegador.
+    void printDocument(sale?.docFormat === "carta" ? "carta" : "ticket");
   }
 
   const isCarta = sale?.docFormat === "carta";
@@ -1580,7 +1582,7 @@ function ProformaDialog({
 
         <DialogFooter className="no-print">
           <Button variant="outline" onClick={onClose}>Cerrar y seguir editando</Button>
-          <Button onClick={() => window.print()}>Imprimir proforma</Button>
+          <Button onClick={() => void printDocument("carta")}>Imprimir proforma</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

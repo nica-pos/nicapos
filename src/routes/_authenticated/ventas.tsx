@@ -32,6 +32,7 @@ import { useActiveTenant } from "@/hooks/use-tenant";
 import { useFiscalSettings, formatUSD, formatNIO } from "@/hooks/use-fiscal";
 import { useVoidSale } from "@/hooks/use-pos";
 import { getFriendlyErrorMessage } from "@/lib/errors";
+import { printDocument } from "@/lib/desktop-print";
 
 export const Route = createFileRoute("/_authenticated/ventas")({
   component: SalesHistoryPage,
@@ -315,7 +316,8 @@ function SaleDetailDialog({
   const thankYou = s.thank_you_message || "¡Gracias por su compra!";
 
   function doPrint() {
-    window.print();
+    // Reimprime facturas usando la impresora carta configurada en el equipo.
+    void printDocument("carta");
   }
 
   if (!sale) return null;
