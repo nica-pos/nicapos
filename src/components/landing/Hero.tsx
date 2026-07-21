@@ -61,15 +61,19 @@ export function Hero() {
 
           <div className="relative">
             <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-3xl" />
-            <img
-              src={heroImage}
-              alt="Cajera usando Nica-POS en una tablet dentro de una tienda nicaragüense"
+            <video
+              src={heroVideo.url}
+              poster={heroImage}
+              autoPlay
+              muted
+              loop
+              playsInline
               width={1920}
               height={1088}
-              className="relative rounded-2xl border border-border/60 shadow-2xl"
-              loading="eager"
-              fetchPriority="high"
+              className="relative rounded-2xl border border-border/60 shadow-2xl w-full h-auto"
+              aria-label="Demostración de Nica-POS en uso"
             />
+
           </div>
         </div>
       </div>
