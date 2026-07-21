@@ -555,7 +555,7 @@ function PosPage() {
           {/* Quick-add grid by category (hidden while typing a search) */}
           {!search && categoryProducts.length > 0 && (
             <div className="flex-1 overflow-auto p-3">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                 {categoryProducts.map((p) => {
                   const { price, promo } = applyPromotions(
                     Number(p.price_usd),
@@ -1423,7 +1423,7 @@ function ProductGridCard({
       onClick={onAdd}
       className="group flex flex-col items-stretch overflow-hidden rounded-lg border border-border/60 bg-card text-left transition hover:border-primary hover:shadow-sm"
     >
-      <div className="flex aspect-square items-center justify-center overflow-hidden bg-muted/40">
+      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted/40">
         {url ? (
           <img
             src={url}
@@ -1431,18 +1431,18 @@ function ProductGridCard({
             className="h-full w-full object-cover transition group-hover:scale-105"
           />
         ) : (
-          <Package className="h-8 w-8 text-muted-foreground/50" />
+          <Package className="h-6 w-6 text-muted-foreground/50" />
         )}
       </div>
-      <div className="flex flex-col p-2">
-        <span className="line-clamp-2 text-sm font-medium">{product.name}</span>
-        <span className="mt-1 text-xs text-muted-foreground">
+      <div className="flex flex-col p-1.5">
+        <span className="line-clamp-2 text-xs font-medium leading-tight">{product.name}</span>
+        <span className="mt-0.5 text-[10px] text-muted-foreground">
           Stock: {Number(product.stock)}
         </span>
-        <span className="mt-1 text-sm font-semibold text-primary">
+        <span className="mt-0.5 text-xs font-semibold text-primary">
           {formatUSD(price)}
           {promo && (
-            <span className="ml-1 text-[10px] font-normal text-muted-foreground line-through">
+            <span className="ml-1 text-[9px] font-normal text-muted-foreground line-through">
               {formatUSD(Number(product.price_usd))}
             </span>
           )}
