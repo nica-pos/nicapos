@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap, Shield, TrendingUp } from "lucide-react";
 import heroImage from "@/assets/hero-pos.jpg";
+import heroVideo from "@/assets/landing-hero.mp4.asset.json";
 
 export function Hero() {
   return (
