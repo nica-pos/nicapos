@@ -369,7 +369,7 @@ export function useCreateSale() {
       }
 
       for (const [productId, info] of aggregated) {
-        await supabase.rpc("record_inventory_movement", {
+        const { error: mvErr } = await supabase.rpc("record_inventory_movement", {
           _product_id: productId,
           _movement_type: "sale",
           _quantity: info.qty,
@@ -377,6 +377,7 @@ export function useCreateSale() {
           _reference: `Venta #${saleNumber}${info.isCombo ? " (combo)" : ""}`,
           _branch_id: branchId,
         });
+        if (mvErr) throw new Error(mvErr.message || "No se pudo descontar el stock");
       }
 
 
