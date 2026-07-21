@@ -10,7 +10,7 @@ const path = require("path");
 // (por ejemplo https://nicapos.com) o define APP_URL antes de empaquetar.
 const APP_URL =
   process.env.APP_URL ||
-  "https://id-preview--7f9d0729-ea9e-42ae-a3f5-f840c25b907d.lovable.app";
+  "https://nicapos.lovable.app";
 
 function createWindow() {
   const win = new BrowserWindow({
