@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/app/DashboardShell";
+import { PrinterSettingsCard } from "@/components/app/PrinterSettingsCard";
 import { useActiveTenant, usePlans } from "@/hooks/use-tenant";
 
 export const Route = createFileRoute("/_authenticated/configuracion")({
@@ -236,6 +237,8 @@ function ConfigPage() {
             </CardContent>
           </Card>
         </div>
+
+        <PrinterSettingsCard />
       </div>
     </DashboardShell>
   );
