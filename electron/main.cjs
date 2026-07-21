@@ -3,7 +3,7 @@
 // Toda la lógica (POS, ventas, auth, backend) sigue viviendo en la web:
 // el escritorio solo aporta ícono, ventana propia y experiencia sin navegador.
 
-const { app, BrowserWindow, Menu, shell } = require("electron");
+const { app, BrowserWindow, Menu, shell, ipcMain } = require("electron");
 const path = require("path");
 
 // URL de la app publicada. Cambia esto al dominio final de producción
@@ -25,7 +25,8 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true,
+      sandbox: false, // requerido para cargar preload con require()
+      preload: path.join(__dirname, "preload.cjs"),
     },
   });
 
