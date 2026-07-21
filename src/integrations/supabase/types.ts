@@ -2230,66 +2230,36 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      record_inventory_movement:
-        | {
-            Args: {
-              _movement_type: string
-              _product_id: string
-              _quantity: number
-              _reference?: string
-              _unit_cost?: number
-            }
-            Returns: {
-              avg_cost_usd: number
-              balance_qty: number
-              branch_id: string
-              created_at: string
-              created_by: string | null
-              id: string
-              movement_type: string
-              product_id: string
-              quantity: number
-              reference: string | null
-              tenant_id: string
-              unit_cost_usd: number
-            }
-            SetofOptions: {
-              from: "*"
-              to: "inventory_movements"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-        | {
-            Args: {
-              _branch_id?: string
-              _movement_type: string
-              _product_id: string
-              _quantity: number
-              _reference?: string
-              _unit_cost?: number
-            }
-            Returns: {
-              avg_cost_usd: number
-              balance_qty: number
-              branch_id: string
-              created_at: string
-              created_by: string | null
-              id: string
-              movement_type: string
-              product_id: string
-              quantity: number
-              reference: string | null
-              tenant_id: string
-              unit_cost_usd: number
-            }
-            SetofOptions: {
-              from: "*"
-              to: "inventory_movements"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
+      record_inventory_movement: {
+        Args: {
+          _branch_id?: string
+          _movement_type: string
+          _product_id: string
+          _quantity: number
+          _reference?: string
+          _unit_cost?: number
+        }
+        Returns: {
+          avg_cost_usd: number
+          balance_qty: number
+          branch_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          movement_type: string
+          product_id: string
+          quantity: number
+          reference: string | null
+          tenant_id: string
+          unit_cost_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "inventory_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       record_layaway_payment: {
         Args: {
           _amount: number

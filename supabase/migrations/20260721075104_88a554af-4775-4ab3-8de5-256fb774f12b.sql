@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.record_inventory_movement(uuid, text, numeric, numeric, text);
