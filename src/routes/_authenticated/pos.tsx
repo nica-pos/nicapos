@@ -555,7 +555,7 @@ function PosPage() {
           {/* Quick-add grid by category (hidden while typing a search) */}
           {!search && categoryProducts.length > 0 && (
             <div className="flex-1 overflow-auto p-3">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                 {categoryProducts.map((p) => {
                   const { price, promo } = applyPromotions(
                     Number(p.price_usd),
