@@ -4,6 +4,7 @@ import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
 import { Pricing } from "@/components/landing/Pricing";
 import { CTA } from "@/components/landing/CTA";
+import { Testimonials } from "@/components/landing/Testimonials";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -33,6 +34,7 @@ function Home() {
     <LandingLayout>
       <Hero />
       <Features />
+      <Testimonials />
       <Pricing />
       <CTA />
     </LandingLayout>
