@@ -20,6 +20,7 @@ export function Header() {
     { label: "Características", to: "/#features" },
     { label: "Precios", to: "/precios" },
     { label: "Soporte", to: "/#support" },
+    { label: "Descargar PC", to: "/descargar" },
   ];
 
   return (
