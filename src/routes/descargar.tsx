@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 
-const WINDOWS_INSTALLER_URL = "/__l5e/assets-v1/6011f8b2-a395-4125-b4aa-41ac41856844/Nica-POS-Windows.zip";
+const WINDOWS_INSTALLER_URL = "/__l5e/assets-v1/a2d258a0-9ae7-4556-bc2c-e7ec34741ff5/Nica-POS-Setup-1.0.0.exe";
 const APP_VERSION = "1.0.0";
 
 export const Route = createFileRoute("/descargar")({
