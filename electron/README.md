@@ -1,64 +1,65 @@
-# Nica-POS — App de escritorio (Electron)
+# Nica-POS — Instalador de escritorio (un solo clic)
 
-Este directorio contiene el envoltorio de escritorio. La app web publicada sigue siendo la fuente de verdad; Electron solo abre una ventana nativa que la carga (sin barra del navegador, con ícono propio, instalador `.exe` / `.dmg` / `.AppImage`).
+Este directorio contiene el envoltorio de escritorio (Electron). La app web publicada sigue siendo la fuente de verdad; Electron abre una ventana nativa que la carga (sin barra del navegador, con ícono propio).
 
-## 1) Publicar la web primero
+El instalador se genera con **electron-builder** en modo **NSIS one-click**: el usuario descarga **un solo archivo `.exe`**, doble clic → se instala solo → crea acceso directo en el escritorio y en el menú Inicio → abre la app.
 
-En Lovable pulsa **Publish** para tener una URL estable (`https://tu-app.lovable.app` o tu dominio propio).
-
-Luego edita `electron/main.cjs` y reemplaza `APP_URL` por esa URL de producción.
-
-## 2) Instalar dependencias (una sola vez, en tu máquina local)
+## 1) Instalar dependencias (una sola vez, en tu máquina local)
 
 ```bash
-npm install --save-dev electron @electron/packager
+npm install
 ```
 
-## 3) Probar la app de escritorio en modo desarrollo
+Ya están declaradas `electron` y `electron-builder` en `devDependencies`.
+
+## 2) Probar la app en modo desarrollo
 
 ```bash
-npx electron electron/main.cjs
+npm run electron:dev
 ```
 
-Se abrirá una ventana con tu Nica-POS cargando desde la URL pública.
+Se abrirá una ventana con Nica-POS cargando desde `https://nicapos.lovable.app`.
 
-## 4) Empaquetar instaladores
+## 3) Generar el instalador de un solo clic
 
-### Windows (.exe portable)
+### Windows (`.exe` único — recomendado)
 ```bash
-npx @electron/packager . "Nica-POS" \
-  --platform=win32 --arch=x64 \
-  --out=electron-release --overwrite \
-  --ignore='^/src' --ignore='^/public' --ignore='^/supabase' \
-  --ignore='^/electron-release'
+npm run electron:installer:win
 ```
-Resultado: `electron-release/Nica-POS-win32-x64/Nica-POS.exe`
+Resultado: `electron-release/Nica-POS-Setup-1.0.0.exe` — **un solo archivo**. El usuario:
+1. Lo descarga.
+2. Doble clic.
+3. Se instala solo (sin preguntas), crea acceso directo y abre la app.
 
-### macOS (.app)
+### macOS (`.dmg`)
 ```bash
-npx @electron/packager . "Nica-POS" \
-  --platform=darwin --arch=universal \
-  --out=electron-release --overwrite \
-  --ignore='^/src' --ignore='^/public' --ignore='^/supabase' \
-  --ignore='^/electron-release'
+npm run electron:installer:mac
 ```
+Resultado: `electron-release/Nica-POS-1.0.0.dmg` — arrastrar a Aplicaciones.
 
-### Linux (AppImage / tar)
+### Linux (`.AppImage`)
 ```bash
-npx @electron/packager . "Nica-POS" \
-  --platform=linux --arch=x64 \
-  --out=electron-release --overwrite \
-  --ignore='^/src' --ignore='^/public' --ignore='^/supabase' \
-  --ignore='^/electron-release'
+npm run electron:installer:linux
 ```
+Resultado: `electron-release/Nica-POS-1.0.0.AppImage` — dar permisos de ejecución y correr.
 
-## Ícono personalizado
+## Ícono
 
-Coloca `electron/icon.png` (512×512 recomendado). Para Windows usa `.ico` y para macOS `.icns`, y pasa `--icon=electron/icon.ico` al comando de packager.
+El ícono `electron/icon.png` (1024×1024) se usa para:
+- La ventana de la app.
+- El instalador (`.exe`).
+- El acceso directo en el escritorio.
+- El desinstalador.
+
+Para reemplazarlo, sustituye `electron/icon.png` por otro PNG cuadrado (mínimo 512×512, ideal 1024×1024). electron-builder genera automáticamente los tamaños `.ico`/`.icns` necesarios.
 
 ## Cómo funciona internamente
 
-- El proceso principal (`electron/main.cjs`) crea un `BrowserWindow` que hace `loadURL(APP_URL)`.
-- Toda la lógica (auth, ventas, inventario, superadmin) vive en la web — no se duplica nada.
-- Los usuarios inician sesión igual que en el navegador; la sesión persiste en el perfil de Electron.
-- Actualizaciones: cuando publicas cambios en Lovable, los usuarios los ven al reiniciar la app (o pulsar Ver → Recargar). No hace falta reinstalar.
+- El proceso principal (`electron/main.cjs`) abre un `BrowserWindow` que hace `loadURL('https://nicapos.lovable.app')`.
+- Toda la lógica (POS, ventas, auth, backend) vive en la web — no se duplica nada.
+- Actualizaciones automáticas: cuando publicas cambios en Lovable, los usuarios los ven al reiniciar la app. **No hace falta reinstalar.**
+- El instalador se conserva pequeño (~80 MB) porque no incluye el código fuente ni `node_modules` del bundle web.
+
+## Configuración
+
+Toda la configuración del empaquetado vive en `electron-builder.yml` en la raíz del proyecto. Ajustable: nombre, versión, íconos, atajos, permisos NSIS, categoría, etc.
