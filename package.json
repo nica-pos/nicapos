@@ -12,9 +12,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "electron:dev": "electron electron/main.cjs",
-    "electron:pack:win": "electron-packager . Nica-POS --platform=win32 --arch=x64 --out=electron-release --overwrite --ignore=^/src --ignore=^/public --ignore=^/supabase --ignore=^/electron-release",
-    "electron:pack:mac": "electron-packager . Nica-POS --platform=darwin --arch=universal --out=electron-release --overwrite --ignore=^/src --ignore=^/public --ignore=^/supabase --ignore=^/electron-release",
-    "electron:pack:linux": "electron-packager . Nica-POS --platform=linux --arch=x64 --out=electron-release --overwrite --ignore=^/src --ignore=^/public --ignore=^/supabase --ignore=^/electron-release"
+    "electron:installer:win": "electron-builder --win --x64",
+    "electron:installer:mac": "electron-builder --mac",
+    "electron:installer:linux": "electron-builder --linux AppImage"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
