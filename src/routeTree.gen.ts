@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PruebaGratisRouteImport } from './routes/prueba-gratis'
 import { Route as PreciosRouteImport } from './routes/precios'
+import { Route as DescargarRouteImport } from './routes/descargar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -59,6 +60,11 @@ const PruebaGratisRoute = PruebaGratisRouteImport.update({
 const PreciosRoute = PreciosRouteImport.update({
   id: '/precios',
   path: '/precios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DescargarRoute = DescargarRouteImport.update({
+  id: '/descargar',
+  path: '/descargar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -239,6 +245,7 @@ const ApiPublicWebhooksPaypalRoute = ApiPublicWebhooksPaypalRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/descargar': typeof DescargarRoute
   '/precios': typeof PreciosRoute
   '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/descargar': typeof DescargarRoute
   '/precios': typeof PreciosRoute
   '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/descargar': typeof DescargarRoute
   '/precios': typeof PreciosRoute
   '/prueba-gratis': typeof PruebaGratisRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -354,6 +363,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/descargar'
     | '/precios'
     | '/prueba-gratis'
     | '/sitemap.xml'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/descargar'
     | '/precios'
     | '/prueba-gratis'
     | '/sitemap.xml'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/descargar'
     | '/precios'
     | '/prueba-gratis'
     | '/sitemap.xml'
@@ -468,6 +480,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DescargarRoute: typeof DescargarRoute
   PreciosRoute: typeof PreciosRoute
   PruebaGratisRoute: typeof PruebaGratisRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -497,6 +510,13 @@ declare module '@tanstack/react-router' {
       path: '/precios'
       fullPath: '/precios'
       preLoaderRoute: typeof PreciosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/descargar': {
+      id: '/descargar'
+      path: '/descargar'
+      fullPath: '/descargar'
+      preLoaderRoute: typeof DescargarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -803,6 +823,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DescargarRoute: DescargarRoute,
   PreciosRoute: PreciosRoute,
   PruebaGratisRoute: PruebaGratisRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
