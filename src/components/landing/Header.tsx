@@ -20,7 +20,6 @@ export function Header() {
     { label: "Características", to: "/#features" },
     { label: "Precios", to: "/precios" },
     { label: "Soporte", to: "/#support" },
-    { label: "Descargar PC", to: "/descargar" },
   ];
 
   return (
@@ -93,6 +92,12 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <Button variant="outline" asChild className="w-full gap-2" onClick={() => setOpen(false)}>
+              <Link to="/descargar">
+                <Download className="h-4 w-4" />
+                Descargar PC
+              </Link>
+            </Button>
             {!loading && (
               <>
                 {user ? (
