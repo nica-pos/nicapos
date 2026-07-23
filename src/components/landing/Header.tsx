@@ -44,6 +44,13 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <Button variant="outline" size="sm" asChild className="gap-2">
+            <Link to="/descargar">
+              <Download className="h-4 w-4" />
+              Descargar PC
+            </Link>
+          </Button>
+
           {!loading && (
             <>
               {user ? (
