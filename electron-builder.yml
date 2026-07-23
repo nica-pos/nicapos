@@ -19,7 +19,7 @@ win:
     - target: nsis
       arch:
         - x64
-  icon: electron/icon.png
+  icon: electron/icon.ico
   artifactName: Nica-POS-Setup-${version}.${ext}
 
 nsis:
@@ -29,9 +29,9 @@ nsis:
   createDesktopShortcut: always
   createStartMenuShortcut: true
   shortcutName: Nica-POS
-  installerIcon: electron/icon.png
-  uninstallerIcon: electron/icon.png
-  installerHeaderIcon: electron/icon.png
+  installerIcon: electron/icon.ico
+  uninstallerIcon: electron/icon.ico
+  installerHeaderIcon: electron/icon.ico
   deleteAppDataOnUninstall: true
 
 mac:
