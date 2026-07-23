@@ -76,7 +76,7 @@ function DescargarPage() {
             <p className="text-sm uppercase tracking-wider text-muted-foreground">Versión {APP_VERSION}</p>
             <h2 className="mt-2 text-2xl font-bold">Descargar para Windows</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Compatible con Windows 10 y 11 (64-bit) · ~110 MB (.zip)
+              Compatible con Windows 10 y 11 (64-bit) · ~113 MB (.exe)
             </p>
             <Button asChild size="lg" className="mt-6 gap-2">
               <a href={WINDOWS_INSTALLER_URL} download>
@@ -87,9 +87,9 @@ function DescargarPage() {
             <div className="mx-auto mt-6 max-w-md rounded-xl border border-border/60 bg-background/60 p-4 text-left text-xs text-muted-foreground">
               <p className="mb-2 font-semibold text-foreground">Cómo instalar:</p>
               <ol className="list-decimal space-y-1 pl-4">
-                <li>Descomprime el archivo ZIP en una carpeta (por ejemplo en <code>C:\Nica-POS</code>).</li>
-                <li>Entra a la carpeta y haz doble clic en <code>Nica-POS.exe</code>.</li>
-                <li>Opcional: click derecho al <code>.exe</code> → "Anclar al inicio" o "Crear acceso directo" en el escritorio.</li>
+                <li>Descarga el archivo <code>Nica-POS-Setup-1.0.0.exe</code>.</li>
+                <li>Doble clic al instalador y sigue los pasos.</li>
+                <li>Se creará automáticamente un acceso directo en tu escritorio.</li>
               </ol>
             </div>
           </div>
