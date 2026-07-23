@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X, Store } from "lucide-react";
+import { Menu, X, Store, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,6 +20,7 @@ export function Header() {
     { label: "Características", to: "/#features" },
     { label: "Precios", to: "/precios" },
     { label: "Soporte", to: "/#support" },
+    { label: "Descargar PC", to: "/descargar" },
   ];
 
   return (
@@ -43,6 +44,13 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <Button variant="outline" size="sm" asChild className="gap-2">
+            <Link to="/descargar">
+              <Download className="h-4 w-4" />
+              Descargar PC
+            </Link>
+          </Button>
+
           {!loading && (
             <>
               {user ? (

@@ -30,7 +30,9 @@ function createWindow() {
     },
   });
 
-  win.loadURL(APP_URL);
+  // En escritorio saltamos la landing y vamos directo al login.
+  // Si el usuario ya tiene sesión, /auth lo redirige a su panel.
+  win.loadURL(`${APP_URL.replace(/\/$/, "")}/auth`);
 
   // Abrir enlaces externos (target=_blank) en el navegador del sistema
   win.webContents.setWindowOpenHandler(({ url }) => {
