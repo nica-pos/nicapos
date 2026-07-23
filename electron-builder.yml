@@ -1,0 +1,53 @@
+appId: com.nicapos.desktop
+productName: Nica-POS
+copyright: Copyright © 2026 Nica-POS
+
+directories:
+  output: electron-release
+  buildResources: electron
+
+files:
+  - electron/**/*
+  - package.json
+
+# Solo empaquetamos el wrapper de escritorio: la app web vive en la nube.
+# No incluimos src/, public/, supabase/, node_modules del bundle web, etc.
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: electron/icon.png
+  artifactName: Nica-POS-Setup-${version}.${ext}
+
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Nica-POS
+  installerIcon: electron/icon.png
+  uninstallerIcon: electron/icon.png
+  installerHeaderIcon: electron/icon.png
+  deleteAppDataOnUninstall: true
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - universal
+  icon: electron/icon.png
+  category: public.app-category.business
+  artifactName: Nica-POS-${version}.${ext}
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: electron/icon.png
+  category: Office
+  artifactName: Nica-POS-${version}.${ext}
