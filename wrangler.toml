@@ -1,4 +1,4 @@
-# Cloudflare Workers/Pages configuration
+name = "nicapos"# Cloudflare Workers/Pages configuration
 # Public Supabase values (safe to commit — anon/publishable key is designed to be public).
 # The SERVICE_ROLE key must NEVER be added here; set it as a secret in the Cloudflare dashboard.
 
