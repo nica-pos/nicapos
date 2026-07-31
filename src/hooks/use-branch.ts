@@ -24,9 +24,9 @@ export function setActiveBranchId(tenantId: string, branchId: string) {
 }
 
 export function useBranches() {
-  const { tenant } = useActiveTenant();
+  const { tenant, role } = useActiveTenant();
   return useQuery({
-    queryKey: ["branches", tenant?.id],
+    queryKey: ["branches", tenant?.id, role],
     enabled: !!tenant,
     staleTime: 60_000,
     queryFn: async (): Promise<Branch[]> => {
@@ -37,10 +37,37 @@ export function useBranches() {
         .order("is_default", { ascending: false })
         .order("name");
       if (error) throw error;
-      return data ?? [];
+      let list = data ?? [];
+
+      // Cajeros: solo ven las sucursales que tienen asignadas.
+      if (role === "cashier") {
+        const { data: u } = await supabase.auth.getUser();
+        const uid = u.user?.id;
+        if (uid) {
+          const { data: assigned } = await supabase
+            .from("user_branches")
+            .select("branch_id")
+            .eq("tenant_id", tenant!.id)
+            .eq("user_id", uid);
+          const ids = new Set((assigned ?? []).map((a) => a.branch_id));
+          if (ids.size > 0) {
+            list = list.filter((b) => ids.has(b.id));
+          } else {
+            const { data: mem } = await supabase
+              .from("tenant_members")
+              .select("branch_id")
+              .eq("tenant_id", tenant!.id)
+              .eq("user_id", uid)
+              .maybeSingle();
+            if (mem?.branch_id) list = list.filter((b) => b.id === mem.branch_id);
+          }
+        }
+      }
+      return list;
     },
   });
 }
+
 
 export function useActiveBranch() {
   const { tenant } = useActiveTenant();

@@ -33,6 +33,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DashboardShell } from "@/components/app/DashboardShell";
+import { MemberBranchesCell } from "@/components/app/MemberBranchesCell";
+
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { addTenantMemberByEmail, removeTenantMember } from "@/lib/tenant.functions";
 
@@ -236,6 +238,8 @@ function TeamPage() {
                   <TableHead>Nombre</TableHead>
                   <TableHead>Correo</TableHead>
                   <TableHead>Rol</TableHead>
+                  <TableHead>Sucursales</TableHead>
+
                   {canManage && <TableHead className="text-right">Acciones</TableHead>}
                 </TableRow>
               </TableHeader>
@@ -262,6 +266,17 @@ function TeamPage() {
                           <Badge variant={isOwner ? "default" : "secondary"}>{roleLabels[m.role]}</Badge>
                         )}
                       </TableCell>
+                      <TableCell>
+                        <MemberBranchesCell
+                          tenantId={tenant!.id}
+                          memberId={m.id}
+                          userId={m.user_id}
+                          role={m.role}
+                          mainBranchId={m.branch_id ?? null}
+                          canManage={canManage}
+                        />
+                      </TableCell>
+
                       {canManage && (
                         <TableCell className="text-right">
                           {!isOwner && (
