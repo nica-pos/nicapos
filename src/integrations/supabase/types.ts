@@ -2147,6 +2147,48 @@ export type Database = {
           },
         ]
       }
+      user_branches: {
+        Row: {
+          branch_id: string
+          created_at: string
+          id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          id?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_branches_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_branches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2182,6 +2224,10 @@ export type Database = {
           _trial_days: number
         }
         Returns: string
+      }
+      can_access_branch: {
+        Args: { _branch_id: string; _user_id: string }
+        Returns: boolean
       }
       can_create_branch: { Args: { _tenant_id: string }; Returns: boolean }
       cleanup_stale_tenants: { Args: never; Returns: undefined }
