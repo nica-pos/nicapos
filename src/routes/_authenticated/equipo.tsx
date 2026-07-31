@@ -33,6 +33,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DashboardShell } from "@/components/app/DashboardShell";
+import { MemberBranchesCell } from "@/components/app/MemberBranchesCell";
+
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { addTenantMemberByEmail, removeTenantMember } from "@/lib/tenant.functions";
 
