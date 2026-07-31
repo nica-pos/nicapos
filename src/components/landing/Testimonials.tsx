@@ -1,5 +1,4 @@
 import { Star, Quote } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 
 type Testimonial = {
   name: string;
@@ -74,101 +73,110 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-/**
- * Sección de testimonios y reseñas de clientes reales de Nica-POS.
- * Se muestra en la landing para transmitir confianza y prueba social.
- */
-export function Testimonials() {
+function TestimonialCard({ t }: { t: Testimonial }) {
   return (
-    <section
-      id="testimonios"
-      className="border-t border-border/50 bg-gradient-to-b from-background to-muted/20 py-20"
-    >
-      <div className="container mx-auto px-4">
-        {/* Encabezado de la sección */}
-        <div className="mx-auto mb-14 max-w-2xl text-center">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-            <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-            Reseñas verificadas
-          </div>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Cientos de negocios en Nicaragua ya confían en Nica-POS
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Descubre por qué comerciantes, farmacias, ferreterías y boutiques
-            eligen nuestro sistema todos los días.
-          </p>
-        </div>
-
-        {/* Grid de tarjetas de testimonios */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((t) => (
-            <Card
-              key={t.name}
-              className="group relative overflow-hidden border-border/60 bg-card/60 backdrop-blur transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
-            >
-              <CardContent className="p-6">
-                {/* Ícono decorativo de comilla */}
-                <Quote className="mb-3 h-6 w-6 text-primary/30" />
-
-                {/* Estrellas de calificación */}
-                <div
-                  className="mb-3 flex gap-0.5"
-                  aria-label={`${t.rating} de 5 estrellas`}
-                >
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={
-                        i < t.rating
-                          ? "h-4 w-4 fill-yellow-400 text-yellow-400"
-                          : "h-4 w-4 text-muted-foreground/30"
-                      }
-                    />
-                  ))}
-                </div>
-
-                {/* Comentario del cliente */}
-                <p className="mb-6 text-sm leading-relaxed text-foreground/90">
-                  “{t.comment}”
-                </p>
-
-                {/* Datos del cliente */}
-                <div className="flex items-center gap-3 border-t border-border/50 pt-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 text-sm font-semibold text-primary">
-                    {t.initials}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{t.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {t.role} · {t.business} · {t.location}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+    <figure className="w-[20rem] shrink-0 rounded-2xl border border-border/60 bg-card p-6 transition-colors hover:border-primary/40 sm:w-[23rem]">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-0.5" aria-label={`${t.rating} de 5 estrellas`}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={
+                i < t.rating
+                  ? "h-3.5 w-3.5 fill-warning text-warning"
+                  : "h-3.5 w-3.5 text-muted-foreground/30"
+              }
+            />
           ))}
         </div>
+        <Quote className="h-5 w-5 text-primary/25" />
+      </div>
 
-        {/* Métricas resumen */}
-        <div className="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-6 rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur sm:grid-cols-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">4.9★</p>
-            <p className="mt-1 text-xs text-muted-foreground">Calificación promedio</p>
+      <blockquote className="mt-4 text-sm leading-relaxed text-foreground/90">
+        “{t.comment}”
+      </blockquote>
+
+      <figcaption className="mt-6 flex items-center gap-3 border-t border-border/50 pt-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/25 to-primary/5 text-sm font-semibold text-primary">
+          {t.initials}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">{t.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {t.role} · {t.business} · {t.location}
+          </p>
+        </div>
+      </figcaption>
+    </figure>
+  );
+}
+
+/**
+ * Sección de testimonios en formato de carrusel infinito (marquesina)
+ * para dar movimiento y modernidad a la landing.
+ */
+export function Testimonials() {
+  const rowA = testimonials.slice(0, 3);
+  const rowB = testimonials.slice(3);
+
+  return (
+    <section id="testimonios" className="relative overflow-hidden border-y border-border/50 py-24">
+      <div className="pointer-events-none absolute inset-0 bg-radial-glow opacity-70" />
+
+      <div className="relative mx-auto mb-14 max-w-3xl px-4 text-center">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+          Reseñas verificadas
+        </div>
+        <h2 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
+          Cientos de negocios ya
+          <br className="hidden sm:block" /> confían en Nica-POS
+        </h2>
+        <p className="mt-4 text-muted-foreground">
+          Comerciantes, farmacias, ferreterías y boutiques lo usan todos los días.
+        </p>
+      </div>
+
+      <div className="relative flex flex-col gap-4">
+        <div className="marquee-mask flex overflow-hidden">
+          <div className="animate-marquee flex shrink-0 gap-4 pr-4">
+            {[...rowA, ...rowA].map((t, i) => (
+              <TestimonialCard key={`a-${t.name}-${i}`} t={t} />
+            ))}
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">+500</p>
-            <p className="mt-1 text-xs text-muted-foreground">Negocios activos</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">99.9%</p>
-            <p className="mt-1 text-xs text-muted-foreground">Uptime garantizado</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">24/7</p>
-            <p className="mt-1 text-xs text-muted-foreground">Soporte en español</p>
+          <div className="animate-marquee flex shrink-0 gap-4 pr-4" aria-hidden>
+            {[...rowA, ...rowA].map((t, i) => (
+              <TestimonialCard key={`a2-${t.name}-${i}`} t={t} />
+            ))}
           </div>
         </div>
+
+        <div className="marquee-mask flex overflow-hidden">
+          <div className="animate-marquee-reverse flex shrink-0 gap-4 pr-4">
+            {[...rowB, ...rowB].map((t, i) => (
+              <TestimonialCard key={`b-${t.name}-${i}`} t={t} />
+            ))}
+          </div>
+          <div className="animate-marquee-reverse flex shrink-0 gap-4 pr-4" aria-hidden>
+            {[...rowB, ...rowB].map((t, i) => (
+              <TestimonialCard key={`b2-${t.name}-${i}`} t={t} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 px-0 sm:grid-cols-4">
+        {[
+          { k: "4.9★", v: "Calificación promedio" },
+          { k: "+500", v: "Negocios activos" },
+          { k: "99.9%", v: "Uptime garantizado" },
+          { k: "24/7", v: "Soporte en español" },
+        ].map((m) => (
+          <div key={m.v} className="bg-card px-4 py-6 text-center">
+            <p className="text-2xl font-bold text-foreground">{m.k}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{m.v}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
