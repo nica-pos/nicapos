@@ -210,7 +210,43 @@
   .bg-radial-glow {
     background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--color-primary) 15%, transparent), transparent 55%);
   }
+
+  /* Marquesinas infinitas de la landing */
+  .marquee-mask {
+    mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  }
+
+  .animate-marquee {
+    animation: nica-marquee 38s linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: nica-marquee 44s linear infinite reverse;
+  }
+
+  .marquee-mask:hover .animate-marquee,
+  .marquee-mask:hover .animate-marquee-reverse {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee,
+    .animate-marquee-reverse {
+      animation: none;
+    }
+  }
 }
+
+@keyframes nica-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
 
 /* Ocultar badge "Made with Lovable" */
 a[href*="lovable.dev"],
