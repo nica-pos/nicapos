@@ -17,6 +17,7 @@ export type Database = {
       audit_logs: {
         Row: {
           action: string
+          branch_id: string | null
           created_at: string
           details: Json
           entity: string
@@ -27,6 +28,7 @@ export type Database = {
         }
         Insert: {
           action: string
+          branch_id?: string | null
           created_at?: string
           details?: Json
           entity: string
@@ -37,6 +39,7 @@ export type Database = {
         }
         Update: {
           action?: string
+          branch_id?: string | null
           created_at?: string
           details?: Json
           entity?: string
@@ -46,6 +49,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "audit_logs_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "audit_logs_tenant_id_fkey"
             columns: ["tenant_id"]
