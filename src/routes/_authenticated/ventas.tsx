@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
 import { useFiscalSettings, formatUSD, formatNIO } from "@/hooks/use-fiscal";
 import { useVoidSale } from "@/hooks/use-pos";
 import { getFriendlyErrorMessage } from "@/lib/errors";
@@ -69,6 +70,7 @@ type SaleRow = {
 
 function SalesHistoryPage() {
   const { tenant, role } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const { data: fiscal } = useFiscalSettings();
   const qc = useQueryClient();
   const voidSale = useVoidSale();
@@ -80,8 +82,8 @@ function SalesHistoryPage() {
   const [confirmDelete, setConfirmDelete] = useState<SaleRow | null>(null);
 
   const { data: sales, isLoading } = useQuery({
-    queryKey: ["ventas-history", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["ventas-history", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
@@ -89,6 +91,7 @@ function SalesHistoryPage() {
           "id, sale_number, subtotal_usd, tax_usd, total_usd, exchange_rate, created_at, voided_at, void_reason, sold_by, sale_items(name, quantity, unit_price_usd, tax_usd, line_total_usd), sale_payments(method, amount, currency)",
         )
         .eq("tenant_id", tenant!.id)
+        .eq("branch_id", branchId!)
         .order("created_at", { ascending: false })
         .limit(300);
       if (error) throw error;

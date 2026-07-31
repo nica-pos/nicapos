@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useActiveTenant } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
+
 
 export type AuditLog = Database["public"]["Tables"]["audit_logs"]["Row"];
 
@@ -24,9 +26,10 @@ function startOfLocalDay(d: Date) {
 
 export function useFinancials() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   return useQuery({
-    queryKey: ["financials", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["financials", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async (): Promise<FinancialSummary> => {
       const since = startOfLocalDay(new Date());
       since.setDate(since.getDate() - 13); // last 14 days
@@ -38,17 +41,20 @@ export function useFinancials() {
             .from("sales")
             .select("id, total_usd, subtotal_usd, created_at")
             .eq("tenant_id", tenant!.id)
+            .eq("branch_id", branchId!)
             .is("voided_at", null)
             .gte("created_at", sinceIso),
           supabase
             .from("sale_items")
-            .select("sale_id, quantity, unit_cost_usd, created_at")
+            .select("sale_id, quantity, unit_cost_usd, created_at, sales!inner(branch_id)")
             .eq("tenant_id", tenant!.id)
+            .eq("sales.branch_id", branchId!)
             .gte("created_at", sinceIso),
           supabase
             .from("cash_movements")
             .select("type, amount, currency, created_at")
             .eq("tenant_id", tenant!.id)
+            .eq("branch_id", branchId!)
             .gte("created_at", sinceIso),
           supabase
             .from("exchange_rates")
@@ -58,6 +64,7 @@ export function useFinancials() {
             .limit(1)
             .maybeSingle(),
         ]);
+
 
       // Real configured exchange rate (NIO per USD); fallback avoids div-by-zero.
       const nioPerUsd = rateRow?.rate ? Number(rateRow.rate) : 0;
@@ -140,14 +147,17 @@ export function useFinancials() {
 // ---------- Audit log ----------
 export function useAuditLogs() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   return useQuery({
-    queryKey: ["audit_logs", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["audit_logs", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
+      // Incluye los registros sin sucursal (histórico o acciones globales).
       const { data, error } = await supabase
         .from("audit_logs")
         .select("*")
         .eq("tenant_id", tenant!.id)
+        .or(`branch_id.eq.${branchId},branch_id.is.null`)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;

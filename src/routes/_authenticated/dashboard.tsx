@@ -18,6 +18,8 @@ import {
 } from "recharts";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
+
 import { useFinancials } from "@/hooks/use-analytics";
 import { useLatestRate } from "@/hooks/use-fiscal";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +43,7 @@ function DashboardPage() {
   const { isLoading, hasTenant, tenant } = useActiveTenant();
   const { data: isSuperadmin, isLoading: saLoading } = useIsSuperadmin();
   const { data: fin } = useFinancials();
+  const { branchId } = useActiveBranch();
   const latestRate = useLatestRate();
 
   useEffect(() => {
@@ -48,21 +51,24 @@ function DashboardPage() {
     if (!hasTenant) navigate({ to: isSuperadmin ? "/admin" : "/onboarding" });
   }, [isLoading, saLoading, hasTenant, isSuperadmin, navigate]);
 
-  // Bajo stock, agrupado por severidad
+  // Bajo stock de la sucursal activa, agrupado por severidad
   const lowStock = useQuery({
-    queryKey: ["dash-lowstock", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["dash-lowstock", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("products")
-        .select("id, name, stock, min_stock, category_id, categories(name)")
+        .from("product_stock")
+        .select("stock, products!inner(id, name, min_stock, is_active)")
         .eq("tenant_id", tenant!.id)
-        .eq("is_active", true);
+        .eq("branch_id", branchId!)
+        .eq("products.is_active", true);
       if (error) throw error;
       let out = 0, low = 0, warn = 0;
       const items: { name: string; qty: number; level: "out" | "low" | "warn" }[] = [];
-      for (const p of data ?? []) {
-        const stock = Number(p.stock ?? 0);
+      for (const row of (data ?? []) as any[]) {
+        const p = row.products;
+        if (!p) continue;
+        const stock = Number(row.stock ?? 0);
         const min = Number(p.min_stock ?? 0);
         if (stock <= 0) { out++; items.push({ name: p.name, qty: stock, level: "out" }); }
         else if (min > 0 && stock <= min) { low++; items.push({ name: p.name, qty: stock, level: "low" }); }
@@ -74,15 +80,16 @@ function DashboardPage() {
 
   // Top categorías (últimos 30 días por USD vendido)
   const topCats = useQuery({
-    queryKey: ["dash-topcats", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["dash-topcats", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
       const since = new Date();
       since.setDate(since.getDate() - 30);
       const { data, error } = await supabase
         .from("sale_items")
-        .select("quantity, unit_price_usd, line_total_usd, tax_usd, products(category_id, categories(name))")
+        .select("quantity, unit_price_usd, line_total_usd, tax_usd, sales!inner(branch_id), products(category_id, categories(name))")
         .eq("tenant_id", tenant!.id)
+        .eq("sales.branch_id", branchId!)
         .gte("created_at", since.toISOString());
       if (error) throw error;
       const totals = new Map<string, number>();
@@ -103,13 +110,14 @@ function DashboardPage() {
 
   // Últimas transacciones
   const recent = useQuery({
-    queryKey: ["dash-recent", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["dash-recent", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
         .select("id, sale_number, total_usd, created_at")
         .eq("tenant_id", tenant!.id)
+        .eq("branch_id", branchId!)
         .is("voided_at", null)
         .order("created_at", { ascending: false })
         .limit(5);
@@ -120,15 +128,17 @@ function DashboardPage() {
 
   // Historial de aperturas y cierres de caja (owner/admin)
   const cashHistory = useQuery({
-    queryKey: ["dash-cash-history", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["dash-cash-history", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cash_sessions")
         .select("id, status, opened_at, closed_at, opening_nio, opening_usd, counted_nio, counted_usd, opened_by, closed_by")
         .eq("tenant_id", tenant!.id)
+        .eq("branch_id", branchId!)
         .order("opened_at", { ascending: false })
         .limit(10);
+
       if (error) throw error;
       const rows = data ?? [];
       const userIds = Array.from(new Set(rows.flatMap((r) => [r.opened_by, r.closed_by]).filter(Boolean))) as string[];
