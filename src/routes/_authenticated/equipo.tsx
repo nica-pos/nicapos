@@ -236,6 +236,8 @@ function TeamPage() {
                   <TableHead>Nombre</TableHead>
                   <TableHead>Correo</TableHead>
                   <TableHead>Rol</TableHead>
+                  <TableHead>Sucursales</TableHead>
+
                   {canManage && <TableHead className="text-right">Acciones</TableHead>}
                 </TableRow>
               </TableHeader>
