@@ -24,9 +24,10 @@ function startOfLocalDay(d: Date) {
 
 export function useFinancials() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   return useQuery({
-    queryKey: ["financials", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["financials", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async (): Promise<FinancialSummary> => {
       const since = startOfLocalDay(new Date());
       since.setDate(since.getDate() - 13); // last 14 days
@@ -38,17 +39,20 @@ export function useFinancials() {
             .from("sales")
             .select("id, total_usd, subtotal_usd, created_at")
             .eq("tenant_id", tenant!.id)
+            .eq("branch_id", branchId!)
             .is("voided_at", null)
             .gte("created_at", sinceIso),
           supabase
             .from("sale_items")
-            .select("sale_id, quantity, unit_cost_usd, created_at")
+            .select("sale_id, quantity, unit_cost_usd, created_at, sales!inner(branch_id)")
             .eq("tenant_id", tenant!.id)
+            .eq("sales.branch_id", branchId!)
             .gte("created_at", sinceIso),
           supabase
             .from("cash_movements")
             .select("type, amount, currency, created_at")
             .eq("tenant_id", tenant!.id)
+            .eq("branch_id", branchId!)
             .gte("created_at", sinceIso),
           supabase
             .from("exchange_rates")
@@ -58,6 +62,7 @@ export function useFinancials() {
             .limit(1)
             .maybeSingle(),
         ]);
+
 
       // Real configured exchange rate (NIO per USD); fallback avoids div-by-zero.
       const nioPerUsd = rateRow?.rate ? Number(rateRow.rate) : 0;
