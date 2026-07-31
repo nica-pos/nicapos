@@ -18,6 +18,8 @@ import {
 } from "recharts";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
+import { useActiveBranch } from "@/hooks/use-branch";
+
 import { useFinancials } from "@/hooks/use-analytics";
 import { useLatestRate } from "@/hooks/use-fiscal";
 import { supabase } from "@/integrations/supabase/client";
