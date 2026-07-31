@@ -147,14 +147,17 @@ export function useFinancials() {
 // ---------- Audit log ----------
 export function useAuditLogs() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   return useQuery({
-    queryKey: ["audit_logs", tenant?.id],
-    enabled: !!tenant,
+    queryKey: ["audit_logs", tenant?.id, branchId],
+    enabled: !!tenant && !!branchId,
     queryFn: async () => {
+      // Incluye los registros sin sucursal (histórico o acciones globales).
       const { data, error } = await supabase
         .from("audit_logs")
         .select("*")
         .eq("tenant_id", tenant!.id)
+        .or(`branch_id.eq.${branchId},branch_id.is.null`)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
