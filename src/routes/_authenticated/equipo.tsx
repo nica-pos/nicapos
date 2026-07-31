@@ -264,6 +264,17 @@ function TeamPage() {
                           <Badge variant={isOwner ? "default" : "secondary"}>{roleLabels[m.role]}</Badge>
                         )}
                       </TableCell>
+                      <TableCell>
+                        <MemberBranchesCell
+                          tenantId={tenant!.id}
+                          memberId={m.id}
+                          userId={m.user_id}
+                          role={m.role}
+                          mainBranchId={m.branch_id ?? null}
+                          canManage={canManage}
+                        />
+                      </TableCell>
+
                       {canManage && (
                         <TableCell className="text-right">
                           {!isOwner && (
