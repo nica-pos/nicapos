@@ -425,7 +425,7 @@ function TrasladosPage() {
             <DialogDescription>
               Se moverán <b>{qtyNum}</b> unidad(es) de <b>{productName}</b> desde{" "}
               <b>{branchName(fromBranch)}</b> hacia <b>{branchName(toBranch)}</b>.
-              Esta acción actualiza el stock inmediatamente.
+              El stock sale del origen ahora y quedará “en tránsito” hasta que destino confirme la recepción.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
