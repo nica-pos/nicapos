@@ -58,6 +58,8 @@ type SaleRow = {
   voided_at: string | null;
   void_reason: string | null;
   sold_by: string | null;
+  branches?: { name: string } | null;
+
   sale_items: {
     name: string;
     quantity: number;
