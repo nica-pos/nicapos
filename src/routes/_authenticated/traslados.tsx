@@ -29,7 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRightLeft, Loader2, Package } from "lucide-react";
+import { ArrowRightLeft, Check, Loader2, Package, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { useBranches } from "@/hooks/use-branch";
@@ -41,6 +42,19 @@ export const Route = createFileRoute("/_authenticated/traslados")({
 
 type ProductLite = { id: string; name: string; sku: string | null };
 type StockRow = { product_id: string; branch_id: string; stock: number };
+type TransferRow = {
+  id: string;
+  product_id: string;
+  from_branch_id: string;
+  to_branch_id: string;
+  quantity: number;
+  note: string | null;
+  status: "in_transit" | "received" | "cancelled";
+  created_at: string;
+  received_at: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+};
 
 function TrasladosPage() {
   const { tenant, role } = useActiveTenant();
@@ -109,9 +123,33 @@ function TrasladosPage() {
   const canSubmit =
     !!productId && !!fromBranch && !!toBranch && !sameBranch && enoughStock;
 
+  const transfersQ = useQuery({
+    queryKey: ["stock-transfers", tenant?.id],
+    enabled: !!tenant,
+    queryFn: async (): Promise<TransferRow[]> => {
+      const { data, error } = await supabase
+        .from("stock_transfers")
+        .select(
+          "id, product_id, from_branch_id, to_branch_id, quantity, note, status, created_at, received_at, cancelled_at, cancel_reason",
+        )
+        .eq("tenant_id", tenant!.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return (data ?? []) as TransferRow[];
+    },
+  });
+
+  const refreshAll = () => {
+    qc.invalidateQueries({ queryKey: ["stock-transfers"] });
+    qc.invalidateQueries({ queryKey: ["product-stock-all"] });
+    qc.invalidateQueries({ queryKey: ["products"] });
+    qc.invalidateQueries({ queryKey: ["inventory"] });
+  };
+
   const transferMut = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("transfer_stock", {
+      const { error } = await supabase.rpc("create_stock_transfer", {
         _product_id: productId,
         _from_branch: fromBranch,
         _to_branch: toBranch,
@@ -121,37 +159,50 @@ function TrasladosPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Traslado registrado correctamente");
+      toast.success("Traslado enviado. Queda en tránsito hasta que destino confirme.");
       setQuantity("");
       setNote("");
       setConfirmOpen(false);
-      qc.invalidateQueries({ queryKey: ["product-stock-all"] });
-      qc.invalidateQueries({ queryKey: ["products"] });
-      qc.invalidateQueries({ queryKey: ["inventory"] });
+      refreshAll();
     },
     onError: (err) => {
       toast.error(getFriendlyErrorMessage(err));
     },
   });
 
+  const receiveMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("receive_stock_transfer", { _transfer_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Recepción confirmada. Stock sumado al destino.");
+      refreshAll();
+    },
+    onError: (err) => toast.error(getFriendlyErrorMessage(err)),
+  });
+
+  const cancelMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("cancel_stock_transfer", {
+        _transfer_id: id,
+        _reason: "Cancelado por el usuario",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Traslado cancelado. Stock devuelto al origen.");
+      refreshAll();
+    },
+    onError: (err) => toast.error(getFriendlyErrorMessage(err)),
+  });
+
   const branchName = (id: string) =>
     activeBranches.find((b) => b.id === id)?.name ?? "—";
   const productName = productsQ.data?.find((p) => p.id === productId)?.name ?? "";
 
-  if (!canManage) {
-    return (
-      <DashboardShell>
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin permiso</CardTitle>
-            <CardDescription>
-              Solo el dueño o un administrador pueden trasladar stock.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </DashboardShell>
-    );
-  }
+
+
 
   return (
     <DashboardShell>
@@ -165,7 +216,16 @@ function TrasladosPage() {
           </p>
         </div>
 
-        {activeBranches.length < 2 ? (
+        {!canManage ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Solo consulta</CardTitle>
+              <CardDescription>
+                Podés confirmar la recepción de traslados hacia tus sucursales, pero solo el dueño o un administrador puede crear traslados.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ) : activeBranches.length < 2 ? (
           <Card>
             <CardHeader>
               <CardTitle>Necesitas al menos 2 sucursales</CardTitle>
@@ -281,7 +341,82 @@ function TrasladosPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Historial de traslados</CardTitle>
+            <CardDescription>
+              Los traslados quedan “en tránsito” hasta que alguien de la sucursal de destino confirme la recepción.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {transfersQ.isLoading ? (
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+            ) : (transfersQ.data ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Todavía no hay traslados registrados.</p>
+            ) : (
+              (transfersQ.data ?? []).map((t) => (
+                <div
+                  key={t.id}
+                  className="flex flex-col gap-2 rounded-md border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="space-y-0.5 text-sm">
+                    <div className="font-medium">
+                      {productsQ.data?.find((p) => p.id === t.product_id)?.name ?? "Producto"} ·{" "}
+                      {Number(t.quantity)} u.
+                    </div>
+                    <div className="text-muted-foreground">
+                      {branchName(t.from_branch_id)} → {branchName(t.to_branch_id)} ·{" "}
+                      {new Date(t.created_at).toLocaleString()}
+                    </div>
+                    {t.note && <div className="text-xs text-muted-foreground">{t.note}</div>}
+                    {t.status === "cancelled" && t.cancel_reason && (
+                      <div className="text-xs text-destructive">{t.cancel_reason}</div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={
+                        t.status === "received"
+                          ? "default"
+                          : t.status === "cancelled"
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    >
+                      {t.status === "received"
+                        ? "Recibido"
+                        : t.status === "cancelled"
+                          ? "Cancelado"
+                          : "En tránsito"}
+                    </Badge>
+                    {t.status === "in_transit" && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => receiveMut.mutate(t.id)}
+                          disabled={receiveMut.isPending || cancelMut.isPending}
+                        >
+                          <Check className="mr-1 h-4 w-4" /> Confirmar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => cancelMut.mutate(t.id)}
+                          disabled={receiveMut.isPending || cancelMut.isPending}
+                        >
+                          <X className="mr-1 h-4 w-4" /> Cancelar
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
+
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
@@ -290,7 +425,7 @@ function TrasladosPage() {
             <DialogDescription>
               Se moverán <b>{qtyNum}</b> unidad(es) de <b>{productName}</b> desde{" "}
               <b>{branchName(fromBranch)}</b> hacia <b>{branchName(toBranch)}</b>.
-              Esta acción actualiza el stock inmediatamente.
+              El stock sale del origen ahora y quedará “en tránsito” hasta que destino confirme la recepción.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

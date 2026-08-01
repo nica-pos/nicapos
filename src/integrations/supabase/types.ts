@@ -1812,6 +1812,92 @@ export type Database = {
           },
         ]
       }
+      stock_transfers: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          from_branch_id: string
+          id: string
+          note: string | null
+          product_id: string
+          quantity: number
+          received_at: string | null
+          received_by: string | null
+          status: string
+          tenant_id: string
+          to_branch_id: string
+          updated_at: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          from_branch_id: string
+          id?: string
+          note?: string | null
+          product_id: string
+          quantity: number
+          received_at?: string | null
+          received_by?: string | null
+          status?: string
+          tenant_id: string
+          to_branch_id: string
+          updated_at?: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          from_branch_id?: string
+          id?: string
+          note?: string | null
+          product_id?: string
+          quantity?: number
+          received_at?: string | null
+          received_by?: string | null
+          status?: string
+          tenant_id?: string
+          to_branch_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_transfers_from_branch_id_fkey"
+            columns: ["from_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfers_to_branch_id_fkey"
+            columns: ["to_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -2240,7 +2326,67 @@ export type Database = {
         Returns: boolean
       }
       can_create_branch: { Args: { _tenant_id: string }; Returns: boolean }
+      cancel_stock_transfer: {
+        Args: { _reason?: string; _transfer_id: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          from_branch_id: string
+          id: string
+          note: string | null
+          product_id: string
+          quantity: number
+          received_at: string | null
+          received_by: string | null
+          status: string
+          tenant_id: string
+          to_branch_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cleanup_stale_tenants: { Args: never; Returns: undefined }
+      create_stock_transfer: {
+        Args: {
+          _from_branch: string
+          _note?: string
+          _product_id: string
+          _quantity: number
+          _to_branch: string
+        }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          from_branch_id: string
+          id: string
+          note: string | null
+          product_id: string
+          quantity: number
+          received_at: string | null
+          received_by: string | null
+          status: string
+          tenant_id: string
+          to_branch_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2282,6 +2428,33 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "purchase_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      receive_stock_transfer: {
+        Args: { _transfer_id: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          from_branch_id: string
+          id: string
+          note: string | null
+          product_id: string
+          quantity: number
+          received_at: string | null
+          received_by: string | null
+          status: string
+          tenant_id: string
+          to_branch_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_transfers"
           isOneToOne: true
           isSetofReturn: false
         }
