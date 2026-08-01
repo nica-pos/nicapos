@@ -20,6 +20,8 @@ import {
   ClipboardCheck,
   Building2,
   ArrowRightLeft,
+  BarChart3,
+
   ChevronDown,
   Menu,
   X,
@@ -49,7 +51,10 @@ type NavItem = { to: string; label: string; icon: typeof LayoutDashboard };
 const navGroups: { label: string; items: NavItem[] }[] = [
   {
     label: "General",
-    items: [{ to: "/dashboard", label: "Panel", icon: LayoutDashboard }],
+    items: [
+      { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
+      { to: "/reportes", label: "Reportes", icon: BarChart3 },
+    ],
   },
   {
     label: "Ventas",
