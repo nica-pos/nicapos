@@ -58,6 +58,8 @@ import {
   useProductsList,
   type Supplier,
 } from "@/hooks/use-credit";
+import { useActiveBranch } from "@/hooks/use-branch";
+
 
 export const Route = createFileRoute("/_authenticated/proveedores")({
   component: ProveedoresPage,
