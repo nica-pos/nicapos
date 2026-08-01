@@ -8,6 +8,10 @@ export type Branch = Database["public"]["Tables"]["branches"]["Row"];
 
 const ACTIVE_BRANCH_KEY = "nicapos.active_branch";
 
+/** Valor especial guardado cuando el usuario elige el modo consolidado. */
+export const ALL_BRANCHES = "__all__";
+
+
 function keyFor(tenantId: string) {
   return `${ACTIVE_BRANCH_KEY}.${tenantId}`;
 }
@@ -70,7 +74,7 @@ export function useBranches() {
 
 
 export function useActiveBranch() {
-  const { tenant } = useActiveTenant();
+  const { tenant, role } = useActiveTenant();
   const branches = useBranches();
   const [tick, setTick] = useState(0);
 
@@ -83,7 +87,13 @@ export function useActiveBranch() {
   const list = branches.data ?? [];
   const activeList = list.filter((b) => b.is_active);
   const savedId = tenant ? getActiveBranchId(tenant.id) : null;
-  const saved = savedId ? activeList.find((b) => b.id === savedId) : null;
+
+  // Solo owner/admin/contador pueden ver el consolidado de todas las sucursales.
+  const canSeeAll =
+    (role === "owner" || role === "admin" || role === "accountant") && activeList.length > 1;
+  const isAll = canSeeAll && savedId === ALL_BRANCHES;
+
+  const saved = savedId && savedId !== ALL_BRANCHES ? activeList.find((b) => b.id === savedId) : null;
   const active = saved ?? activeList.find((b) => b.is_default) ?? activeList[0] ?? null;
 
   // void tick for re-render dependency
@@ -93,10 +103,18 @@ export function useActiveBranch() {
     ...branches,
     branches: list,
     activeBranches: activeList,
+    canSeeAll,
+    isAll,
     branch: active,
+    // Sucursal real para operaciones de escritura (POS, caja, inventario).
     branchId: active?.id ?? null,
+    // Filtro de lectura: null = todas las sucursales (modo consolidado).
+    scopeBranchId: isAll ? null : (active?.id ?? null),
+    // Clave estable para react-query.
+    scopeKey: isAll ? "all" : (active?.id ?? null),
   };
 }
+
 
 export function useCanCreateBranch() {
   const { tenant } = useActiveTenant();

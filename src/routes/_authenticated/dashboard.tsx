@@ -43,7 +43,7 @@ function DashboardPage() {
   const { isLoading, hasTenant, tenant } = useActiveTenant();
   const { data: isSuperadmin, isLoading: saLoading } = useIsSuperadmin();
   const { data: fin } = useFinancials();
-  const { branchId } = useActiveBranch();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   const latestRate = useLatestRate();
 
   useEffect(() => {
@@ -51,25 +51,34 @@ function DashboardPage() {
     if (!hasTenant) navigate({ to: isSuperadmin ? "/admin" : "/onboarding" });
   }, [isLoading, saLoading, hasTenant, isSuperadmin, navigate]);
 
-  // Bajo stock de la sucursal activa, agrupado por severidad
+  // Bajo stock de la sucursal activa (o consolidado), agrupado por severidad
   const lowStock = useQuery({
-    queryKey: ["dash-lowstock", tenant?.id, branchId],
-    enabled: !!tenant && !!branchId,
+    queryKey: ["dash-lowstock", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("product_stock")
         .select("stock, products!inner(id, name, min_stock, is_active)")
         .eq("tenant_id", tenant!.id)
-        .eq("branch_id", branchId!)
         .eq("products.is_active", true);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q;
       if (error) throw error;
       let out = 0, low = 0, warn = 0;
       const items: { name: string; qty: number; level: "out" | "low" | "warn" }[] = [];
+      // En consolidado se suma el stock de todas las sucursales por producto.
+      const byProduct = new Map<string, { name: string; stock: number; min: number }>();
       for (const row of (data ?? []) as any[]) {
         const p = row.products;
         if (!p) continue;
+        const prev = byProduct.get(p.id);
         const stock = Number(row.stock ?? 0);
-        const min = Number(p.min_stock ?? 0);
+        if (prev) prev.stock += stock;
+        else byProduct.set(p.id, { name: p.name, stock, min: Number(p.min_stock ?? 0) });
+      }
+      for (const p of byProduct.values()) {
+        const stock = p.stock;
+        const min = p.min;
         if (stock <= 0) { out++; items.push({ name: p.name, qty: stock, level: "out" }); }
         else if (min > 0 && stock <= min) { low++; items.push({ name: p.name, qty: stock, level: "low" }); }
         else if (min > 0 && stock <= min * 2) { warn++; items.push({ name: p.name, qty: stock, level: "warn" }); }
@@ -80,17 +89,18 @@ function DashboardPage() {
 
   // Top categorías (últimos 30 días por USD vendido)
   const topCats = useQuery({
-    queryKey: ["dash-topcats", tenant?.id, branchId],
-    enabled: !!tenant && !!branchId,
+    queryKey: ["dash-topcats", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
       const since = new Date();
       since.setDate(since.getDate() - 30);
-      const { data, error } = await supabase
+      let q = supabase
         .from("sale_items")
         .select("quantity, unit_price_usd, line_total_usd, tax_usd, sales!inner(branch_id), products(category_id, categories(name))")
         .eq("tenant_id", tenant!.id)
-        .eq("sales.branch_id", branchId!)
         .gte("created_at", since.toISOString());
+      if (scopeBranchId) q = q.eq("sales.branch_id", scopeBranchId);
+      const { data, error } = await q;
       if (error) throw error;
       const totals = new Map<string, number>();
       let grand = 0;
@@ -110,15 +120,16 @@ function DashboardPage() {
 
   // Últimas transacciones
   const recent = useQuery({
-    queryKey: ["dash-recent", tenant?.id, branchId],
-    enabled: !!tenant && !!branchId,
+    queryKey: ["dash-recent", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("sales")
         .select("id, sale_number, total_usd, created_at")
         .eq("tenant_id", tenant!.id)
-        .eq("branch_id", branchId!)
-        .is("voided_at", null)
+        .is("voided_at", null);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q
         .order("created_at", { ascending: false })
         .limit(5);
       if (error) throw error;
@@ -128,16 +139,18 @@ function DashboardPage() {
 
   // Historial de aperturas y cierres de caja (owner/admin)
   const cashHistory = useQuery({
-    queryKey: ["dash-cash-history", tenant?.id, branchId],
-    enabled: !!tenant && !!branchId,
+    queryKey: ["dash-cash-history", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("cash_sessions")
         .select("id, status, opened_at, closed_at, opening_nio, opening_usd, counted_nio, counted_usd, opened_by, closed_by")
-        .eq("tenant_id", tenant!.id)
-        .eq("branch_id", branchId!)
+        .eq("tenant_id", tenant!.id);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q
         .order("opened_at", { ascending: false })
         .limit(10);
+
 
       if (error) throw error;
       const rows = data ?? [];

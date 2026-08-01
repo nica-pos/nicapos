@@ -58,6 +58,8 @@ type SaleRow = {
   voided_at: string | null;
   void_reason: string | null;
   sold_by: string | null;
+  branches?: { name: string } | null;
+
   sale_items: {
     name: string;
     quantity: number;
@@ -70,7 +72,7 @@ type SaleRow = {
 
 function SalesHistoryPage() {
   const { tenant, role } = useActiveTenant();
-  const { branchId } = useActiveBranch();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   const { data: fiscal } = useFiscalSettings();
   const qc = useQueryClient();
   const voidSale = useVoidSale();
@@ -82,18 +84,20 @@ function SalesHistoryPage() {
   const [confirmDelete, setConfirmDelete] = useState<SaleRow | null>(null);
 
   const { data: sales, isLoading } = useQuery({
-    queryKey: ["ventas-history", tenant?.id, branchId],
-    enabled: !!tenant && !!branchId,
+    queryKey: ["ventas-history", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("sales")
         .select(
-          "id, sale_number, subtotal_usd, tax_usd, total_usd, exchange_rate, created_at, voided_at, void_reason, sold_by, sale_items(name, quantity, unit_price_usd, tax_usd, line_total_usd), sale_payments(method, amount, currency)",
+          "id, sale_number, subtotal_usd, tax_usd, total_usd, exchange_rate, created_at, voided_at, void_reason, sold_by, branches(name), sale_items(name, quantity, unit_price_usd, tax_usd, line_total_usd), sale_payments(method, amount, currency)",
         )
-        .eq("tenant_id", tenant!.id)
-        .eq("branch_id", branchId!)
+        .eq("tenant_id", tenant!.id);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q
         .order("created_at", { ascending: false })
         .limit(300);
+
       if (error) throw error;
       return (data ?? []) as unknown as SaleRow[];
     },
@@ -212,7 +216,15 @@ function SalesHistoryPage() {
                     const seller = sellers?.[s.sold_by ?? ""]?.name ?? "—";
                     return (
                       <tr key={s.id} className="border-b last:border-0 hover:bg-muted/30">
-                        <td className="py-2.5 pr-3 font-medium tabular-nums">#{s.sale_number}</td>
+                        <td className="py-2.5 pr-3 font-medium tabular-nums">
+                          #{s.sale_number}
+                          {!scopeBranchId && s.branches?.name && (
+                            <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground">
+                              {s.branches.name}
+                            </span>
+                          )}
+                        </td>
+
                         <td className="py-2.5 pr-3 text-muted-foreground">
                           {new Date(s.created_at).toLocaleString("es-NI")}
                         </td>
