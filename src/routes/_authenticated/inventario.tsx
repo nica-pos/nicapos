@@ -85,8 +85,10 @@ const MOVEMENT_LABELS: Record<string, string> = {
 
 function InventoryPage() {
   const { data: products, isLoading } = useProducts();
+  const { branch, isAll } = useActiveBranch();
   const [purchaseFor, setPurchaseFor] = useState<Product | null>(null);
   const [kardexFor, setKardexFor] = useState<Product | null>(null);
+
 
   const lowStock = useMemo(
     () =>
