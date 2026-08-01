@@ -109,9 +109,33 @@ function TrasladosPage() {
   const canSubmit =
     !!productId && !!fromBranch && !!toBranch && !sameBranch && enoughStock;
 
+  const transfersQ = useQuery({
+    queryKey: ["stock-transfers", tenant?.id],
+    enabled: !!tenant,
+    queryFn: async (): Promise<TransferRow[]> => {
+      const { data, error } = await supabase
+        .from("stock_transfers")
+        .select(
+          "id, product_id, from_branch_id, to_branch_id, quantity, note, status, created_at, received_at, cancelled_at, cancel_reason",
+        )
+        .eq("tenant_id", tenant!.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return (data ?? []) as TransferRow[];
+    },
+  });
+
+  const refreshAll = () => {
+    qc.invalidateQueries({ queryKey: ["stock-transfers"] });
+    qc.invalidateQueries({ queryKey: ["product-stock-all"] });
+    qc.invalidateQueries({ queryKey: ["products"] });
+    qc.invalidateQueries({ queryKey: ["inventory"] });
+  };
+
   const transferMut = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("transfer_stock", {
+      const { error } = await supabase.rpc("create_stock_transfer", {
         _product_id: productId,
         _from_branch: fromBranch,
         _to_branch: toBranch,
@@ -121,17 +145,42 @@ function TrasladosPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Traslado registrado correctamente");
+      toast.success("Traslado enviado. Queda en tránsito hasta que destino confirme.");
       setQuantity("");
       setNote("");
       setConfirmOpen(false);
-      qc.invalidateQueries({ queryKey: ["product-stock-all"] });
-      qc.invalidateQueries({ queryKey: ["products"] });
-      qc.invalidateQueries({ queryKey: ["inventory"] });
+      refreshAll();
     },
     onError: (err) => {
       toast.error(getFriendlyErrorMessage(err));
     },
+  });
+
+  const receiveMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("receive_stock_transfer", { _transfer_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Recepción confirmada. Stock sumado al destino.");
+      refreshAll();
+    },
+    onError: (err) => toast.error(getFriendlyErrorMessage(err)),
+  });
+
+  const cancelMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("cancel_stock_transfer", {
+        _transfer_id: id,
+        _reason: "Cancelado por el usuario",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Traslado cancelado. Stock devuelto al origen.");
+      refreshAll();
+    },
+    onError: (err) => toast.error(getFriendlyErrorMessage(err)),
   });
 
   const branchName = (id: string) =>
