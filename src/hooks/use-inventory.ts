@@ -82,20 +82,23 @@ export function useDeleteLookup(
 
 // ---------- Kardex ----------
 export function useKardex(productId?: string) {
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   return useQuery({
-    queryKey: ["kardex", productId],
+    queryKey: ["kardex", productId, scopeKey],
     enabled: !!productId,
     queryFn: async (): Promise<InventoryMovement[]> => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("inventory_movements")
         .select("*")
-        .eq("product_id", productId!)
-        .order("created_at", { ascending: false });
+        .eq("product_id", productId!);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
 }
+
 
 export function useRecordMovement() {
   const { branchId } = useActiveBranch();
