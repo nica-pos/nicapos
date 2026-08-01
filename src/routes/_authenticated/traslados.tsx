@@ -216,7 +216,16 @@ function TrasladosPage() {
           </p>
         </div>
 
-        {activeBranches.length < 2 ? (
+        {!canManage ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Solo consulta</CardTitle>
+              <CardDescription>
+                Podés confirmar la recepción de traslados hacia tus sucursales, pero solo el dueño o un administrador puede crear traslados.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ) : activeBranches.length < 2 ? (
           <Card>
             <CardHeader>
               <CardTitle>Necesitas al menos 2 sucursales</CardTitle>
