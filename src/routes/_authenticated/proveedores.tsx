@@ -262,15 +262,22 @@ function OrdersTab() {
   const { data: suppliers } = useSuppliers();
   const { data: products } = useProductsList();
   const { data: orders, isLoading } = usePurchaseOrders();
+  const { activeBranches, branchId: currentBranchId } = useActiveBranch();
   const create = useCreatePurchaseOrder();
   const receive = useReceivePurchaseOrder();
   const pay = useRecordPayablePayment();
   const [open, setOpen] = useState(false);
   const [supplierId, setSupplierId] = useState("");
+  const [branchId, setBranchId] = useState("");
   const [expected, setExpected] = useState("");
   const [lines, setLines] = useState<Line[]>([
     { product_id: "", name: "", quantity: "1", unit_cost_usd: "" },
   ]);
+
+  const destBranchId = branchId || currentBranchId || "";
+  const branchName = (id: string | null) =>
+    activeBranches.find((b) => b.id === id)?.name ?? null;
+
 
   const total = lines.reduce(
     (s, l) => s + (Number(l.quantity) || 0) * (Number(l.unit_cost_usd) || 0),
