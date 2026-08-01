@@ -201,20 +201,8 @@ function TrasladosPage() {
     activeBranches.find((b) => b.id === id)?.name ?? "—";
   const productName = productsQ.data?.find((p) => p.id === productId)?.name ?? "";
 
-  if (!canManage) {
-    return (
-      <DashboardShell>
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin permiso</CardTitle>
-            <CardDescription>
-              Solo el dueño o un administrador pueden trasladar stock.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </DashboardShell>
-    );
-  }
+
+
 
   return (
     <DashboardShell>
