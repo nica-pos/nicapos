@@ -216,20 +216,23 @@ export type LayawayWithCustomer = Layaway & { customer: Customer | null };
 
 export function useLayaways() {
   const { tenant } = useActiveTenant();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   return useQuery({
-    queryKey: ["layaways", tenant?.id],
+    queryKey: ["layaways", tenant?.id, scopeKey],
     enabled: !!tenant,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("layaways")
         .select("*, customer:customers(*)")
-        .eq("tenant_id", tenant!.id)
-        .order("created_at", { ascending: false });
+        .eq("tenant_id", tenant!.id);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
       return data as LayawayWithCustomer[];
     },
   });
 }
+
 
 export function useLayawayItems(layawayId: string | null) {
   return useQuery({
