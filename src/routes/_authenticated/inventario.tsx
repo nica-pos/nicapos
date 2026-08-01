@@ -152,11 +152,19 @@ function InventoryPage() {
           <TabsContent value="stock">
             <Card>
               <CardHeader>
-                <CardTitle>Existencias y costos</CardTitle>
+                <CardTitle className="flex flex-wrap items-center gap-2">
+                  Existencias y costos
+                  <Badge variant={isAll ? "default" : "secondary"}>
+                    {isAll ? "Todas las sucursales" : (branch?.name ?? "Sin sucursal")}
+                  </Badge>
+                </CardTitle>
                 <CardDescription>
-                  El costo mostrado es el Costo Promedio Ponderado (CPP).
+                  {isAll
+                    ? "Suma de existencias de todas tus sucursales. El costo mostrado es el Costo Promedio Ponderado (CPP)."
+                    : "Existencias de la sucursal activa. Cambia de sucursal desde el selector del encabezado. El costo mostrado es el CPP."}
                 </CardDescription>
               </CardHeader>
+
               <CardContent>
                 {isLoading ? (
                   <div className="flex justify-center py-12">
