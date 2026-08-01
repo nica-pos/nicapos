@@ -29,7 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRightLeft, Loader2, Package } from "lucide-react";
+import { ArrowRightLeft, Check, Loader2, Package, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { useBranches } from "@/hooks/use-branch";
