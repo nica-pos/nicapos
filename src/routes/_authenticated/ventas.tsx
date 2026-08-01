@@ -216,7 +216,15 @@ function SalesHistoryPage() {
                     const seller = sellers?.[s.sold_by ?? ""]?.name ?? "—";
                     return (
                       <tr key={s.id} className="border-b last:border-0 hover:bg-muted/30">
-                        <td className="py-2.5 pr-3 font-medium tabular-nums">#{s.sale_number}</td>
+                        <td className="py-2.5 pr-3 font-medium tabular-nums">
+                          #{s.sale_number}
+                          {!scopeBranchId && s.branches?.name && (
+                            <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground">
+                              {s.branches.name}
+                            </span>
+                          )}
+                        </td>
+
                         <td className="py-2.5 pr-3 text-muted-foreground">
                           {new Date(s.created_at).toLocaleString("es-NI")}
                         </td>
