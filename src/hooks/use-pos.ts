@@ -12,10 +12,15 @@ export type Sale = Database["public"]["Tables"]["sales"]["Row"];
 export type PaymentMethod = "cash_nio" | "cash_usd" | "card" | "transfer";
 
 // ---------------- Products ----------------
+/**
+ * Devuelve los productos de la tienda con el stock/costo de la sucursal activa.
+ * En modo consolidado ("Todas las sucursales") se usan los totales de `products`.
+ */
 export function useProducts() {
   const { tenant } = useActiveTenant();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   return useQuery({
-    queryKey: ["products", tenant?.id],
+    queryKey: ["products", tenant?.id, scopeKey],
     enabled: !!tenant,
     queryFn: async (): Promise<Product[]> => {
       const { data, error } = await supabase
@@ -24,10 +29,31 @@ export function useProducts() {
         .eq("tenant_id", tenant!.id)
         .order("name");
       if (error) throw error;
-      return data ?? [];
+      const list = data ?? [];
+      if (!scopeBranchId) return list;
+
+      const { data: stockRows, error: stockErr } = await supabase
+        .from("product_stock")
+        .select("product_id, stock, cost_usd")
+        .eq("tenant_id", tenant!.id)
+        .eq("branch_id", scopeBranchId);
+      if (stockErr) throw stockErr;
+
+      const byProduct = new Map(
+        (stockRows ?? []).map((r) => [r.product_id, r]),
+      );
+      return list.map((p) => {
+        const row = byProduct.get(p.id);
+        return {
+          ...p,
+          stock: Number(row?.stock ?? 0),
+          cost_usd: row ? Number(row.cost_usd) : Number(p.cost_usd),
+        };
+      });
     },
   });
 }
+
 
 export function useSaveProduct() {
   const { tenant } = useActiveTenant();
