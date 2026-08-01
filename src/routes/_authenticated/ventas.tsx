@@ -70,7 +70,7 @@ type SaleRow = {
 
 function SalesHistoryPage() {
   const { tenant, role } = useActiveTenant();
-  const { branchId } = useActiveBranch();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   const { data: fiscal } = useFiscalSettings();
   const qc = useQueryClient();
   const voidSale = useVoidSale();
@@ -82,18 +82,20 @@ function SalesHistoryPage() {
   const [confirmDelete, setConfirmDelete] = useState<SaleRow | null>(null);
 
   const { data: sales, isLoading } = useQuery({
-    queryKey: ["ventas-history", tenant?.id, branchId],
-    enabled: !!tenant && !!branchId,
+    queryKey: ["ventas-history", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("sales")
         .select(
-          "id, sale_number, subtotal_usd, tax_usd, total_usd, exchange_rate, created_at, voided_at, void_reason, sold_by, sale_items(name, quantity, unit_price_usd, tax_usd, line_total_usd), sale_payments(method, amount, currency)",
+          "id, sale_number, subtotal_usd, tax_usd, total_usd, exchange_rate, created_at, voided_at, void_reason, sold_by, branches(name), sale_items(name, quantity, unit_price_usd, tax_usd, line_total_usd), sale_payments(method, amount, currency)",
         )
-        .eq("tenant_id", tenant!.id)
-        .eq("branch_id", branchId!)
+        .eq("tenant_id", tenant!.id);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q
         .order("created_at", { ascending: false })
         .limit(300);
+
       if (error) throw error;
       return (data ?? []) as unknown as SaleRow[];
     },
