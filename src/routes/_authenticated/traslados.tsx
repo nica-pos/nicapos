@@ -41,6 +41,19 @@ export const Route = createFileRoute("/_authenticated/traslados")({
 
 type ProductLite = { id: string; name: string; sku: string | null };
 type StockRow = { product_id: string; branch_id: string; stock: number };
+type TransferRow = {
+  id: string;
+  product_id: string;
+  from_branch_id: string;
+  to_branch_id: string;
+  quantity: number;
+  note: string | null;
+  status: "in_transit" | "received" | "cancelled";
+  created_at: string;
+  received_at: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+};
 
 function TrasladosPage() {
   const { tenant, role } = useActiveTenant();
