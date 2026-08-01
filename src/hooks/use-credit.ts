@@ -334,20 +334,24 @@ export type PurchaseOrderWithSupplier = PurchaseOrder & {
 
 export function usePurchaseOrders() {
   const { tenant } = useActiveTenant();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   return useQuery({
-    queryKey: ["purchase_orders", tenant?.id],
+    queryKey: ["purchase_orders", tenant?.id, scopeKey],
     enabled: !!tenant,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("purchase_orders")
         .select("*, supplier:suppliers(*)")
-        .eq("tenant_id", tenant!.id)
-        .order("created_at", { ascending: false });
+        .eq("tenant_id", tenant!.id);
+      // Los pedidos antiguos sin sucursal siguen visibles en cualquier sede.
+      if (scopeBranchId) q = q.or(`branch_id.eq.${scopeBranchId},branch_id.is.null`);
+      const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
       return data as PurchaseOrderWithSupplier[];
     },
   });
 }
+
 
 export function usePurchaseOrderItems(poId: string | null) {
   return useQuery({
