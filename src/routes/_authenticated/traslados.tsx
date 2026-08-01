@@ -330,7 +330,82 @@ function TrasladosPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Historial de traslados</CardTitle>
+            <CardDescription>
+              Los traslados quedan “en tránsito” hasta que alguien de la sucursal de destino confirme la recepción.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {transfersQ.isLoading ? (
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+            ) : (transfersQ.data ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Todavía no hay traslados registrados.</p>
+            ) : (
+              (transfersQ.data ?? []).map((t) => (
+                <div
+                  key={t.id}
+                  className="flex flex-col gap-2 rounded-md border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="space-y-0.5 text-sm">
+                    <div className="font-medium">
+                      {productsQ.data?.find((p) => p.id === t.product_id)?.name ?? "Producto"} ·{" "}
+                      {Number(t.quantity)} u.
+                    </div>
+                    <div className="text-muted-foreground">
+                      {branchName(t.from_branch_id)} → {branchName(t.to_branch_id)} ·{" "}
+                      {new Date(t.created_at).toLocaleString()}
+                    </div>
+                    {t.note && <div className="text-xs text-muted-foreground">{t.note}</div>}
+                    {t.status === "cancelled" && t.cancel_reason && (
+                      <div className="text-xs text-destructive">{t.cancel_reason}</div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={
+                        t.status === "received"
+                          ? "default"
+                          : t.status === "cancelled"
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    >
+                      {t.status === "received"
+                        ? "Recibido"
+                        : t.status === "cancelled"
+                          ? "Cancelado"
+                          : "En tránsito"}
+                    </Badge>
+                    {t.status === "in_transit" && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => receiveMut.mutate(t.id)}
+                          disabled={receiveMut.isPending || cancelMut.isPending}
+                        >
+                          <Check className="mr-1 h-4 w-4" /> Confirmar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => cancelMut.mutate(t.id)}
+                          disabled={receiveMut.isPending || cancelMut.isPending}
+                        >
+                          <X className="mr-1 h-4 w-4" /> Cancelar
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
+
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
