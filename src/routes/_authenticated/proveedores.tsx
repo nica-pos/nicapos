@@ -307,11 +307,13 @@ function OrdersTab() {
 
   async function save() {
     if (!supplierId) return toast.error("Selecciona un proveedor");
+    if (!destBranchId) return toast.error("Selecciona la sucursal de destino");
     const valid = lines.filter((l) => l.name.trim() && Number(l.quantity) > 0);
     if (!valid.length) return toast.error("Agrega al menos un artículo");
     try {
       await create.mutateAsync({
         supplier_id: supplierId,
+        branch_id: destBranchId,
         expected_at: expected || null,
         items: valid.map((l) => ({
           product_id: l.product_id || null,
@@ -323,8 +325,10 @@ function OrdersTab() {
       toast.success("Pedido creado");
       setOpen(false);
       setSupplierId("");
+      setBranchId("");
       setExpected("");
       setLines([{ product_id: "", name: "", quantity: "1", unit_cost_usd: "" }]);
+
     } catch (e) {
       toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
