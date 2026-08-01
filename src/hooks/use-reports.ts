@@ -125,7 +125,7 @@ export interface SaleDetailRow {
   branch_id: string | null;
   total_usd: number;
   subtotal_usd: number;
-  payment_method: string | null;
+  tax_usd: number;
 }
 
 /** Detalle de ventas para exportar (opcionalmente filtrado por sucursal). */
@@ -139,7 +139,7 @@ export function useSalesExport(from: string, to: string, branchId: string | null
       const toIso = new Date(`${to}T23:59:59.999`).toISOString();
       let q = supabase
         .from("sales")
-        .select("sale_number, created_at, branch_id, total_usd, subtotal_usd, payment_method")
+        .select("sale_number, created_at, branch_id, total_usd, subtotal_usd, tax_usd")
         .eq("tenant_id", tenant!.id)
         .is("voided_at", null)
         .gte("created_at", fromIso)
