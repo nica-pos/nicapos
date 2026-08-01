@@ -20,6 +20,7 @@ import { Route as AuthenticatedVerificacionPendienteRouteImport } from './routes
 import { Route as AuthenticatedVentasRouteImport } from './routes/_authenticated/ventas'
 import { Route as AuthenticatedTrasladosRouteImport } from './routes/_authenticated/traslados'
 import { Route as AuthenticatedSucursalesRouteImport } from './routes/_authenticated/sucursales'
+import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
 import { Route as AuthenticatedPruebaRechazadaRouteImport } from './routes/_authenticated/prueba-rechazada'
 import { Route as AuthenticatedPruebaEnRevisionRouteImport } from './routes/_authenticated/prueba-en-revision'
 import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenticated/proveedores'
@@ -100,6 +101,11 @@ const AuthenticatedTrasladosRoute = AuthenticatedTrasladosRouteImport.update({
 const AuthenticatedSucursalesRoute = AuthenticatedSucursalesRouteImport.update({
   id: '/sucursales',
   path: '/sucursales',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportesRoute = AuthenticatedReportesRouteImport.update({
+  id: '/reportes',
+  path: '/reportes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPruebaRechazadaRoute =
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/reportes': typeof AuthenticatedReportesRoute
   '/sucursales': typeof AuthenticatedSucursalesRoute
   '/traslados': typeof AuthenticatedTrasladosRoute
   '/ventas': typeof AuthenticatedVentasRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/reportes': typeof AuthenticatedReportesRoute
   '/sucursales': typeof AuthenticatedSucursalesRoute
   '/traslados': typeof AuthenticatedTrasladosRoute
   '/ventas': typeof AuthenticatedVentasRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
   '/_authenticated/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/_authenticated/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/_authenticated/reportes': typeof AuthenticatedReportesRoute
   '/_authenticated/sucursales': typeof AuthenticatedSucursalesRoute
   '/_authenticated/traslados': typeof AuthenticatedTrasladosRoute
   '/_authenticated/ventas': typeof AuthenticatedVentasRoute
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/prueba-en-revision'
     | '/prueba-rechazada'
+    | '/reportes'
     | '/sucursales'
     | '/traslados'
     | '/ventas'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/prueba-en-revision'
     | '/prueba-rechazada'
+    | '/reportes'
     | '/sucursales'
     | '/traslados'
     | '/ventas'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/_authenticated/proveedores'
     | '/_authenticated/prueba-en-revision'
     | '/_authenticated/prueba-rechazada'
+    | '/_authenticated/reportes'
     | '/_authenticated/sucursales'
     | '/_authenticated/traslados'
     | '/_authenticated/ventas'
@@ -566,6 +578,13 @@ declare module '@tanstack/react-router' {
       path: '/sucursales'
       fullPath: '/sucursales'
       preLoaderRoute: typeof AuthenticatedSucursalesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reportes': {
+      id: '/_authenticated/reportes'
+      path: '/reportes'
+      fullPath: '/reportes'
+      preLoaderRoute: typeof AuthenticatedReportesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/prueba-rechazada': {
@@ -774,6 +793,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProveedoresRoute: typeof AuthenticatedProveedoresRoute
   AuthenticatedPruebaEnRevisionRoute: typeof AuthenticatedPruebaEnRevisionRoute
   AuthenticatedPruebaRechazadaRoute: typeof AuthenticatedPruebaRechazadaRoute
+  AuthenticatedReportesRoute: typeof AuthenticatedReportesRoute
   AuthenticatedSucursalesRoute: typeof AuthenticatedSucursalesRoute
   AuthenticatedTrasladosRoute: typeof AuthenticatedTrasladosRoute
   AuthenticatedVentasRoute: typeof AuthenticatedVentasRoute
@@ -804,6 +824,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProveedoresRoute: AuthenticatedProveedoresRoute,
   AuthenticatedPruebaEnRevisionRoute: AuthenticatedPruebaEnRevisionRoute,
   AuthenticatedPruebaRechazadaRoute: AuthenticatedPruebaRechazadaRoute,
+  AuthenticatedReportesRoute: AuthenticatedReportesRoute,
   AuthenticatedSucursalesRoute: AuthenticatedSucursalesRoute,
   AuthenticatedTrasladosRoute: AuthenticatedTrasladosRoute,
   AuthenticatedVentasRoute: AuthenticatedVentasRoute,
