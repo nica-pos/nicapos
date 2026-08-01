@@ -322,7 +322,15 @@ function PosPage() {
     });
   }
 
+  const cashierNeedsSession = role === "cashier" && !session;
+
   async function confirmSale() {
+    if (cashierNeedsSession) {
+      toast.error("Abrí la caja antes de cobrar", {
+        description: "Tu rol requiere una sesión de caja abierta en esta sucursal.",
+      });
+      return;
+    }
     if (isCredit) {
       if (!selectedCustomer) {
         toast.error("Seleccioná un cliente para vender a crédito");
@@ -436,7 +444,9 @@ function PosPage() {
       {!session && (
         <div className="flex items-center gap-2 bg-destructive/10 px-4 py-2 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4" />
-          No hay caja abierta. Puedes vender, pero se recomienda abrir caja para el arqueo.
+          {cashierNeedsSession
+            ? "No hay caja abierta en esta sucursal. Debés abrir caja para poder cobrar."
+            : "No hay caja abierta. Puedes vender, pero se recomienda abrir caja para el arqueo."}
         </div>
       )}
 
@@ -986,7 +996,12 @@ function PosPage() {
             </Button>
             <Button
               onClick={confirmSale}
-              disabled={!enoughPaid || createSale.isPending || createReceivable.isPending}
+              disabled={
+                !enoughPaid ||
+                cashierNeedsSession ||
+                createSale.isPending ||
+                createReceivable.isPending
+              }
             >
               {isCredit ? "Registrar venta a crédito" : "Confirmar venta"}
             </Button>
