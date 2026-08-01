@@ -69,6 +69,8 @@ import {
 
 } from "@/hooks/use-inventory";
 import { formatUSD } from "@/hooks/use-fiscal";
+import { useActiveBranch } from "@/hooks/use-branch";
+
 
 export const Route = createFileRoute("/_authenticated/inventario")({
   component: InventoryPage,
