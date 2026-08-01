@@ -370,14 +370,18 @@ export function usePurchaseOrderItems(poId: string | null) {
 
 export function useCreatePurchaseOrder() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
       supplier_id: string;
       expected_at?: string | null;
       notes?: string;
+      branch_id?: string | null;
       items: { product_id?: string | null; name: string; quantity: number; unit_cost_usd: number }[];
     }) => {
+      const destBranch = v.branch_id ?? branchId;
+      if (!destBranch) throw new Error("Selecciona una sucursal primero");
       const total = v.items.reduce(
         (s, i) => s + i.quantity * i.unit_cost_usd,
         0,
@@ -387,6 +391,7 @@ export function useCreatePurchaseOrder() {
         .from("purchase_orders")
         .insert({
           tenant_id: tenant!.id,
+          branch_id: destBranch,
           supplier_id: v.supplier_id,
           total_usd: total,
           expected_at: v.expected_at || null,
@@ -394,6 +399,7 @@ export function useCreatePurchaseOrder() {
           status: "ordered",
           created_by: userData.user?.id ?? null,
         })
+
         .select()
         .single();
       if (error) throw error;
