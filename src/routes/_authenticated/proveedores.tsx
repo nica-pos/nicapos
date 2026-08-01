@@ -502,6 +502,7 @@ function OrdersTab() {
             <TableHeader>
               <TableRow>
                 <TableHead>Proveedor</TableHead>
+                <TableHead>Sucursal</TableHead>
                 <TableHead>Esperado</TableHead>
                 <TableHead className="text-right">Total</TableHead>
                 <TableHead className="text-right">Por pagar</TableHead>
@@ -517,7 +518,11 @@ function OrdersTab() {
                     <TableCell className="font-medium">
                       {o.supplier?.name ?? "—"}
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {branchName(o.branch_id) ?? "—"}
+                    </TableCell>
                     <TableCell>{o.expected_at ?? "—"}</TableCell>
+
                     <TableCell className="text-right">
                       {money(o.total_usd)}
                     </TableCell>
