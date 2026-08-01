@@ -216,20 +216,23 @@ export type LayawayWithCustomer = Layaway & { customer: Customer | null };
 
 export function useLayaways() {
   const { tenant } = useActiveTenant();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   return useQuery({
-    queryKey: ["layaways", tenant?.id],
+    queryKey: ["layaways", tenant?.id, scopeKey],
     enabled: !!tenant,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("layaways")
         .select("*, customer:customers(*)")
-        .eq("tenant_id", tenant!.id)
-        .order("created_at", { ascending: false });
+        .eq("tenant_id", tenant!.id);
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
       return data as LayawayWithCustomer[];
     },
   });
 }
+
 
 export function useLayawayItems(layawayId: string | null) {
   return useQuery({
@@ -331,20 +334,24 @@ export type PurchaseOrderWithSupplier = PurchaseOrder & {
 
 export function usePurchaseOrders() {
   const { tenant } = useActiveTenant();
+  const { scopeBranchId, scopeKey } = useActiveBranch();
   return useQuery({
-    queryKey: ["purchase_orders", tenant?.id],
+    queryKey: ["purchase_orders", tenant?.id, scopeKey],
     enabled: !!tenant,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("purchase_orders")
         .select("*, supplier:suppliers(*)")
-        .eq("tenant_id", tenant!.id)
-        .order("created_at", { ascending: false });
+        .eq("tenant_id", tenant!.id);
+      // Los pedidos antiguos sin sucursal siguen visibles en cualquier sede.
+      if (scopeBranchId) q = q.or(`branch_id.eq.${scopeBranchId},branch_id.is.null`);
+      const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
       return data as PurchaseOrderWithSupplier[];
     },
   });
 }
+
 
 export function usePurchaseOrderItems(poId: string | null) {
   return useQuery({
@@ -363,14 +370,18 @@ export function usePurchaseOrderItems(poId: string | null) {
 
 export function useCreatePurchaseOrder() {
   const { tenant } = useActiveTenant();
+  const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
       supplier_id: string;
       expected_at?: string | null;
       notes?: string;
+      branch_id?: string | null;
       items: { product_id?: string | null; name: string; quantity: number; unit_cost_usd: number }[];
     }) => {
+      const destBranch = v.branch_id ?? branchId;
+      if (!destBranch) throw new Error("Selecciona una sucursal primero");
       const total = v.items.reduce(
         (s, i) => s + i.quantity * i.unit_cost_usd,
         0,
@@ -380,6 +391,7 @@ export function useCreatePurchaseOrder() {
         .from("purchase_orders")
         .insert({
           tenant_id: tenant!.id,
+          branch_id: destBranch,
           supplier_id: v.supplier_id,
           total_usd: total,
           expected_at: v.expected_at || null,
@@ -387,6 +399,7 @@ export function useCreatePurchaseOrder() {
           status: "ordered",
           created_by: userData.user?.id ?? null,
         })
+
         .select()
         .single();
       if (error) throw error;

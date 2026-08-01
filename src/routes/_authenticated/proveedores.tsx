@@ -58,6 +58,8 @@ import {
   useProductsList,
   type Supplier,
 } from "@/hooks/use-credit";
+import { useActiveBranch } from "@/hooks/use-branch";
+
 
 export const Route = createFileRoute("/_authenticated/proveedores")({
   component: ProveedoresPage,
@@ -262,15 +264,22 @@ function OrdersTab() {
   const { data: suppliers } = useSuppliers();
   const { data: products } = useProductsList();
   const { data: orders, isLoading } = usePurchaseOrders();
+  const { activeBranches, branchId: currentBranchId } = useActiveBranch();
   const create = useCreatePurchaseOrder();
   const receive = useReceivePurchaseOrder();
   const pay = useRecordPayablePayment();
   const [open, setOpen] = useState(false);
   const [supplierId, setSupplierId] = useState("");
+  const [branchId, setBranchId] = useState("");
   const [expected, setExpected] = useState("");
   const [lines, setLines] = useState<Line[]>([
     { product_id: "", name: "", quantity: "1", unit_cost_usd: "" },
   ]);
+
+  const destBranchId = branchId || currentBranchId || "";
+  const branchName = (id: string | null) =>
+    activeBranches.find((b) => b.id === id)?.name ?? null;
+
 
   const total = lines.reduce(
     (s, l) => s + (Number(l.quantity) || 0) * (Number(l.unit_cost_usd) || 0),
@@ -298,11 +307,13 @@ function OrdersTab() {
 
   async function save() {
     if (!supplierId) return toast.error("Selecciona un proveedor");
+    if (!destBranchId) return toast.error("Selecciona la sucursal de destino");
     const valid = lines.filter((l) => l.name.trim() && Number(l.quantity) > 0);
     if (!valid.length) return toast.error("Agrega al menos un artículo");
     try {
       await create.mutateAsync({
         supplier_id: supplierId,
+        branch_id: destBranchId,
         expected_at: expected || null,
         items: valid.map((l) => ({
           product_id: l.product_id || null,
@@ -314,8 +325,10 @@ function OrdersTab() {
       toast.success("Pedido creado");
       setOpen(false);
       setSupplierId("");
+      setBranchId("");
       setExpected("");
       setLines([{ product_id: "", name: "", quantity: "1", unit_cost_usd: "" }]);
+
     } catch (e) {
       toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
@@ -390,6 +403,25 @@ function OrdersTab() {
                   />
                 </div>
               </div>
+              <div className="grid gap-1.5">
+                <Label>Sucursal de destino</Label>
+                <Select value={destBranchId} onValueChange={setBranchId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona la sucursal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeBranches.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  El inventario se sumará a esta sucursal al recibir el pedido.
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label>Artículos</Label>
                 {lines.map((l, idx) => (
@@ -470,6 +502,7 @@ function OrdersTab() {
             <TableHeader>
               <TableRow>
                 <TableHead>Proveedor</TableHead>
+                <TableHead>Sucursal</TableHead>
                 <TableHead>Esperado</TableHead>
                 <TableHead className="text-right">Total</TableHead>
                 <TableHead className="text-right">Por pagar</TableHead>
@@ -485,7 +518,11 @@ function OrdersTab() {
                     <TableCell className="font-medium">
                       {o.supplier?.name ?? "—"}
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {branchName(o.branch_id) ?? "—"}
+                    </TableCell>
                     <TableCell>{o.expected_at ?? "—"}</TableCell>
+
                     <TableCell className="text-right">
                       {money(o.total_usd)}
                     </TableCell>
