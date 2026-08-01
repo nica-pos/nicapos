@@ -20,6 +20,8 @@ import {
   ClipboardCheck,
   Building2,
   ArrowRightLeft,
+  BarChart3,
+
   ChevronDown,
   Menu,
   X,
