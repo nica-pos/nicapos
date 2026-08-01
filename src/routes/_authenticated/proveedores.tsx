@@ -399,6 +399,25 @@ function OrdersTab() {
                   />
                 </div>
               </div>
+              <div className="grid gap-1.5">
+                <Label>Sucursal de destino</Label>
+                <Select value={destBranchId} onValueChange={setBranchId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona la sucursal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeBranches.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  El inventario se sumará a esta sucursal al recibir el pedido.
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label>Artículos</Label>
                 {lines.map((l, idx) => (
