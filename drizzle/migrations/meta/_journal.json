@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791438408843,
+      "tag": "0000_add_technician_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791438549250,
+      "tag": "0001_repairs_module",
+      "breakpoints": true
+    }
+  ]
+}

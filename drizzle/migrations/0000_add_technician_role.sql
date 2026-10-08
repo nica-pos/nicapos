@@ -1,0 +1,1 @@
+ALTER TYPE public.tenant_role ADD VALUE IF NOT EXISTS 'technician';
