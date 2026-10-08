@@ -1527,6 +1527,413 @@ export type Database = {
           },
         ]
       }
+      repair_notes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string
+          order_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note: string
+          order_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string
+          order_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_orders: {
+        Row: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        Insert: {
+          accessories?: string | null
+          branch_id: string
+          brand: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          color?: string | null
+          created_at?: string
+          created_by: string
+          customer_id: string
+          delivered_at?: string | null
+          delivered_by?: string | null
+          delivery_exception_reason?: string | null
+          diagnosis?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          imei?: string | null
+          labor_usd?: number
+          model: string
+          observations?: string | null
+          order_number: number
+          paid_usd?: number
+          parts_cost_usd?: number
+          parts_usd?: number
+          photo_paths?: string[]
+          physical_condition?: string | null
+          quote_status?: string
+          reported_issue: string
+          status?: string
+          technician_id?: string | null
+          tenant_id: string
+          total_usd?: number
+          updated_at?: string
+          work_to_do?: string | null
+        }
+        Update: {
+          accessories?: string | null
+          branch_id?: string
+          brand?: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id?: string
+          delivered_at?: string | null
+          delivered_by?: string | null
+          delivery_exception_reason?: string | null
+          diagnosis?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          imei?: string | null
+          labor_usd?: number
+          model?: string
+          observations?: string | null
+          order_number?: number
+          paid_usd?: number
+          parts_cost_usd?: number
+          parts_usd?: number
+          photo_paths?: string[]
+          physical_condition?: string | null
+          quote_status?: string
+          reported_issue?: string
+          status?: string
+          technician_id?: string | null
+          tenant_id?: string
+          total_usd?: number
+          updated_at?: string
+          work_to_do?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_orders_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repair_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repair_orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_parts: {
+        Row: {
+          consumed: boolean
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          tenant_id: string
+          unit_cost_usd: number
+          unit_price_usd: number
+        }
+        Insert: {
+          consumed?: boolean
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          order_id: string
+          product_id?: string | null
+          quantity: number
+          tenant_id: string
+          unit_cost_usd?: number
+          unit_price_usd?: number
+        }
+        Update: {
+          consumed?: boolean
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          order_id?: string
+          product_id?: string | null
+          quantity?: number
+          tenant_id?: string
+          unit_cost_usd?: number
+          unit_price_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_parts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repair_parts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_payments: {
+        Row: {
+          amount: number
+          amount_usd: number
+          branch_id: string
+          cash_session_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          exchange_rate: number
+          id: string
+          kind: string
+          method: string
+          order_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          amount_usd: number
+          branch_id: string
+          cash_session_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          exchange_rate?: number
+          id?: string
+          kind: string
+          method: string
+          order_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          amount_usd?: number
+          branch_id?: string
+          cash_session_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          exchange_rate?: number
+          id?: string
+          kind?: string
+          method?: string
+          order_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_quotes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          labor_usd: number
+          note: string | null
+          order_id: string
+          parts_usd: number
+          status: string
+          tenant_id: string
+          total_usd: number
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          labor_usd?: number
+          note?: string | null
+          order_id: string
+          parts_usd?: number
+          status?: string
+          tenant_id: string
+          total_usd?: number
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          labor_usd?: number
+          note?: string | null
+          order_id?: string
+          parts_usd?: number
+          status?: string
+          tenant_id?: string
+          total_usd?: number
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_quotes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_secrets: {
+        Row: {
+          created_at: string
+          order_id: string
+          tenant_id: string
+          unlock_code: string
+        }
+        Insert: {
+          created_at?: string
+          order_id: string
+          tenant_id: string
+          unlock_code: string
+        }
+        Update: {
+          created_at?: string
+          order_id?: string
+          tenant_id?: string
+          unlock_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_secrets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          note: string | null
+          order_id: string
+          tenant_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          order_id: string
+          tenant_id: string
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          order_id?: string
+          tenant_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_items: {
         Row: {
           created_at: string
@@ -2311,6 +2718,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _repair_guard: {
+        Args: { _allow_accountant?: boolean; _order_id: string }
+        Returns: Database["public"]["Enums"]["tenant_role"]
+      }
+      _repair_log: {
+        Args: {
+          _note: string
+          _o: Database["public"]["Tables"]["repair_orders"]["Row"]
+          _to: string
+        }
+        Returns: undefined
+      }
+      add_repair_note: {
+        Args: { _note: string; _order_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string
+          order_id: string
+          tenant_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_notes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_trial_request: {
         Args: {
           _owner_user_id: string
@@ -2326,6 +2762,54 @@ export type Database = {
         Returns: boolean
       }
       can_create_branch: { Args: { _tenant_id: string }; Returns: boolean }
+      can_view_repair: {
+        Args: { _order_id: string; _uid: string }
+        Returns: boolean
+      }
+      cancel_repair: {
+        Args: { _order_id: string; _reason: string }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_stock_transfer: {
         Args: { _reason?: string; _transfer_id: string }
         Returns: {
@@ -2353,7 +2837,124 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      change_repair_status: {
+        Args: { _note?: string; _order_id: string; _status: string }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cleanup_stale_tenants: { Args: never; Returns: undefined }
+      consume_repair_part: {
+        Args: { _part_id: string }
+        Returns: {
+          consumed: boolean
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          tenant_id: string
+          unit_cost_usd: number
+          unit_price_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_parts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_repair_order: {
+        Args: {
+          _branch_id: string
+          _customer_id: string
+          _data: Json
+          _technician_id?: string
+          _unlock_code?: string
+        }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_stock_transfer: {
         Args: {
           _from_branch: string
@@ -2383,6 +2984,94 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "stock_transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      decide_repair_quote: {
+        Args: { _approved: boolean; _note?: string; _order_id: string }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      deliver_repair: {
+        Args: { _exception_reason?: string; _order_id: string }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2574,6 +3263,56 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      record_repair_payment: {
+        Args: {
+          _amount: number
+          _currency: string
+          _kind?: string
+          _method: string
+          _order_id: string
+        }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reject_trial_request: {
         Args: { _reason: string; _request_id: string }
         Returns: undefined
@@ -2592,6 +3331,79 @@ export type Database = {
           _user_agent: string
         }
         Returns: string
+      }
+      save_repair_quote: {
+        Args: {
+          _labor: number
+          _note?: string
+          _order_id: string
+          _parts: Json
+          _skip_approval?: boolean
+        }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_repair_part_cost: {
+        Args: { _part_id: string; _unit_cost: number }
+        Returns: {
+          consumed: boolean
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          tenant_id: string
+          unit_cost_usd: number
+          unit_price_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_parts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       shares_tenant: { Args: { _a: string; _b: string }; Returns: boolean }
       submit_payment_and_mark_pending: {
@@ -2632,6 +3444,50 @@ export type Database = {
           _to_branch: string
         }
         Returns: undefined
+      }
+      update_repair_order: {
+        Args: { _data: Json; _order_id: string }
+        Returns: {
+          accessories: string | null
+          branch_id: string
+          brand: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          delivery_exception_reason: string | null
+          diagnosis: string | null
+          estimated_delivery: string | null
+          id: string
+          imei: string | null
+          labor_usd: number
+          model: string
+          observations: string | null
+          order_number: number
+          paid_usd: number
+          parts_cost_usd: number
+          parts_usd: number
+          photo_paths: string[]
+          physical_condition: string | null
+          quote_status: string
+          reported_issue: string
+          status: string
+          technician_id: string | null
+          tenant_id: string
+          total_usd: number
+          updated_at: string
+          work_to_do: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "repair_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       void_sale: {
         Args: { _reason?: string; _sale_id: string }
