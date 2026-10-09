@@ -21,6 +21,7 @@ import { Route as AuthenticatedVentasRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedTrasladosRouteImport } from './routes/_authenticated/traslados'
 import { Route as AuthenticatedSucursalesRouteImport } from './routes/_authenticated/sucursales'
 import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
+import { Route as AuthenticatedReparacionesRouteImport } from './routes/_authenticated/reparaciones'
 import { Route as AuthenticatedPruebaRechazadaRouteImport } from './routes/_authenticated/prueba-rechazada'
 import { Route as AuthenticatedPruebaEnRevisionRouteImport } from './routes/_authenticated/prueba-en-revision'
 import { Route as AuthenticatedProveedoresRouteImport } from './routes/_authenticated/proveedores'
@@ -42,6 +43,7 @@ import { Route as AuthenticatedBitacoraRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicTrialRequestsRouteImport } from './routes/api/public/trial-requests'
+import { Route as AuthenticatedReparacionesIdRouteImport } from './routes/_authenticated/reparaciones.$id'
 import { Route as AuthenticatedAdminSolicitudesPruebaRouteImport } from './routes/_authenticated/admin_.solicitudes-prueba'
 import { Route as AuthenticatedAdminPagosPendientesRouteImport } from './routes/_authenticated/admin_.pagos-pendientes'
 import { Route as AuthenticatedAdminBancosRouteImport } from './routes/_authenticated/admin_.bancos'
@@ -108,6 +110,12 @@ const AuthenticatedReportesRoute = AuthenticatedReportesRouteImport.update({
   path: '/reportes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReparacionesRoute =
+  AuthenticatedReparacionesRouteImport.update({
+    id: '/reparaciones',
+    path: '/reparaciones',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPruebaRechazadaRoute =
   AuthenticatedPruebaRechazadaRouteImport.update({
     id: '/prueba-rechazada',
@@ -219,6 +227,12 @@ const ApiPublicTrialRequestsRoute = ApiPublicTrialRequestsRouteImport.update({
   path: '/api/public/trial-requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedReparacionesIdRoute =
+  AuthenticatedReparacionesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedReparacionesRoute,
+  } as any)
 const AuthenticatedAdminSolicitudesPruebaRoute =
   AuthenticatedAdminSolicitudesPruebaRouteImport.update({
     id: '/admin_/solicitudes-prueba',
@@ -275,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/reparaciones': typeof AuthenticatedReparacionesRouteWithChildren
   '/reportes': typeof AuthenticatedReportesRoute
   '/sucursales': typeof AuthenticatedSucursalesRoute
   '/traslados': typeof AuthenticatedTrasladosRoute
@@ -283,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/admin/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
+  '/reparaciones/$id': typeof AuthenticatedReparacionesIdRoute
   '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -314,6 +330,7 @@ export interface FileRoutesByTo {
   '/proveedores': typeof AuthenticatedProveedoresRoute
   '/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/reparaciones': typeof AuthenticatedReparacionesRouteWithChildren
   '/reportes': typeof AuthenticatedReportesRoute
   '/sucursales': typeof AuthenticatedSucursalesRoute
   '/traslados': typeof AuthenticatedTrasladosRoute
@@ -322,6 +339,7 @@ export interface FileRoutesByTo {
   '/admin/bancos': typeof AuthenticatedAdminBancosRoute
   '/admin/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/admin/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
+  '/reparaciones/$id': typeof AuthenticatedReparacionesIdRoute
   '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -355,6 +373,7 @@ export interface FileRoutesById {
   '/_authenticated/proveedores': typeof AuthenticatedProveedoresRoute
   '/_authenticated/prueba-en-revision': typeof AuthenticatedPruebaEnRevisionRoute
   '/_authenticated/prueba-rechazada': typeof AuthenticatedPruebaRechazadaRoute
+  '/_authenticated/reparaciones': typeof AuthenticatedReparacionesRouteWithChildren
   '/_authenticated/reportes': typeof AuthenticatedReportesRoute
   '/_authenticated/sucursales': typeof AuthenticatedSucursalesRoute
   '/_authenticated/traslados': typeof AuthenticatedTrasladosRoute
@@ -363,6 +382,7 @@ export interface FileRoutesById {
   '/_authenticated/admin_/bancos': typeof AuthenticatedAdminBancosRoute
   '/_authenticated/admin_/pagos-pendientes': typeof AuthenticatedAdminPagosPendientesRoute
   '/_authenticated/admin_/solicitudes-prueba': typeof AuthenticatedAdminSolicitudesPruebaRoute
+  '/_authenticated/reparaciones/$id': typeof AuthenticatedReparacionesIdRoute
   '/api/public/trial-requests': typeof ApiPublicTrialRequestsRoute
   '/api/public/webhooks/paypal': typeof ApiPublicWebhooksPaypalRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -396,6 +416,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/prueba-en-revision'
     | '/prueba-rechazada'
+    | '/reparaciones'
     | '/reportes'
     | '/sucursales'
     | '/traslados'
@@ -404,6 +425,7 @@ export interface FileRouteTypes {
     | '/admin/bancos'
     | '/admin/pagos-pendientes'
     | '/admin/solicitudes-prueba'
+    | '/reparaciones/$id'
     | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
@@ -435,6 +457,7 @@ export interface FileRouteTypes {
     | '/proveedores'
     | '/prueba-en-revision'
     | '/prueba-rechazada'
+    | '/reparaciones'
     | '/reportes'
     | '/sucursales'
     | '/traslados'
@@ -443,6 +466,7 @@ export interface FileRouteTypes {
     | '/admin/bancos'
     | '/admin/pagos-pendientes'
     | '/admin/solicitudes-prueba'
+    | '/reparaciones/$id'
     | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
@@ -475,6 +499,7 @@ export interface FileRouteTypes {
     | '/_authenticated/proveedores'
     | '/_authenticated/prueba-en-revision'
     | '/_authenticated/prueba-rechazada'
+    | '/_authenticated/reparaciones'
     | '/_authenticated/reportes'
     | '/_authenticated/sucursales'
     | '/_authenticated/traslados'
@@ -483,6 +508,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin_/bancos'
     | '/_authenticated/admin_/pagos-pendientes'
     | '/_authenticated/admin_/solicitudes-prueba'
+    | '/_authenticated/reparaciones/$id'
     | '/api/public/trial-requests'
     | '/api/public/webhooks/paypal'
     | '/api/public/webhooks/stripe'
@@ -585,6 +611,13 @@ declare module '@tanstack/react-router' {
       path: '/reportes'
       fullPath: '/reportes'
       preLoaderRoute: typeof AuthenticatedReportesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reparaciones': {
+      id: '/_authenticated/reparaciones'
+      path: '/reparaciones'
+      fullPath: '/reparaciones'
+      preLoaderRoute: typeof AuthenticatedReparacionesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/prueba-rechazada': {
@@ -734,6 +767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTrialRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/reparaciones/$id': {
+      id: '/_authenticated/reparaciones/$id'
+      path: '/$id'
+      fullPath: '/reparaciones/$id'
+      preLoaderRoute: typeof AuthenticatedReparacionesIdRouteImport
+      parentRoute: typeof AuthenticatedReparacionesRoute
+    }
     '/_authenticated/admin_/solicitudes-prueba': {
       id: '/_authenticated/admin_/solicitudes-prueba'
       path: '/admin/solicitudes-prueba'
@@ -772,6 +812,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedReparacionesRouteChildren {
+  AuthenticatedReparacionesIdRoute: typeof AuthenticatedReparacionesIdRoute
+}
+
+const AuthenticatedReparacionesRouteChildren: AuthenticatedReparacionesRouteChildren =
+  {
+    AuthenticatedReparacionesIdRoute: AuthenticatedReparacionesIdRoute,
+  }
+
+const AuthenticatedReparacionesRouteWithChildren =
+  AuthenticatedReparacionesRoute._addFileChildren(
+    AuthenticatedReparacionesRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
@@ -793,6 +847,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProveedoresRoute: typeof AuthenticatedProveedoresRoute
   AuthenticatedPruebaEnRevisionRoute: typeof AuthenticatedPruebaEnRevisionRoute
   AuthenticatedPruebaRechazadaRoute: typeof AuthenticatedPruebaRechazadaRoute
+  AuthenticatedReparacionesRoute: typeof AuthenticatedReparacionesRouteWithChildren
   AuthenticatedReportesRoute: typeof AuthenticatedReportesRoute
   AuthenticatedSucursalesRoute: typeof AuthenticatedSucursalesRoute
   AuthenticatedTrasladosRoute: typeof AuthenticatedTrasladosRoute
@@ -824,6 +879,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProveedoresRoute: AuthenticatedProveedoresRoute,
   AuthenticatedPruebaEnRevisionRoute: AuthenticatedPruebaEnRevisionRoute,
   AuthenticatedPruebaRechazadaRoute: AuthenticatedPruebaRechazadaRoute,
+  AuthenticatedReparacionesRoute: AuthenticatedReparacionesRouteWithChildren,
   AuthenticatedReportesRoute: AuthenticatedReportesRoute,
   AuthenticatedSucursalesRoute: AuthenticatedSucursalesRoute,
   AuthenticatedTrasladosRoute: AuthenticatedTrasladosRoute,
