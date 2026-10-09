@@ -21,6 +21,7 @@ import {
   Building2,
   ArrowRightLeft,
   BarChart3,
+  Wrench,
 
   ChevronDown,
   Menu,
@@ -63,6 +64,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       { to: "/ventas", label: "Historial de ventas", icon: FileText },
       { to: "/promociones", label: "Promociones", icon: Tag },
       { to: "/clientes", label: "Clientes y Créditos", icon: HandCoins },
+      { to: "/reparaciones", label: "Reparaciones", icon: Wrench },
     ],
   },
   {
