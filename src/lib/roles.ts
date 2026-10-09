@@ -15,6 +15,7 @@ export const ROUTE_ROLES: Record<string, TenantRole[]> = {
   "/auditoria": ["owner", "admin", "accountant"],
   "/proveedores": ["owner", "admin", "accountant"],
   "/caja": ["owner", "admin", "cashier", "accountant"],
+  "/reparaciones": ["owner", "admin", "cashier", "accountant", "technician"],
   "/fiscal": ["owner", "admin"],
   
   "/bitacora": ["owner", "admin", "accountant"],
@@ -27,6 +28,7 @@ export const ROUTE_ROLES: Record<string, TenantRole[]> = {
 // Ruta por defecto tras iniciar sesión según rol.
 export function defaultHomeForRole(role: TenantRole | null): string {
   if (role === "cashier") return "/cajero";
+  if (role === "technician") return "/reparaciones";
   if (role === "accountant") return "/dashboard";
   return "/dashboard";
 }

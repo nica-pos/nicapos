@@ -48,6 +48,7 @@ const roleLabels: Record<string, string> = {
   admin: "Administrador",
   cashier: "Cajero",
   accountant: "Contador",
+  technician: "Técnico",
 };
 
 function TeamPage() {
@@ -210,6 +211,7 @@ function TeamPage() {
                     <SelectItem value="admin">Administrador</SelectItem>
                     <SelectItem value="cashier">Cajero</SelectItem>
                     <SelectItem value="accountant">Contador</SelectItem>
+                    <SelectItem value="technician">Técnico</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -260,6 +262,7 @@ function TeamPage() {
                               <SelectItem value="admin">Administrador</SelectItem>
                               <SelectItem value="cashier">Cajero</SelectItem>
                               <SelectItem value="accountant">Contador</SelectItem>
+                              <SelectItem value="technician">Técnico</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : (
