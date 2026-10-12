@@ -14,6 +14,25 @@ import {
   REPAIR_STATUSES, repairBalance, repairNumber, repairProfit, statusLabel,
   useRepairAction, useRepairOrder, useTechnicians,
 } from "@/hooks/use-repairs";
+import { decodeLock, PatternReplay } from "@/components/app/PatternLock";
+import { supabase } from "@/integrations/supabase/client";
+
+function RepairPhotos({ paths }: { paths: string[] }) {
+  const [urls, setUrls] = useState<string[]>([]);
+  useEffect(() => {
+    if (!paths.length) return;
+    supabase.storage.from("repair-photos").createSignedUrls(paths, 3600)
+      .then(({ data }) => setUrls((data ?? []).map((d) => d.signedUrl).filter(Boolean) as string[]));
+  }, [paths.join("|")]);
+  if (!urls.length) return null;
+  return (
+    <div className="pt-2"><b>Fotos de ingreso:</b>
+      <div className="mt-1 flex flex-wrap gap-2">
+        {urls.map((u) => <a key={u} href={u} target="_blank" rel="noreferrer"><img src={u} alt="Foto del equipo" className="h-24 w-24 rounded object-cover" /></a>)}
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/reparaciones/$id")({
   head: () => ({ meta: [{ title: "Orden de reparación — Nica-POS" }, { name: "description", content: "Detalle de la orden de reparación." }] }),
@@ -99,7 +118,13 @@ Fecha: ${new Date().toLocaleString()}</pre>`);
             <div><b>Accesorios:</b> {o.accessories ?? "—"}</div>
             <div><b>Estado físico:</b> {o.physical_condition ?? "—"}</div>
             <div><b>Entrega estimada:</b> {o.estimated_delivery ?? "—"}</div>
-            {data.unlockCode && <div><b>Código desbloqueo:</b> <span className="font-mono">{data.unlockCode}</span></div>}
+            {data.unlockCode && (() => {
+              const l = decodeLock(data.unlockCode);
+              return l.type === "pattern"
+                ? <div><b>Patrón de desbloqueo:</b><PatternReplay seq={l.pattern} /></div>
+                : <div><b>{l.type === "pin" ? "PIN" : "Contraseña"}:</b> <span className="font-mono">{l.text}</span></div>;
+            })()}
+            <RepairPhotos paths={o.photo_paths ?? []} />
             <div className="pt-2">
               <b>Técnico:</b>{" "}
               {isAdmin ? (
