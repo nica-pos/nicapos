@@ -117,6 +117,7 @@ Fecha: ${new Date().toLocaleString()}</pre>`);
             <div><b>Falla:</b> {o.reported_issue}</div>
             <div><b>Accesorios:</b> {o.accessories ?? "—"}</div>
             <div><b>Estado físico:</b> {o.physical_condition ?? "—"}</div>
+            {o.observations && <div><b>Detalle:</b> {o.observations}</div>}
             <div><b>Entrega estimada:</b> {o.estimated_delivery ?? "—"}</div>
             {data.unlockCode && (() => {
               const l = decodeLock(data.unlockCode);
