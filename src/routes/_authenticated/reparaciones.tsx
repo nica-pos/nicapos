@@ -209,50 +209,73 @@ const ISSUES = [
 function NewRepairDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { tenant } = useActiveTenant();
   const { branchId } = useActiveBranch();
-  const { refetch } = useCustomers();
+  const { data: customers = [], refetch } = useCustomers();
   const action = useRepairAction();
-  const [name, setName] = useState("");
-  const [brand, setBrand] = useState("");
-  const [otherBrand, setOtherBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [issue, setIssue] = useState("");
-  const [otherIssue, setOtherIssue] = useState("");
+  const empty = {
+    name: "", phone: "", brand: "", brandText: "", model: "", color: "", imei: "", issue: "", issueText: "",
+    details: "", accessories: "", delivery: "", cost: "", advance: "", method: "cash_usd",
+  };
+  const [f, setF] = useState(empty);
+  const set = (k: keyof typeof empty) => (v: string) => setF((s) => ({ ...s, [k]: v }));
   const [lockType, setLockType] = useState<LockType>("none");
   const [lockText, setLockText] = useState("");
   const [pattern, setPattern] = useState<number[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
 
-  function reset() {
-    setName(""); setBrand(""); setOtherBrand(""); setModel(""); setIssue(""); setOtherIssue("");
-    setLockType("none"); setLockText(""); setPattern([]); setFiles([]);
-  }
+  function reset() { setF(empty); setLockType("none"); setLockText(""); setPattern([]); setFiles([]); }
 
   async function submit() {
     if (!tenant || !branchId) return toast.error("Selecciona una sucursal");
-    const b = brand === "Otra" ? otherBrand.trim() : brand;
-    const i = issue === "Otra" ? otherIssue.trim() : issue;
-    if (!name.trim() || !b || !model.trim() || !i) return toast.error("Completa cliente, marca, modelo y falla");
+    const b = f.brandText.trim() || (f.brand !== "Otra" ? f.brand : "");
+    const i = f.issueText.trim() || (f.issue !== "Otra" ? f.issue : "");
+    if (!f.name.trim() || !b || !f.model.trim() || !i) return toast.error("Completa cliente, marca, modelo y falla");
     if (lockType === "pattern" && pattern.length < 4) return toast.error("El patrón debe tener al menos 4 puntos");
     if ((lockType === "pin" || lockType === "password") && !lockText) return toast.error("Escribe el código de bloqueo");
+    const cost = Number(f.cost) || 0;
+    const advance = Number(f.advance) || 0;
+    if (advance > 0 && cost <= 0) return toast.error("Indica el costo de la reparación antes del anticipo");
+    if (advance > cost && f.method !== "cash_nio") return toast.error("El anticipo no puede superar el costo");
     setBusy(true);
     try {
-      const { data: c, error } = await supabase.from("customers")
-        .insert({ tenant_id: tenant.id, name: name.trim() }).select("id").single();
-      if (error) throw error;
-      refetch();
+      const phone = f.phone.trim();
+      let customerId = phone ? customers.find((c) => c.phone === phone)?.id : undefined;
+      if (!customerId) {
+        const { data: c, error } = await supabase.from("customers")
+          .insert({ tenant_id: tenant.id, name: f.name.trim(), phone: phone || null }).select("id").single();
+        if (error) throw error;
+        customerId = c.id;
+        refetch();
+      }
       const photo_paths: string[] = [];
-      for (const f of files) {
-        const path = `${tenant.id}/${crypto.randomUUID()}.${f.name.split(".").pop() || "jpg"}`;
-        const up = await supabase.storage.from("repair-photos").upload(path, f);
+      for (const file of files) {
+        const path = `${tenant.id}/${crypto.randomUUID()}.${file.name.split(".").pop() || "jpg"}`;
+        const up = await supabase.storage.from("repair-photos").upload(path, file);
         if (up.error) throw up.error;
         photo_paths.push(path);
       }
       const code = encodeLock(lockType, lockText, pattern);
       const o = (await action.mutateAsync({
         fn: "create_repair_order",
-        args: { _branch_id: branchId, _customer_id: c.id, _data: { brand: b, model: model.trim(), reported_issue: i, photo_paths }, _unlock_code: code || undefined },
+        args: {
+          _branch_id: branchId, _customer_id: customerId, _unlock_code: code || undefined,
+          _data: {
+            brand: b, model: f.model.trim(), reported_issue: i, photo_paths, color: f.color, imei: f.imei,
+            accessories: f.accessories, observations: f.details, estimated_delivery: f.delivery,
+          },
+        },
       })) as RepairOrder;
+      if (cost > 0) {
+        // Precio acordado en mostrador con el cliente presente: se registra y se aprueba.
+        await action.mutateAsync({ fn: "save_repair_quote", args: { _order_id: o.id, _labor: cost, _parts: [], _note: "Precio acordado al ingreso" } });
+        await action.mutateAsync({ fn: "decide_repair_quote", args: { _order_id: o.id, _approved: true, _note: "Aprobado al ingreso" } });
+      }
+      if (advance > 0) {
+        await action.mutateAsync({
+          fn: "record_repair_payment",
+          args: { _order_id: o.id, _amount: advance, _method: f.method, _currency: f.method === "cash_nio" ? "NIO" : "USD", _kind: "advance" },
+        });
+      }
       toast.success(`Orden ${repairNumber(o.order_number)} creada`);
       onOpenChange(false); reset();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
@@ -260,27 +283,58 @@ function NewRepairDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader><DialogTitle>Nueva reparación</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div className="space-y-1"><Label>Nombre del cliente *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1"><Label>Nombre del cliente *</Label><Input value={f.name} onChange={(e) => set("name")(e.target.value)} /></div>
+            <div className="space-y-1"><Label>Teléfono</Label><Input inputMode="tel" value={f.phone} onChange={(e) => set("phone")(e.target.value)} /></div>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1"><Label>Marca *</Label>
-              <Select value={brand} onValueChange={setBrand}>
-                <SelectTrigger><SelectValue placeholder="Elige marca" /></SelectTrigger>
+              <Select value={f.brand} onValueChange={set("brand")}>
+                <SelectTrigger><SelectValue placeholder="Elige de la lista" /></SelectTrigger>
                 <SelectContent>{BRANDS.map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}</SelectContent>
               </Select>
-              {brand === "Otra" && <Input placeholder="Escribe la marca" value={otherBrand} onChange={(e) => setOtherBrand(e.target.value)} />}
+              <Input placeholder="…o escríbela a mano" value={f.brandText} onChange={(e) => set("brandText")(e.target.value)} />
             </div>
-            <div className="space-y-1"><Label>Modelo *</Label><Input value={model} onChange={(e) => setModel(e.target.value)} /></div>
+            <div className="space-y-1"><Label>Modelo *</Label><Input value={f.model} onChange={(e) => set("model")(e.target.value)} />
+              <div className="grid grid-cols-2 gap-2">
+                <Input placeholder="Color" value={f.color} onChange={(e) => set("color")(e.target.value)} />
+                <Input placeholder="IMEI" value={f.imei} onChange={(e) => set("imei")(e.target.value)} />
+              </div>
+            </div>
           </div>
           <div className="space-y-1"><Label>Falla *</Label>
-            <Select value={issue} onValueChange={setIssue}>
-              <SelectTrigger><SelectValue placeholder="Elige la falla" /></SelectTrigger>
+            <Select value={f.issue} onValueChange={set("issue")}>
+              <SelectTrigger><SelectValue placeholder="Elige de la lista" /></SelectTrigger>
               <SelectContent>{ISSUES.map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}</SelectContent>
             </Select>
-            {issue === "Otra" && <Input placeholder="Describe la falla" value={otherIssue} onChange={(e) => setOtherIssue(e.target.value)} />}
+            <Input placeholder="…o escribe la falla si no está en la lista" value={f.issueText} onChange={(e) => set("issueText")(e.target.value)} />
           </div>
+          <div className="space-y-1"><Label>Detalle de la reparación</Label>
+            <Textarea placeholder="Describe con más detalle lo que hay que hacer, estado físico, etc." value={f.details} onChange={(e) => set("details")(e.target.value)} />
+          </div>
+          <div className="space-y-1"><Label>Accesorios que deja</Label>
+            <Input placeholder="Cargador, funda, chip…" value={f.accessories} onChange={(e) => set("accessories")(e.target.value)} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1"><Label>Fecha de entrega</Label><Input type="date" value={f.delivery} onChange={(e) => set("delivery")(e.target.value)} /></div>
+            <div className="space-y-1"><Label>Costo reparación (USD)</Label><Input type="number" min="0" step="0.01" value={f.cost} onChange={(e) => set("cost")(e.target.value)} /></div>
+            <div className="space-y-1"><Label>Anticipo</Label><Input type="number" min="0" step="0.01" value={f.advance} onChange={(e) => set("advance")(e.target.value)} /></div>
+          </div>
+          {Number(f.advance) > 0 && (
+            <div className="space-y-1"><Label>Forma de pago del anticipo</Label>
+              <Select value={f.method} onValueChange={set("method")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash_usd">Efectivo USD</SelectItem><SelectItem value="cash_nio">Efectivo C$</SelectItem>
+                  <SelectItem value="card">Tarjeta</SelectItem><SelectItem value="transfer">Transferencia</SelectItem>
+                </SelectContent>
+              </Select>
+              {Number(f.cost) > 0 && f.method !== "cash_nio" && <p className="text-xs text-muted-foreground">Saldo pendiente: {usd(Math.max(0, Number(f.cost) - Number(f.advance)))}</p>}
+            </div>
+          )}
           <div className="space-y-1"><Label>Tipo de bloqueo</Label>
             <Select value={lockType} onValueChange={(v) => { setLockType(v as LockType); setLockText(""); setPattern([]); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
