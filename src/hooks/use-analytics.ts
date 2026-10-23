@@ -4,7 +4,6 @@ import type { Database } from "@/integrations/supabase/types";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { useActiveBranch } from "@/hooks/use-branch";
 
-
 export type AuditLog = Database["public"]["Tables"]["audit_logs"]["Row"];
 
 // ---------- Financial dashboard ----------
@@ -72,8 +71,6 @@ export function useFinancials() {
             .maybeSingle(),
         ]);
 
-
-
       // Real configured exchange rate (NIO per USD); fallback avoids div-by-zero.
       const nioPerUsd = rateRow?.rate ? Number(rateRow.rate) : 0;
 
@@ -104,9 +101,7 @@ export function useFinancials() {
         const sub = Number(s.subtotal_usd);
         const cogs = cogsBySale.get(s.id) ?? 0;
         const profit = sub - cogs;
-        const key = startOfLocalDay(new Date(s.created_at))
-          .toISOString()
-          .slice(0, 10);
+        const key = startOfLocalDay(new Date(s.created_at)).toISOString().slice(0, 10);
         const b = buckets.get(key);
         if (b) {
           b.sales += Number(s.total_usd);
@@ -161,17 +156,11 @@ export function useAuditLogs() {
     enabled: !!tenant && !!scopeKey,
     queryFn: async () => {
       // Incluye los registros sin sucursal (histórico o acciones globales).
-      let q = supabase
-        .from("audit_logs")
-        .select("*")
-        .eq("tenant_id", tenant!.id);
+      let q = supabase.from("audit_logs").select("*").eq("tenant_id", tenant!.id);
       if (scopeBranchId) q = q.or(`branch_id.eq.${scopeBranchId},branch_id.is.null`);
-      const { data, error } = await q
-        .order("created_at", { ascending: false })
-        .limit(200);
+      const { data, error } = await q.order("created_at", { ascending: false }).limit(200);
       if (error) throw error;
       return data as AuditLog[];
     },
   });
 }
-

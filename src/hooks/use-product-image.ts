@@ -20,19 +20,14 @@ export function useProductImage(path: string | null | undefined) {
   });
 }
 
-export async function uploadProductImage(
-  tenantId: string,
-  file: File,
-): Promise<string> {
+export async function uploadProductImage(tenantId: string, file: File): Promise<string> {
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const path = `${tenantId}/products/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type || undefined,
-    });
+  const { error } = await supabase.storage.from("product-images").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
   if (error) throw error;
   return path;
 }

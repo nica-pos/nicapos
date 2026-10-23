@@ -23,29 +23,37 @@ Se abrirá una ventana con Nica-POS cargando desde `https://nicapos.lovable.app`
 ## 3) Generar el instalador de un solo clic
 
 ### Windows (`.exe` único — recomendado)
+
 ```bash
 npm run electron:installer:win
 ```
+
 Resultado: `electron-release/Nica-POS-Setup-1.0.0.exe` — **un solo archivo**. El usuario:
+
 1. Lo descarga.
 2. Doble clic.
 3. Se instala solo (sin preguntas), crea acceso directo y abre la app.
 
 ### macOS (`.dmg`)
+
 ```bash
 npm run electron:installer:mac
 ```
+
 Resultado: `electron-release/Nica-POS-1.0.0.dmg` — arrastrar a Aplicaciones.
 
 ### Linux (`.AppImage`)
+
 ```bash
 npm run electron:installer:linux
 ```
+
 Resultado: `electron-release/Nica-POS-1.0.0.AppImage` — dar permisos de ejecución y correr.
 
 ## Ícono
 
 El ícono `electron/icon.png` (1024×1024) se usa para:
+
 - La ventana de la app.
 - El instalador (`.exe`).
 - El acceso directo en el escritorio.

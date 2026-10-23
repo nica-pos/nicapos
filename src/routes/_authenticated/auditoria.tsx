@@ -2,23 +2,11 @@ import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import {
-  Loader2,
-  ClipboardCheck,
-  Plus,
-  ArrowLeft,
-  CheckCircle2,
-} from "lucide-react";
+import { Loader2, ClipboardCheck, Plus, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -68,9 +56,7 @@ function AuditPage() {
             <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
               <ClipboardCheck className="h-6 w-6 text-primary" /> Auditoría física
             </h1>
-            <p className="text-muted-foreground">
-              Conteo físico y cuadre de faltantes/sobrantes.
-            </p>
+            <p className="text-muted-foreground">Conteo físico y cuadre de faltantes/sobrantes.</p>
           </div>
           <Button onClick={startAudit} disabled={createAudit.isPending}>
             {createAudit.isPending ? (
@@ -93,9 +79,7 @@ function AuditPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : (audits?.length ?? 0) === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">
-                No hay auditorías todavía.
-              </p>
+              <p className="py-12 text-center text-muted-foreground">No hay auditorías todavía.</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -108,9 +92,7 @@ function AuditPage() {
                 <TableBody>
                   {(audits ?? []).map((a) => (
                     <TableRow key={a.id}>
-                      <TableCell>
-                        {new Date(a.created_at).toLocaleString("es-NI")}
-                      </TableCell>
+                      <TableCell>{new Date(a.created_at).toLocaleString("es-NI")}</TableCell>
                       <TableCell>
                         {a.status === "completed" ? (
                           <Badge variant="secondary">Completada</Badge>
@@ -119,11 +101,7 @@ function AuditPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setActiveId(a.id)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => setActiveId(a.id)}>
                           {a.status === "completed" ? "Ver" : "Continuar"}
                         </Button>
                       </TableCell>
@@ -139,13 +117,7 @@ function AuditPage() {
   );
 }
 
-function AuditDetail({
-  auditId,
-  onBack,
-}: {
-  auditId: string;
-  onBack: () => void;
-}) {
+function AuditDetail({ auditId, onBack }: { auditId: string; onBack: () => void }) {
   const { data: audits } = useAudits();
   const audit = audits?.find((a) => a.id === auditId);
   const { data: items, isLoading } = useAuditItems(auditId);
@@ -189,8 +161,7 @@ function AuditDetail({
             <ClipboardCheck className="h-6 w-6 text-primary" /> Conteo físico
           </h1>
           <p className="text-muted-foreground">
-            Ingresa el conteo real de cada producto. La diferencia se calcula
-            automáticamente.
+            Ingresa el conteo real de cada producto. La diferencia se calcula automáticamente.
           </p>
         </div>
 
@@ -212,8 +183,7 @@ function AuditDetail({
                 </TableHeader>
                 <TableBody>
                   {(items ?? []).map((it) => {
-                    const diff =
-                      Number(it.counted_qty) - Number(it.system_qty);
+                    const diff = Number(it.counted_qty) - Number(it.system_qty);
                     return (
                       <TableRow key={it.id}>
                         <TableCell className="font-medium">

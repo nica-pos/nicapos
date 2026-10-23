@@ -73,9 +73,7 @@ export function Pricing() {
             <div
               key={plan.name}
               className={`relative flex flex-col rounded-2xl border p-6 shadow-sm ${
-                plan.popular
-                  ? "border-primary bg-primary/5"
-                  : "border-border/60 bg-card"
+                plan.popular ? "border-primary bg-primary/5" : "border-border/60 bg-card"
               }`}
             >
               {plan.popular && (
@@ -96,7 +94,10 @@ export function Pricing() {
 
               <ul className="mb-6 flex-1 space-y-3">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                  >
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     {feature}
                   </li>
@@ -121,8 +122,8 @@ export function Pricing() {
                 Solicita tu prueba gratis de 7 días
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Sin tarjeta y sin pago. Nuestro equipo revisa tu solicitud manualmente y
-                te envía tus credenciales de acceso.
+                Sin tarjeta y sin pago. Nuestro equipo revisa tu solicitud manualmente y te envía
+                tus credenciales de acceso.
               </p>
             </div>
             <Button asChild size="lg">

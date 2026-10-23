@@ -14,13 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -102,17 +96,13 @@ function TrasladosPage() {
 
   const fromStock = useMemo(() => {
     if (!productId || !fromBranch) return 0;
-    const row = stockQ.data?.find(
-      (r) => r.product_id === productId && r.branch_id === fromBranch,
-    );
+    const row = stockQ.data?.find((r) => r.product_id === productId && r.branch_id === fromBranch);
     return Number(row?.stock ?? 0);
   }, [productId, fromBranch, stockQ.data]);
 
   const toStock = useMemo(() => {
     if (!productId || !toBranch) return 0;
-    const row = stockQ.data?.find(
-      (r) => r.product_id === productId && r.branch_id === toBranch,
-    );
+    const row = stockQ.data?.find((r) => r.product_id === productId && r.branch_id === toBranch);
     return Number(row?.stock ?? 0);
   }, [productId, toBranch, stockQ.data]);
 
@@ -120,8 +110,7 @@ function TrasladosPage() {
   const validQty = Number.isFinite(qtyNum) && qtyNum > 0;
   const sameBranch = fromBranch && toBranch && fromBranch === toBranch;
   const enoughStock = validQty && qtyNum <= fromStock;
-  const canSubmit =
-    !!productId && !!fromBranch && !!toBranch && !sameBranch && enoughStock;
+  const canSubmit = !!productId && !!fromBranch && !!toBranch && !sameBranch && enoughStock;
 
   const transfersQ = useQuery({
     queryKey: ["stock-transfers", tenant?.id],
@@ -197,12 +186,8 @@ function TrasladosPage() {
     onError: (err) => toast.error(getFriendlyErrorMessage(err)),
   });
 
-  const branchName = (id: string) =>
-    activeBranches.find((b) => b.id === id)?.name ?? "—";
+  const branchName = (id: string) => activeBranches.find((b) => b.id === id)?.name ?? "—";
   const productName = productsQ.data?.find((p) => p.id === productId)?.name ?? "";
-
-
-
 
   return (
     <DashboardShell>
@@ -212,7 +197,8 @@ function TrasladosPage() {
             <ArrowRightLeft className="h-6 w-6 text-primary" /> Traslados de stock
           </h1>
           <p className="text-sm text-muted-foreground">
-            Mueve inventario entre tus sucursales. El stock se descuenta del origen y se suma al destino.
+            Mueve inventario entre tus sucursales. El stock se descuenta del origen y se suma al
+            destino.
           </p>
         </div>
 
@@ -221,7 +207,8 @@ function TrasladosPage() {
             <CardHeader>
               <CardTitle>Solo consulta</CardTitle>
               <CardDescription>
-                Podés confirmar la recepción de traslados hacia tus sucursales, pero solo el dueño o un administrador puede crear traslados.
+                Podés confirmar la recepción de traslados hacia tus sucursales, pero solo el dueño o
+                un administrador puede crear traslados.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -230,7 +217,8 @@ function TrasladosPage() {
             <CardHeader>
               <CardTitle>Necesitas al menos 2 sucursales</CardTitle>
               <CardDescription>
-                Crea otra sucursal desde <span className="font-medium">Sucursales</span> para poder trasladar stock.
+                Crea otra sucursal desde <span className="font-medium">Sucursales</span> para poder
+                trasladar stock.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -245,10 +233,14 @@ function TrasladosPage() {
                 <div className="space-y-1.5">
                   <Label>Sucursal de origen</Label>
                   <Select value={fromBranch} onValueChange={setFromBranch}>
-                    <SelectTrigger><SelectValue placeholder="Selecciona origen" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona origen" />
+                    </SelectTrigger>
                     <SelectContent>
                       {activeBranches.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -256,12 +248,16 @@ function TrasladosPage() {
                 <div className="space-y-1.5">
                   <Label>Sucursal de destino</Label>
                   <Select value={toBranch} onValueChange={setToBranch}>
-                    <SelectTrigger><SelectValue placeholder="Selecciona destino" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona destino" />
+                    </SelectTrigger>
                     <SelectContent>
                       {activeBranches
                         .filter((b) => b.id !== fromBranch)
                         .map((b) => (
-                          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.name}
+                          </SelectItem>
                         ))}
                     </SelectContent>
                   </Select>
@@ -272,12 +268,15 @@ function TrasladosPage() {
                 <Label>Producto</Label>
                 <Select value={productId} onValueChange={setProductId}>
                   <SelectTrigger>
-                    <SelectValue placeholder={productsQ.isLoading ? "Cargando..." : "Selecciona producto"} />
+                    <SelectValue
+                      placeholder={productsQ.isLoading ? "Cargando..." : "Selecciona producto"}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {(productsQ.data ?? []).map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.name}{p.sku ? ` · ${p.sku}` : ""}
+                        {p.name}
+                        {p.sku ? ` · ${p.sku}` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -288,11 +287,15 @@ function TrasladosPage() {
                 <div className="grid gap-3 rounded-md border border-border/60 bg-muted/30 p-3 text-sm sm:grid-cols-2">
                   <div className="flex items-center gap-2">
                     <Package className="h-4 w-4 text-muted-foreground" />
-                    <span>Stock en <b>{branchName(fromBranch)}</b>: <b>{fromStock}</b></span>
+                    <span>
+                      Stock en <b>{branchName(fromBranch)}</b>: <b>{fromStock}</b>
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Package className="h-4 w-4 text-muted-foreground" />
-                    <span>Stock en <b>{branchName(toBranch)}</b>: <b>{toStock}</b></span>
+                    <span>
+                      Stock en <b>{branchName(toBranch)}</b>: <b>{toStock}</b>
+                    </span>
                   </div>
                 </div>
               )}
@@ -309,9 +312,7 @@ function TrasladosPage() {
                     placeholder="0"
                   />
                   {validQty && !enoughStock && (
-                    <p className="text-xs text-destructive">
-                      Stock insuficiente en el origen.
-                    </p>
+                    <p className="text-xs text-destructive">Stock insuficiente en el origen.</p>
                   )}
                 </div>
                 <div className="space-y-1.5">
@@ -326,7 +327,9 @@ function TrasladosPage() {
               </div>
 
               {sameBranch && (
-                <p className="text-sm text-destructive">Origen y destino no pueden ser la misma sucursal.</p>
+                <p className="text-sm text-destructive">
+                  Origen y destino no pueden ser la misma sucursal.
+                </p>
               )}
 
               <div className="flex justify-end">
@@ -346,7 +349,8 @@ function TrasladosPage() {
           <CardHeader>
             <CardTitle>Historial de traslados</CardTitle>
             <CardDescription>
-              Los traslados quedan “en tránsito” hasta que alguien de la sucursal de destino confirme la recepción.
+              Los traslados quedan “en tránsito” hasta que alguien de la sucursal de destino
+              confirme la recepción.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -417,19 +421,22 @@ function TrasladosPage() {
         </Card>
       </div>
 
-
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar traslado</DialogTitle>
             <DialogDescription>
               Se moverán <b>{qtyNum}</b> unidad(es) de <b>{productName}</b> desde{" "}
-              <b>{branchName(fromBranch)}</b> hacia <b>{branchName(toBranch)}</b>.
-              El stock sale del origen ahora y quedará “en tránsito” hasta que destino confirme la recepción.
+              <b>{branchName(fromBranch)}</b> hacia <b>{branchName(toBranch)}</b>. El stock sale del
+              origen ahora y quedará “en tránsito” hasta que destino confirme la recepción.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={transferMut.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={transferMut.isPending}
+            >
               Cancelar
             </Button>
             <Button onClick={() => transferMut.mutate()} disabled={transferMut.isPending}>

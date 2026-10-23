@@ -32,15 +32,15 @@ function TrialPendingPage() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Tu solicitud está en revisión</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Solicitaste una prueba gratuita de 7 días. Nuestro equipo la revisará
-              en breve (normalmente en menos de 24 horas).
+              Solicitaste una prueba gratuita de 7 días. Nuestro equipo la revisará en breve
+              (normalmente en menos de 24 horas).
             </p>
           </div>
           <div className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
             <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <p>
-              Te notificaremos por correo tan pronto tu cuenta sea aprobada.
-              También recibirás un correo si necesitamos más información.
+              Te notificaremos por correo tan pronto tu cuenta sea aprobada. También recibirás un
+              correo si necesitamos más información.
             </p>
           </div>
           <Button

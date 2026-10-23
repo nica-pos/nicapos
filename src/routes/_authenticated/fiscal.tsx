@@ -11,13 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -97,7 +91,6 @@ function FiscalPage() {
     }
   }, [settings]);
 
-
   const saveSettings = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
@@ -123,19 +116,17 @@ function FiscalPage() {
   const saveInvoiceData = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
-      const { error } = await supabase
-        .from("fiscal_settings")
-        .upsert(
-          {
-            tenant_id: tenant.id,
-            legal_name: legalName.trim() || null,
-            address: address.trim() || null,
-            phone: phone.trim() || null,
-            email: email.trim() || null,
-            invoice_footer: invoiceFooter.trim() || null,
-          },
-          { onConflict: "tenant_id" },
-        );
+      const { error } = await supabase.from("fiscal_settings").upsert(
+        {
+          tenant_id: tenant.id,
+          legal_name: legalName.trim() || null,
+          address: address.trim() || null,
+          phone: phone.trim() || null,
+          email: email.trim() || null,
+          invoice_footer: invoiceFooter.trim() || null,
+        },
+        { onConflict: "tenant_id" },
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -148,23 +139,21 @@ function FiscalPage() {
   const saveDocCustomization = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
-      const { error } = await supabase
-        .from("fiscal_settings")
-        .upsert(
-          {
-            tenant_id: tenant.id,
-            show_logo: showLogo,
-            ticket_prefix: ticketPrefix.trim() || "TKT-",
-            next_ticket_number: Math.max(1, parseInt(nextTicket) || 1),
-            invoice_prefix: invoicePrefix.trim() || "FAC-",
-            next_invoice_number: Math.max(1, parseInt(nextInvoice) || 1),
-            proforma_prefix: proformaPrefix.trim() || "PRO-",
-            next_proforma_number: Math.max(1, parseInt(nextProforma) || 1),
-            ticket_header: ticketHeader.trim() || null,
-            thank_you_message: thankYou.trim() || null,
-          },
-          { onConflict: "tenant_id" },
-        );
+      const { error } = await supabase.from("fiscal_settings").upsert(
+        {
+          tenant_id: tenant.id,
+          show_logo: showLogo,
+          ticket_prefix: ticketPrefix.trim() || "TKT-",
+          next_ticket_number: Math.max(1, parseInt(nextTicket) || 1),
+          invoice_prefix: invoicePrefix.trim() || "FAC-",
+          next_invoice_number: Math.max(1, parseInt(nextInvoice) || 1),
+          proforma_prefix: proformaPrefix.trim() || "PRO-",
+          next_proforma_number: Math.max(1, parseInt(nextProforma) || 1),
+          ticket_header: ticketHeader.trim() || null,
+          thank_you_message: thankYou.trim() || null,
+        },
+        { onConflict: "tenant_id" },
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -173,8 +162,6 @@ function FiscalPage() {
     },
     onError: (e: Error) => toast.error(getFriendlyErrorMessage(e)),
   });
-
-
 
   // New exchange rate
   const [newRate, setNewRate] = useState("");
@@ -258,7 +245,11 @@ function FiscalPage() {
                     />
                   </div>
                   <div className="flex items-center gap-2 pb-2">
-                    <Switch checked={ivaEnabled} disabled={!canEdit} onCheckedChange={setIvaEnabled} />
+                    <Switch
+                      checked={ivaEnabled}
+                      disabled={!canEdit}
+                      onCheckedChange={setIvaEnabled}
+                    />
                     <span className="text-sm text-muted-foreground">Aplicar IVA</span>
                   </div>
                 </div>
@@ -275,7 +266,11 @@ function FiscalPage() {
                     />
                   </div>
                   <div className="flex items-center gap-2 pb-2">
-                    <Switch checked={irEnabled} disabled={!canEdit} onCheckedChange={setIrEnabled} />
+                    <Switch
+                      checked={irEnabled}
+                      disabled={!canEdit}
+                      onCheckedChange={setIrEnabled}
+                    />
                     <span className="text-sm text-muted-foreground">Aplicar IR</span>
                   </div>
                 </div>
@@ -315,7 +310,8 @@ function FiscalPage() {
                 value={usdInput}
                 onChange={(e) => {
                   setUsdInput(e.target.value);
-                  if (latestRate) setNioInput(usdToNio(Number(e.target.value) || 0, latestRate).toFixed(2));
+                  if (latestRate)
+                    setNioInput(usdToNio(Number(e.target.value) || 0, latestRate).toFixed(2));
                 }}
               />
             </div>
@@ -327,7 +323,8 @@ function FiscalPage() {
                 value={nioInput}
                 onChange={(e) => {
                   setNioInput(e.target.value);
-                  if (latestRate) setUsdInput(nioToUsd(Number(e.target.value) || 0, latestRate).toFixed(2));
+                  if (latestRate)
+                    setUsdInput(nioToUsd(Number(e.target.value) || 0, latestRate).toFixed(2));
                 }}
               />
             </div>
@@ -335,7 +332,9 @@ function FiscalPage() {
               <div className="rounded-lg bg-muted/50 p-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{formatUSD(Number(usdInput) || 0)}</span>
-                  <span className="font-semibold text-foreground">{formatNIO(Number(nioInput) || 0)}</span>
+                  <span className="font-semibold text-foreground">
+                    {formatNIO(Number(nioInput) || 0)}
+                  </span>
                 </div>
               </div>
             )}
@@ -348,29 +347,56 @@ function FiscalPage() {
         <CardHeader>
           <CardTitle>Datos legales para documentos</CardTitle>
           <CardDescription>
-            Aparecen en tickets, facturas y proformas (razón social, RUC de la tienda en Configuración).
+            Aparecen en tickets, facturas y proformas (razón social, RUC de la tienda en
+            Configuración).
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="legal">Razón social</Label>
-            <Input id="legal" value={legalName} disabled={!canEdit} onChange={(e) => setLegalName(e.target.value)} />
+            <Input
+              id="legal"
+              value={legalName}
+              disabled={!canEdit}
+              onChange={(e) => setLegalName(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Teléfono</Label>
-            <Input id="phone" value={phone} disabled={!canEdit} onChange={(e) => setPhone(e.target.value)} />
+            <Input
+              id="phone"
+              value={phone}
+              disabled={!canEdit}
+              onChange={(e) => setPhone(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="addr">Dirección</Label>
-            <Input id="addr" value={address} disabled={!canEdit} onChange={(e) => setAddress(e.target.value)} />
+            <Input
+              id="addr"
+              value={address}
+              disabled={!canEdit}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="mail">Correo</Label>
-            <Input id="mail" type="email" value={email} disabled={!canEdit} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="mail"
+              type="email"
+              value={email}
+              disabled={!canEdit}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="footer">Nota de pie de página (políticas de devolución, etc.)</Label>
-            <Textarea id="footer" value={invoiceFooter} disabled={!canEdit} onChange={(e) => setInvoiceFooter(e.target.value)} />
+            <Textarea
+              id="footer"
+              value={invoiceFooter}
+              disabled={!canEdit}
+              onChange={(e) => setInvoiceFooter(e.target.value)}
+            />
           </div>
           {canEdit && (
             <div className="sm:col-span-2">
@@ -404,27 +430,57 @@ function FiscalPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Prefijo ticket</Label>
-              <Input value={ticketPrefix} disabled={!canEdit} onChange={(e) => setTicketPrefix(e.target.value)} />
+              <Input
+                value={ticketPrefix}
+                disabled={!canEdit}
+                onChange={(e) => setTicketPrefix(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Siguiente número ticket</Label>
-              <Input type="number" min="1" value={nextTicket} disabled={!canEdit} onChange={(e) => setNextTicket(e.target.value)} />
+              <Input
+                type="number"
+                min="1"
+                value={nextTicket}
+                disabled={!canEdit}
+                onChange={(e) => setNextTicket(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Prefijo factura</Label>
-              <Input value={invoicePrefix} disabled={!canEdit} onChange={(e) => setInvoicePrefix(e.target.value)} />
+              <Input
+                value={invoicePrefix}
+                disabled={!canEdit}
+                onChange={(e) => setInvoicePrefix(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Siguiente número factura</Label>
-              <Input type="number" min="1" value={nextInvoice} disabled={!canEdit} onChange={(e) => setNextInvoice(e.target.value)} />
+              <Input
+                type="number"
+                min="1"
+                value={nextInvoice}
+                disabled={!canEdit}
+                onChange={(e) => setNextInvoice(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Prefijo proforma</Label>
-              <Input value={proformaPrefix} disabled={!canEdit} onChange={(e) => setProformaPrefix(e.target.value)} />
+              <Input
+                value={proformaPrefix}
+                disabled={!canEdit}
+                onChange={(e) => setProformaPrefix(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Siguiente número proforma</Label>
-              <Input type="number" min="1" value={nextProforma} disabled={!canEdit} onChange={(e) => setNextProforma(e.target.value)} />
+              <Input
+                type="number"
+                min="1"
+                value={nextProforma}
+                disabled={!canEdit}
+                onChange={(e) => setNextProforma(e.target.value)}
+              />
             </div>
           </div>
 
@@ -448,14 +504,16 @@ function FiscalPage() {
           </div>
 
           {canEdit && (
-            <Button onClick={() => saveDocCustomization.mutate()} disabled={saveDocCustomization.isPending}>
+            <Button
+              onClick={() => saveDocCustomization.mutate()}
+              disabled={saveDocCustomization.isPending}
+            >
               {saveDocCustomization.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Guardar personalización
             </Button>
           )}
         </CardContent>
       </Card>
-
 
       <Card className="mt-6">
         <CardHeader>

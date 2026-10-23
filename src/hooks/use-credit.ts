@@ -9,10 +9,8 @@ export type Supplier = Database["public"]["Tables"]["suppliers"]["Row"];
 export type Receivable = Database["public"]["Tables"]["receivables"]["Row"];
 export type Layaway = Database["public"]["Tables"]["layaways"]["Row"];
 export type LayawayItem = Database["public"]["Tables"]["layaway_items"]["Row"];
-export type PurchaseOrder =
-  Database["public"]["Tables"]["purchase_orders"]["Row"];
-export type PurchaseOrderItem =
-  Database["public"]["Tables"]["purchase_order_items"]["Row"];
+export type PurchaseOrder = Database["public"]["Tables"]["purchase_orders"]["Row"];
+export type PurchaseOrderItem = Database["public"]["Tables"]["purchase_order_items"]["Row"];
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 
 // ---------- Customers ----------
@@ -233,7 +231,6 @@ export function useLayaways() {
   });
 }
 
-
 export function useLayawayItems(layawayId: string | null) {
   return useQuery({
     queryKey: ["layaway_items", layawayId],
@@ -258,13 +255,15 @@ export function useCreateLayaway() {
       customer_id: string;
       expires_at?: string | null;
       deposit: number;
-      items: { name: string; quantity: number; unit_price_usd: number; product_id?: string | null }[];
+      items: {
+        name: string;
+        quantity: number;
+        unit_price_usd: number;
+        product_id?: string | null;
+      }[];
     }) => {
       if (!branchId) throw new Error("Selecciona una sucursal primero");
-      const total = v.items.reduce(
-        (s, i) => s + i.quantity * i.unit_price_usd,
-        0,
-      );
+      const total = v.items.reduce((s, i) => s + i.quantity * i.unit_price_usd, 0);
       const { data: userData } = await supabase.auth.getUser();
       const { data: layaway, error } = await supabase
         .from("layaways")
@@ -288,16 +287,16 @@ export function useCreateLayaway() {
         quantity: i.quantity,
         unit_price_usd: i.unit_price_usd,
       }));
-      const { error: itemsError } = await supabase
-        .from("layaway_items")
-        .insert(items);
+      const { error: itemsError } = await supabase.from("layaway_items").insert(items);
       if (itemsError) throw itemsError;
 
       if (v.deposit > 0) {
-        const { error: payError } = await supabase.rpc(
-          "record_layaway_payment",
-          { _layaway_id: layaway.id, _amount: v.deposit, _method: "cash", _note: "Abono inicial" },
-        );
+        const { error: payError } = await supabase.rpc("record_layaway_payment", {
+          _layaway_id: layaway.id,
+          _amount: v.deposit,
+          _method: "cash",
+          _note: "Abono inicial",
+        });
         if (payError) throw payError;
       }
       return layaway;
@@ -309,11 +308,7 @@ export function useCreateLayaway() {
 export function useRecordLayawayPayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (v: {
-      layaway_id: string;
-      amount: number;
-      method?: string;
-    }) => {
+    mutationFn: async (v: { layaway_id: string; amount: number; method?: string }) => {
       const { data, error } = await supabase.rpc("record_layaway_payment", {
         _layaway_id: v.layaway_id,
         _amount: v.amount,
@@ -352,7 +347,6 @@ export function usePurchaseOrders() {
   });
 }
 
-
 export function usePurchaseOrderItems(poId: string | null) {
   return useQuery({
     queryKey: ["purchase_order_items", poId],
@@ -378,14 +372,16 @@ export function useCreatePurchaseOrder() {
       expected_at?: string | null;
       notes?: string;
       branch_id?: string | null;
-      items: { product_id?: string | null; name: string; quantity: number; unit_cost_usd: number }[];
+      items: {
+        product_id?: string | null;
+        name: string;
+        quantity: number;
+        unit_cost_usd: number;
+      }[];
     }) => {
       const destBranch = v.branch_id ?? branchId;
       if (!destBranch) throw new Error("Selecciona una sucursal primero");
-      const total = v.items.reduce(
-        (s, i) => s + i.quantity * i.unit_cost_usd,
-        0,
-      );
+      const total = v.items.reduce((s, i) => s + i.quantity * i.unit_cost_usd, 0);
       const { data: userData } = await supabase.auth.getUser();
       const { data: po, error } = await supabase
         .from("purchase_orders")
@@ -412,9 +408,7 @@ export function useCreatePurchaseOrder() {
         quantity: i.quantity,
         unit_cost_usd: i.unit_cost_usd,
       }));
-      const { error: itemsError } = await supabase
-        .from("purchase_order_items")
-        .insert(items);
+      const { error: itemsError } = await supabase.from("purchase_order_items").insert(items);
       if (itemsError) throw itemsError;
       return po;
     },
@@ -442,11 +436,7 @@ export function useReceivePurchaseOrder() {
 export function useRecordPayablePayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (v: {
-      po_id: string;
-      amount: number;
-      method?: string;
-    }) => {
+    mutationFn: async (v: { po_id: string; amount: number; method?: string }) => {
       const { data, error } = await supabase.rpc("record_payable_payment", {
         _po_id: v.po_id,
         _amount: v.amount,

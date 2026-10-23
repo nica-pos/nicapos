@@ -2,27 +2,13 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Loader2, Download, Trophy, BarChart3 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -50,8 +36,7 @@ export const Route = createFileRoute("/_authenticated/reportes")({
       { title: "Reportes por sucursal — Nica-POS" },
       {
         name: "description",
-        content:
-          "Compará el desempeño de tus sucursales y exportá reportes de ventas en CSV.",
+        content: "Compará el desempeño de tus sucursales y exportá reportes de ventas en CSV.",
       },
       { property: "og:title", content: "Reportes por sucursal — Nica-POS" },
       {
@@ -78,11 +63,7 @@ function ReportesPage() {
 
   const { data: branches } = useBranches();
   const report = useBranchComparison(from, to);
-  const salesExport = useSalesExport(
-    from,
-    to,
-    exportBranch === "__all__" ? null : exportBranch,
-  );
+  const salesExport = useSalesExport(from, to, exportBranch === "__all__" ? null : exportBranch);
 
   const rows = report.data?.rows ?? [];
   const totals = report.data?.totals;
@@ -113,7 +94,15 @@ function ReportesPage() {
     }
     downloadCsv(
       `comparativa-sucursales_${from}_${to}.csv`,
-      ["Sucursal", "Ventas (#)", "Total USD", "Costo USD", "Utilidad USD", "Ticket prom. USD", "Margen %"],
+      [
+        "Sucursal",
+        "Ventas (#)",
+        "Total USD",
+        "Costo USD",
+        "Utilidad USD",
+        "Ticket prom. USD",
+        "Margen %",
+      ],
       rows.map((r) => [
         r.branchName,
         r.salesCount,
@@ -135,7 +124,8 @@ function ReportesPage() {
         toast.error("No hay ventas en ese rango");
         return;
       }
-      const label = exportBranch === "__all__" ? "todas" : (branchNameOf.get(exportBranch) ?? "sucursal");
+      const label =
+        exportBranch === "__all__" ? "todas" : (branchNameOf.get(exportBranch) ?? "sucursal");
       downloadCsv(
         `ventas_${label}_${from}_${to}.csv`.replace(/\s+/g, "-"),
         ["Factura", "Fecha", "Sucursal", "Subtotal USD", "Impuesto USD", "Total USD"],
@@ -192,13 +182,34 @@ function ReportesPage() {
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => { setFrom(todayStr(0)); setTo(todayStr(0)); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFrom(todayStr(0));
+                  setTo(todayStr(0));
+                }}
+              >
                 Hoy
               </Button>
-              <Button variant="outline" size="sm" onClick={() => { setFrom(todayStr(-6)); setTo(todayStr(0)); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFrom(todayStr(-6));
+                  setTo(todayStr(0));
+                }}
+              >
                 7 días
               </Button>
-              <Button variant="outline" size="sm" onClick={() => { setFrom(todayStr(-29)); setTo(todayStr(0)); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFrom(todayStr(-29));
+                  setTo(todayStr(0));
+                }}
+              >
                 30 días
               </Button>
             </div>
@@ -238,7 +249,11 @@ function ReportesPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" vertical={false} />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-border/50"
+                        vertical={false}
+                      />
                       <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
                       <YAxis tickLine={false} axisLine={false} fontSize={12} width={50} />
                       <Tooltip
@@ -293,11 +308,15 @@ function ReportesPage() {
                           <TableCell className="font-medium">
                             {r.branchName}
                             {i === 0 && r.totalUsd > 0 && (
-                              <Badge variant="secondary" className="ml-2">Líder</Badge>
+                              <Badge variant="secondary" className="ml-2">
+                                Líder
+                              </Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-right">{r.salesCount}</TableCell>
-                          <TableCell className="text-right font-medium">{formatUSD(r.totalUsd)}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatUSD(r.totalUsd)}
+                          </TableCell>
                           <TableCell className="text-right">{formatUSD(r.profitUsd)}</TableCell>
                           <TableCell className="text-right">{formatUSD(r.avgTicketUsd)}</TableCell>
                           <TableCell className="text-right">{r.marginPct.toFixed(1)}%</TableCell>

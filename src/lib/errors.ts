@@ -16,7 +16,7 @@ const CODE_MESSAGES: Record<string, string> = {
   "23514": "Los datos ingresados no cumplen con las reglas del sistema.",
   "22P02": "Uno de los valores ingresados tiene un formato inválido.",
   "42501": "No tienes permisos para realizar esta acción.",
-  "P0001": "", // errores RAISE EXCEPTION: usar el mensaje directamente
+  P0001: "", // errores RAISE EXCEPTION: usar el mensaje directamente
   PGRST301: "Tu sesión expiró. Vuelve a iniciar sesión.",
   "401": "Tu sesión expiró. Vuelve a iniciar sesión.",
   "403": "No tienes permisos para realizar esta acción.",
@@ -30,7 +30,10 @@ const MESSAGE_MAP: Array<[RegExp, string]> = [
   [/user already registered/i, "Este correo ya está registrado."],
   [/password should be at least/i, "La contraseña es demasiado corta."],
   [/no autorizado/i, "No tienes permisos para realizar esta acción."],
-  [/network|failed to fetch|load failed/i, "Sin conexión. Revisa tu internet e inténtalo de nuevo."],
+  [
+    /network|failed to fetch|load failed/i,
+    "Sin conexión. Revisa tu internet e inténtalo de nuevo.",
+  ],
   [/jwt|token/i, "Tu sesión expiró. Vuelve a iniciar sesión."],
 ];
 
@@ -43,8 +46,7 @@ export function getFriendlyErrorMessage(error: unknown): string {
 
   const err = error as SupabaseLikeError & { error_description?: string };
 
-  const rawMessage =
-    err.message || err.details || err.error_description || "";
+  const rawMessage = err.message || err.details || err.error_description || "";
 
   // Código conocido con mensaje mapeado.
   const code = err.code ?? (err.status != null ? String(err.status) : undefined);

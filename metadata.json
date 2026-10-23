@@ -1,0 +1,5 @@
+{
+  "name": "Nica-POS",
+  "description": "Sistema de punto de venta y contabilidad para Nicaragua con soporte multi-sucursal, facturación multimoneda e inventario.",
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -6,11 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -160,8 +156,8 @@ export function MemberBranchesCell({
             </div>
           )}
           <p className="text-[11px] text-muted-foreground">
-            Si no marcás ninguna, se usa solo la sucursal principal. Si tampoco hay principal,
-            puede operar en todas.
+            Si no marcás ninguna, se usa solo la sucursal principal. Si tampoco hay principal, puede
+            operar en todas.
           </p>
         </div>
       </PopoverContent>

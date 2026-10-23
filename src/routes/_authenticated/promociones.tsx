@@ -7,13 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -86,8 +80,7 @@ function PromocionesPage() {
     [products],
   );
   const categoryName = useMemo(
-    () => (id: string | null) =>
-      categories?.find((c) => c.id === id)?.name ?? "—",
+    () => (id: string | null) => categories?.find((c) => c.id === id)?.name ?? "—",
     [categories],
   );
 
@@ -114,8 +107,7 @@ function PromocionesPage() {
 
   async function handleSave() {
     if (!form.name.trim()) return toast.error("Escribe un nombre");
-    if (form.target === "product" && !form.product_id)
-      return toast.error("Selecciona un producto");
+    if (form.target === "product" && !form.product_id) return toast.error("Selecciona un producto");
     if (form.target === "category" && !form.category_id)
       return toast.error("Selecciona una categoría");
     try {
@@ -141,9 +133,7 @@ function PromocionesPage() {
     <DashboardShell>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Promociones
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Promociones</h1>
           <p className="text-muted-foreground">
             Descuentos automáticos por producto o categoría, aplicados en el POS.
           </p>
@@ -156,9 +146,7 @@ function PromocionesPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
-                {form.id ? "Editar promoción" : "Nueva promoción"}
-              </DialogTitle>
+              <DialogTitle>{form.id ? "Editar promoción" : "Nueva promoción"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -174,9 +162,7 @@ function PromocionesPage() {
                 <Label>Aplica a</Label>
                 <Select
                   value={form.target}
-                  onValueChange={(v) =>
-                    setForm({ ...form, target: v as "product" | "category" })
-                  }
+                  onValueChange={(v) => setForm({ ...form, target: v as "product" | "category" })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -193,9 +179,7 @@ function PromocionesPage() {
                   <Label>Producto</Label>
                   <Select
                     value={form.product_id || NONE}
-                    onValueChange={(v) =>
-                      setForm({ ...form, product_id: v === NONE ? "" : v })
-                    }
+                    onValueChange={(v) => setForm({ ...form, product_id: v === NONE ? "" : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona" />
@@ -214,9 +198,7 @@ function PromocionesPage() {
                   <Label>Categoría</Label>
                   <Select
                     value={form.category_id || NONE}
-                    onValueChange={(v) =>
-                      setForm({ ...form, category_id: v === NONE ? "" : v })
-                    }
+                    onValueChange={(v) => setForm({ ...form, category_id: v === NONE ? "" : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona" />
@@ -260,9 +242,7 @@ function PromocionesPage() {
                     min="0"
                     step="0.01"
                     value={form.discount_value}
-                    onChange={(e) =>
-                      setForm({ ...form, discount_value: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, discount_value: e.target.value })}
                   />
                 </div>
               </div>
@@ -273,9 +253,7 @@ function PromocionesPage() {
                   <Input
                     type="date"
                     value={form.starts_at}
-                    onChange={(e) =>
-                      setForm({ ...form, starts_at: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, starts_at: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -283,9 +261,7 @@ function PromocionesPage() {
                   <Input
                     type="date"
                     value={form.ends_at}
-                    onChange={(e) =>
-                      setForm({ ...form, ends_at: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
                   />
                 </div>
               </div>
@@ -300,17 +276,11 @@ function PromocionesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={save.isPending}
-              >
+              <Button variant="outline" onClick={() => setOpen(false)} disabled={save.isPending}>
                 Cancelar
               </Button>
               <Button onClick={handleSave} disabled={save.isPending}>
-                {save.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Guardar
               </Button>
             </DialogFooter>
@@ -324,8 +294,8 @@ function PromocionesPage() {
             <Tag className="h-5 w-5 text-primary" /> Promociones
           </CardTitle>
           <CardDescription>
-            Las promociones activas se aplican automáticamente al agregar
-            productos en el Punto de Venta.
+            Las promociones activas se aplican automáticamente al agregar productos en el Punto de
+            Venta.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -346,9 +316,7 @@ function PromocionesPage() {
                     <p className="font-medium text-foreground">
                       {p.name}{" "}
                       {!p.is_active && (
-                        <span className="text-xs text-muted-foreground">
-                          (inactiva)
-                        </span>
+                        <span className="text-xs text-muted-foreground">(inactiva)</span>
                       )}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -364,11 +332,7 @@ function PromocionesPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openEdit(p)}
-                    >
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button

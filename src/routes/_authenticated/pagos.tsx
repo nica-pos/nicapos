@@ -188,11 +188,7 @@ function ProviderCard({
           <Label htmlFor={`${provider}-enabled`} className="text-sm">
             Activo
           </Label>
-          <Switch
-            id={`${provider}-enabled`}
-            checked={enabled}
-            onCheckedChange={setEnabled}
-          />
+          <Switch id={`${provider}-enabled`} checked={enabled} onCheckedChange={setEnabled} />
         </div>
       </div>
 
@@ -228,7 +224,9 @@ function ProviderCard({
             type="password"
             value={clientSecret}
             onChange={(e) => setClientSecret(e.target.value)}
-            placeholder={row?.has_secret ? row.secret_preview ?? "•••• (guardado)" : "Pega tu secreto"}
+            placeholder={
+              row?.has_secret ? (row.secret_preview ?? "•••• (guardado)") : "Pega tu secreto"
+            }
             className="mt-1 font-mono text-sm"
           />
           <p className="mt-1 text-xs text-muted-foreground">

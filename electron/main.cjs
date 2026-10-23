@@ -8,9 +8,7 @@ const path = require("path");
 
 // URL de la app publicada. Cambia esto al dominio final de producción
 // (por ejemplo https://nicapos.com) o define APP_URL antes de empaquetar.
-const APP_URL =
-  process.env.APP_URL ||
-  "https://nicapos.lovable.app";
+const APP_URL = process.env.APP_URL || "https://nicapos.lovable.app";
 
 function createWindow() {
   const win = new BrowserWindow({

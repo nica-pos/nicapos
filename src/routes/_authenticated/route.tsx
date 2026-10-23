@@ -1,4 +1,10 @@
-import { createFileRoute, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useLocation,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
@@ -17,7 +23,6 @@ const EXEMPT_PATHS = [
   "/admin/solicitudes-prueba",
   "/pagos",
 ];
-
 
 function TenantStatusGate() {
   const location = useLocation();

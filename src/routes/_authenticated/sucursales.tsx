@@ -58,8 +58,8 @@ function SucursalesPage() {
               <Building2 className="h-6 w-6 text-primary" /> Sucursales
             </h1>
             <p className="text-sm text-muted-foreground">
-              Gestiona tus puntos de venta. Inventario y caja se manejan de forma
-              independiente por sucursal.
+              Gestiona tus puntos de venta. Inventario y caja se manejan de forma independiente por
+              sucursal.
             </p>
           </div>
           {canManage && (
@@ -105,9 +105,13 @@ function SucursalesPage() {
                   <TableCell className="text-muted-foreground">{b.phone ?? "—"}</TableCell>
                   <TableCell>
                     {b.is_active ? (
-                      <Badge variant="outline" className="text-success">Activa</Badge>
+                      <Badge variant="outline" className="text-success">
+                        Activa
+                      </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-muted-foreground">Inactiva</Badge>
+                      <Badge variant="outline" className="text-muted-foreground">
+                        Inactiva
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -131,16 +135,8 @@ function SucursalesPage() {
         </div>
       </div>
 
-      <BranchDialog
-        open={openNew}
-        onClose={() => setOpenNew(false)}
-        branch={null}
-      />
-      <BranchDialog
-        open={!!editing}
-        onClose={() => setEditing(null)}
-        branch={editing}
-      />
+      <BranchDialog open={openNew} onClose={() => setOpenNew(false)} branch={null} />
+      <BranchDialog open={!!editing} onClose={() => setEditing(null)} branch={editing} />
     </DashboardShell>
   );
 }
@@ -219,7 +215,11 @@ function BranchDialog({
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Nombre</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Sucursal Centro" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Sucursal Centro"
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Dirección</Label>

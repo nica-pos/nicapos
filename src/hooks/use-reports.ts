@@ -73,7 +73,9 @@ export function useBranchComparison(from: string, to: string) {
         return {
           branchId: key === "__none__" ? null : key,
           branchName:
-            key === "__none__" ? "Sin sucursal (histórico)" : (nameOf.get(key) ?? "Sucursal eliminada"),
+            key === "__none__"
+              ? "Sin sucursal (histórico)"
+              : (nameOf.get(key) ?? "Sucursal eliminada"),
           salesCount: v.count,
           totalUsd: v.total,
           cogsUsd: v.cogs,

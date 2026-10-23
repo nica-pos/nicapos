@@ -18,7 +18,16 @@ export const Route = createFileRoute("/_authenticated/configuracion")({
   head: () => ({ meta: [{ title: "Configuración — Nica-POS" }] }),
 });
 
-const PRESET_COLORS = ["#f59e0b", "#ef4444", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#0ea5e9", "#14b8a6"];
+const PRESET_COLORS = [
+  "#f59e0b",
+  "#ef4444",
+  "#10b981",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#0ea5e9",
+  "#14b8a6",
+];
 
 function ConfigPage() {
   const queryClient = useQueryClient();
@@ -111,11 +120,21 @@ function ConfigPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre</Label>
-                <Input id="name" value={name} disabled={!canEdit} onChange={(e) => setName(e.target.value)} />
+                <Input
+                  id="name"
+                  value={name}
+                  disabled={!canEdit}
+                  onChange={(e) => setName(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ruc">RUC</Label>
-                <Input id="ruc" value={ruc} disabled={!canEdit} onChange={(e) => setRuc(e.target.value)} />
+                <Input
+                  id="ruc"
+                  value={ruc}
+                  disabled={!canEdit}
+                  onChange={(e) => setRuc(e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
@@ -312,7 +331,11 @@ function LogoUploader({
               disabled={disabled || uploading}
               onClick={() => fileRef.current?.click()}
             >
-              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {uploading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="mr-2 h-4 w-4" />
+              )}
               Subir archivo
             </Button>
             {value && (

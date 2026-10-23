@@ -2,25 +2,12 @@ import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import {
-  Truck,
-  Plus,
-  Loader2,
-  PackageCheck,
-  HandCoins,
-  AlertTriangle,
-} from "lucide-react";
+import { Truck, Plus, Loader2, PackageCheck, HandCoins, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -59,7 +46,6 @@ import {
   type Supplier,
 } from "@/hooks/use-credit";
 import { useActiveBranch } from "@/hooks/use-branch";
-
 
 export const Route = createFileRoute("/_authenticated/proveedores")({
   component: ProveedoresPage,
@@ -182,9 +168,7 @@ function SuppliersTab() {
                   <Label>Contacto</Label>
                   <Input
                     value={form.contact_name}
-                    onChange={(e) =>
-                      setForm({ ...form, contact_name: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
                   />
                 </div>
               </div>
@@ -207,9 +191,7 @@ function SuppliersTab() {
             </div>
             <DialogFooter>
               <Button onClick={save} disabled={upsert.isPending}>
-                {upsert.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {upsert.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Guardar
               </Button>
             </DialogFooter>
@@ -233,11 +215,7 @@ function SuppliersTab() {
             </TableHeader>
             <TableBody>
               {suppliers.map((s) => (
-                <TableRow
-                  key={s.id}
-                  className="cursor-pointer"
-                  onClick={() => openEdit(s)}
-                >
+                <TableRow key={s.id} className="cursor-pointer" onClick={() => openEdit(s)}>
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell>{s.contact_name ?? "—"}</TableCell>
                   <TableCell>{s.phone ?? "—"}</TableCell>
@@ -277,9 +255,7 @@ function OrdersTab() {
   ]);
 
   const destBranchId = branchId || currentBranchId || "";
-  const branchName = (id: string | null) =>
-    activeBranches.find((b) => b.id === id)?.name ?? null;
-
+  const branchName = (id: string | null) => activeBranches.find((b) => b.id === id)?.name ?? null;
 
   const total = lines.reduce(
     (s, l) => s + (Number(l.quantity) || 0) * (Number(l.unit_cost_usd) || 0),
@@ -287,10 +263,7 @@ function OrdersTab() {
   );
 
   function addLine() {
-    setLines([
-      ...lines,
-      { product_id: "", name: "", quantity: "1", unit_cost_usd: "" },
-    ]);
+    setLines([...lines, { product_id: "", name: "", quantity: "1", unit_cost_usd: "" }]);
   }
 
   function pickProduct(idx: number, productId: string) {
@@ -328,7 +301,6 @@ function OrdersTab() {
       setBranchId("");
       setExpected("");
       setLines([{ product_id: "", name: "", quantity: "1", unit_cost_usd: "" }]);
-
     } catch (e) {
       toast.error("Error", { description: getFriendlyErrorMessage(e) });
     }
@@ -427,10 +399,7 @@ function OrdersTab() {
                 {lines.map((l, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-2">
                     <div className="col-span-5">
-                      <Select
-                        value={l.product_id}
-                        onValueChange={(v) => pickProduct(idx, v)}
-                      >
+                      <Select value={l.product_id} onValueChange={(v) => pickProduct(idx, v)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Producto" />
                         </SelectTrigger>
@@ -466,10 +435,7 @@ function OrdersTab() {
                       }}
                     />
                     <div className="col-span-2 flex items-center text-sm text-muted-foreground">
-                      {money(
-                        (Number(l.quantity) || 0) *
-                          (Number(l.unit_cost_usd) || 0),
-                      )}
+                      {money((Number(l.quantity) || 0) * (Number(l.unit_cost_usd) || 0))}
                     </div>
                   </div>
                 ))}
@@ -477,15 +443,11 @@ function OrdersTab() {
                   <Plus className="mr-1 h-4 w-4" /> Agregar artículo
                 </Button>
               </div>
-              <div className="text-right text-lg font-semibold">
-                Total: {money(total)}
-              </div>
+              <div className="text-right text-lg font-semibold">Total: {money(total)}</div>
             </div>
             <DialogFooter>
               <Button onClick={save} disabled={create.isPending}>
-                {create.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Crear pedido
               </Button>
             </DialogFooter>
@@ -515,44 +477,28 @@ function OrdersTab() {
                 const saldo = Number(o.total_usd) - Number(o.paid_usd);
                 return (
                   <TableRow key={o.id}>
-                    <TableCell className="font-medium">
-                      {o.supplier?.name ?? "—"}
-                    </TableCell>
+                    <TableCell className="font-medium">{o.supplier?.name ?? "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {branchName(o.branch_id) ?? "—"}
                     </TableCell>
                     <TableCell>{o.expected_at ?? "—"}</TableCell>
 
-                    <TableCell className="text-right">
-                      {money(o.total_usd)}
-                    </TableCell>
+                    <TableCell className="text-right">{money(o.total_usd)}</TableCell>
                     <TableCell className="text-right">{money(saldo)}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          o.status === "received" ? "secondary" : "default"
-                        }
-                      >
+                      <Badge variant={o.status === "received" ? "secondary" : "default"}>
                         {o.status === "received" ? "Recibido" : "Ordenado"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         {o.status !== "received" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => doReceive(o.id)}
-                          >
+                          <Button size="sm" variant="outline" onClick={() => doReceive(o.id)}>
                             <PackageCheck className="mr-1 h-4 w-4" /> Recibir
                           </Button>
                         )}
                         {saldo > 0.001 && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => abonar(o.id, saldo)}
-                          >
+                          <Button size="sm" variant="outline" onClick={() => abonar(o.id, saldo)}>
                             <HandCoins className="mr-1 h-4 w-4" /> Pagar
                           </Button>
                         )}
@@ -579,9 +525,7 @@ function SuggestionsTab() {
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-primary" /> Sugerencias de compra
         </CardTitle>
-        <CardDescription>
-          Productos en o por debajo de su stock mínimo.
-        </CardDescription>
+        <CardDescription>Productos en o por debajo de su stock mínimo.</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -603,10 +547,7 @@ function SuggestionsTab() {
             </TableHeader>
             <TableBody>
               {suggestions.map((p) => {
-                const suggested = Math.max(
-                  Math.ceil(Number(p.min_stock) * 2 - Number(p.stock)),
-                  1,
-                );
+                const suggested = Math.max(Math.ceil(Number(p.min_stock) * 2 - Number(p.stock)), 1);
                 return (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>

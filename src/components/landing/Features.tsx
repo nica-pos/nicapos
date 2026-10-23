@@ -99,9 +99,7 @@ export function Features() {
             <article
               key={feature.title}
               className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border/60 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 ${
-                feature.highlight
-                  ? "bg-gradient-to-br from-primary/15 via-card to-card"
-                  : "bg-card"
+                feature.highlight ? "bg-gradient-to-br from-primary/15 via-card to-card" : "bg-card"
               } ${feature.span}`}
             >
               <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />

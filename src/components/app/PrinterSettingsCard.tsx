@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   isDesktopApp,
@@ -64,8 +70,8 @@ export function PrinterSettingsCard() {
           </CardTitle>
           <CardDescription>
             Estás en la versión web. Al facturar se abrirá el diálogo de impresión del navegador.
-            Para impresión silenciosa, selector de impresora y cajón monedero,
-            instala la app de escritorio Nica-POS.
+            Para impresión silenciosa, selector de impresora y cajón monedero, instala la app de
+            escritorio Nica-POS.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -79,8 +85,8 @@ export function PrinterSettingsCard() {
           <Monitor className="h-5 w-5" /> Impresión (escritorio)
         </CardTitle>
         <CardDescription>
-          Configura qué impresora usar para tickets térmicos y para facturas
-          tamaño carta. La configuración se guarda en este equipo.
+          Configura qué impresora usar para tickets térmicos y para facturas tamaño carta. La
+          configuración se guarda en este equipo.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -144,10 +150,7 @@ export function PrinterSettingsCard() {
               Imprime directo sin mostrar el diálogo del sistema.
             </p>
           </div>
-          <Switch
-            checked={settings.silent}
-            onCheckedChange={(v) => update({ silent: v })}
-          />
+          <Switch checked={settings.silent} onCheckedChange={(v) => update({ silent: v })} />
         </div>
 
         <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">

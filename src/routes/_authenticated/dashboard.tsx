@@ -7,15 +7,11 @@ import {
   Clock,
   RefreshCcw,
   ArrowUpRight,
+  Wrench,
+  Coins,
+  TrendingUp,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useActiveTenant, useIsSuperadmin } from "@/hooks/use-tenant";
 import { useActiveBranch } from "@/hooks/use-branch";
@@ -64,7 +60,9 @@ function DashboardPage() {
       if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
       const { data, error } = await q;
       if (error) throw error;
-      let out = 0, low = 0, warn = 0;
+      let out = 0,
+        low = 0,
+        warn = 0;
       const items: { name: string; qty: number; level: "out" | "low" | "warn" }[] = [];
       // En consolidado se suma el stock de todas las sucursales por producto.
       const byProduct = new Map<string, { name: string; stock: number; min: number }>();
@@ -79,9 +77,16 @@ function DashboardPage() {
       for (const p of byProduct.values()) {
         const stock = p.stock;
         const min = p.min;
-        if (stock <= 0) { out++; items.push({ name: p.name, qty: stock, level: "out" }); }
-        else if (min > 0 && stock <= min) { low++; items.push({ name: p.name, qty: stock, level: "low" }); }
-        else if (min > 0 && stock <= min * 2) { warn++; items.push({ name: p.name, qty: stock, level: "warn" }); }
+        if (stock <= 0) {
+          out++;
+          items.push({ name: p.name, qty: stock, level: "out" });
+        } else if (min > 0 && stock <= min) {
+          low++;
+          items.push({ name: p.name, qty: stock, level: "low" });
+        } else if (min > 0 && stock <= min * 2) {
+          warn++;
+          items.push({ name: p.name, qty: stock, level: "warn" });
+        }
       }
       return { out, low, warn, items: items.slice(0, 6) };
     },
@@ -96,7 +101,9 @@ function DashboardPage() {
       since.setDate(since.getDate() - 30);
       let q = supabase
         .from("sale_items")
-        .select("quantity, unit_price_usd, line_total_usd, tax_usd, sales!inner(branch_id), products(category_id, categories(name))")
+        .select(
+          "quantity, unit_price_usd, line_total_usd, tax_usd, sales!inner(branch_id), products(category_id, categories(name))",
+        )
         .eq("tenant_id", tenant!.id)
         .gte("created_at", since.toISOString());
       if (scopeBranchId) q = q.eq("sales.branch_id", scopeBranchId);
@@ -129,9 +136,7 @@ function DashboardPage() {
         .eq("tenant_id", tenant!.id)
         .is("voided_at", null);
       if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
-      const { data, error } = await q
-        .order("created_at", { ascending: false })
-        .limit(5);
+      const { data, error } = await q.order("created_at", { ascending: false }).limit(5);
       if (error) throw error;
       return data ?? [];
     },
@@ -144,23 +149,65 @@ function DashboardPage() {
     queryFn: async () => {
       let q = supabase
         .from("cash_sessions")
-        .select("id, status, opened_at, closed_at, opening_nio, opening_usd, counted_nio, counted_usd, opened_by, closed_by")
+        .select(
+          "id, status, opened_at, closed_at, opening_nio, opening_usd, counted_nio, counted_usd, opened_by, closed_by",
+        )
         .eq("tenant_id", tenant!.id);
       if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
-      const { data, error } = await q
-        .order("opened_at", { ascending: false })
-        .limit(10);
-
+      const { data, error } = await q.order("opened_at", { ascending: false }).limit(10);
 
       if (error) throw error;
       const rows = data ?? [];
-      const userIds = Array.from(new Set(rows.flatMap((r) => [r.opened_by, r.closed_by]).filter(Boolean))) as string[];
+      const userIds = Array.from(
+        new Set(rows.flatMap((r) => [r.opened_by, r.closed_by]).filter(Boolean)),
+      ) as string[];
       let profiles: Record<string, { full_name: string | null; email: string | null }> = {};
       if (userIds.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", userIds);
-        profiles = Object.fromEntries((profs ?? []).map((p) => [p.id, { full_name: p.full_name, email: p.email }]));
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        profiles = Object.fromEntries(
+          (profs ?? []).map((p) => [p.id, { full_name: p.full_name, email: p.email }]),
+        );
       }
       return { rows, profiles };
+    },
+  });
+
+  // Finanzas exclusivas del taller de reparaciones (separadas de ventas POS)
+  const repairsSummary = useQuery({
+    queryKey: ["dash-repairs-summary", tenant?.id, scopeKey],
+    enabled: !!tenant && !!scopeKey,
+    queryFn: async () => {
+      let q = supabase
+        .from("repair_orders")
+        .select("id, status, total_usd, parts_cost_usd, paid_usd, created_at")
+        .eq("tenant_id", tenant!.id)
+        .neq("status", "cancelled");
+      if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
+      const { data, error } = await q;
+      if (error) throw error;
+      const rows = data ?? [];
+      const revenueUsd = rows.reduce((s, r) => s + Number(r.total_usd || 0), 0);
+      const partsCostUsd = rows.reduce((s, r) => s + Number(r.parts_cost_usd || 0), 0);
+      const profitUsd = Math.max(0, revenueUsd - partsCostUsd);
+      const activeCount = rows.filter((r) =>
+        ["received", "diagnosing", "waiting_approval", "in_repair", "waiting_parts"].includes(
+          r.status,
+        ),
+      ).length;
+      const readyCount = rows.filter((r) => r.status === "ready").length;
+      const deliveredCount = rows.filter((r) => r.status === "delivered").length;
+      return {
+        revenueUsd,
+        partsCostUsd,
+        profitUsd,
+        activeCount,
+        readyCount,
+        deliveredCount,
+        total: rows.length,
+      };
     },
   });
 
@@ -183,7 +230,6 @@ function DashboardPage() {
     `C$ ${(v * rate).toLocaleString("es-NI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const usd = (v: number) =>
     `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
 
   const catColors = ["bg-cyan-400", "bg-violet-500", "bg-orange-400", "bg-emerald-400"];
 
@@ -263,6 +309,78 @@ function DashboardPage() {
         </div>
       </section>
 
+      {/* Finanzas separadas: Taller de Reparaciones */}
+      <section className="mt-6 rounded-2xl border border-primary/20 bg-card p-5 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <Wrench className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                Finanzas del Taller de Reparaciones
+                <span className="text-[10px] font-normal uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Separado de Ventas POS
+                </span>
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Control exclusivo de ingresos por mano de obra, costos de refacciones y ganancia
+                neta.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/reparaciones"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/20"
+          >
+            Ir a Reparaciones <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl bg-white/5 p-3.5">
+            <span className="text-xs text-muted-foreground block">Ingresos Taller</span>
+            <span className="text-xl font-bold text-white block mt-1">
+              {usd(repairsSummary.data?.revenueUsd ?? 0)}
+            </span>
+            <span className="text-[11px] text-muted-foreground">
+              {nio(repairsSummary.data?.revenueUsd ?? 0)}
+            </span>
+          </div>
+
+          <div className="rounded-xl bg-rose-500/10 p-3.5">
+            <span className="text-xs text-rose-400 font-medium block">Costo de Refacciones</span>
+            <span className="text-xl font-bold text-rose-400 block mt-1">
+              {usd(repairsSummary.data?.partsCostUsd ?? 0)}
+            </span>
+            <span className="text-[11px] text-muted-foreground">Piezas compradas</span>
+          </div>
+
+          <div className="rounded-xl bg-emerald-500/10 p-3.5">
+            <span className="text-xs text-emerald-400 font-medium block flex items-center gap-1">
+              <TrendingUp className="h-3.5 w-3.5" /> Ganancia Neta Taller
+            </span>
+            <span className="text-xl font-extrabold text-emerald-400 block mt-1">
+              +{usd(repairsSummary.data?.profitUsd ?? 0)}
+            </span>
+            <span className="text-[11px] text-emerald-400/80">
+              {nio(repairsSummary.data?.profitUsd ?? 0)}
+            </span>
+          </div>
+
+          <div className="rounded-xl bg-blue-500/10 p-3.5">
+            <span className="text-xs text-blue-400 font-medium block">Celulares en Taller</span>
+            <span className="text-xl font-bold text-blue-400 block mt-1">
+              {(repairsSummary.data?.activeCount ?? 0) + (repairsSummary.data?.readyCount ?? 0)}
+            </span>
+            <span className="text-[11px] text-muted-foreground">
+              {repairsSummary.data?.activeCount ?? 0} en proceso ·{" "}
+              {repairsSummary.data?.readyCount ?? 0} listos
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* Secondary grid */}
       <div className="mt-6 grid gap-6 lg:grid-cols-12">
         {/* Categorías */}
@@ -276,7 +394,9 @@ function DashboardPage() {
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             </div>
           ) : (topCats.data?.rows.length ?? 0) === 0 ? (
-            <p className="py-8 text-center text-xs text-muted-foreground">Sin ventas registradas.</p>
+            <p className="py-8 text-center text-xs text-muted-foreground">
+              Sin ventas registradas.
+            </p>
           ) : (
             <div className="space-y-4">
               {topCats.data!.rows.map((c, i) => (
@@ -326,7 +446,10 @@ function DashboardPage() {
         <section className="rounded-2xl border border-white/5 bg-card p-5 lg:col-span-4">
           <div className="mb-5 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">Últimas transacciones</h3>
-            <Link to="/bitacora" className="text-[10px] uppercase tracking-widest text-primary hover:underline">
+            <Link
+              to="/bitacora"
+              className="text-[10px] uppercase tracking-widest text-primary hover:underline"
+            >
               Ver todo
             </Link>
           </div>
@@ -339,7 +462,8 @@ function DashboardPage() {
           ) : (
             <div className="space-y-4">
               {recent.data!.map((s: any) => {
-                const name = s.customers?.name ?? `Venta ${s.sale_number ?? "#" + s.id.slice(0, 6)}`;
+                const name =
+                  s.customers?.name ?? `Venta ${s.sale_number ?? "#" + s.id.slice(0, 6)}`;
                 const initials = name
                   .split(" ")
                   .map((p: string) => p[0])
@@ -353,9 +477,7 @@ function DashboardPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-medium text-white">{name}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {relTime(s.created_at)}
-                      </p>
+                      <p className="text-[10px] text-muted-foreground">{relTime(s.created_at)}</p>
                     </div>
                     <span className="text-xs font-semibold text-primary tabular-nums">
                       +{usd(Number(s.total_usd))}
@@ -377,7 +499,10 @@ function DashboardPage() {
               Registro no editable · empleados y administración
             </p>
           </div>
-          <Link to="/caja" className="text-[10px] uppercase tracking-widest text-primary hover:underline">
+          <Link
+            to="/caja"
+            className="text-[10px] uppercase tracking-widest text-primary hover:underline"
+          >
             Ir a caja
           </Link>
         </div>
@@ -420,14 +545,17 @@ function DashboardPage() {
                           {s.status === "open" ? "Abierta" : "Cerrada"}
                         </span>
                       </td>
-                      <td className="py-2 text-muted-foreground">{new Date(s.opened_at).toLocaleString("es-NI")}</td>
+                      <td className="py-2 text-muted-foreground">
+                        {new Date(s.opened_at).toLocaleString("es-NI")}
+                      </td>
                       <td className="py-2">{nameOf(openBy)}</td>
                       <td className="py-2 text-muted-foreground">
                         {s.closed_at ? new Date(s.closed_at).toLocaleString("es-NI") : "—"}
                       </td>
                       <td className="py-2">{s.closed_at ? nameOf(closeBy) : "—"}</td>
                       <td className="py-2 text-right tabular-nums">
-                        C${Number(s.opening_nio ?? 0).toFixed(0)} · ${Number(s.opening_usd ?? 0).toFixed(0)}
+                        C${Number(s.opening_nio ?? 0).toFixed(0)} · $
+                        {Number(s.opening_usd ?? 0).toFixed(0)}
                       </td>
                       <td className="py-2 text-right tabular-nums">
                         {s.closed_at
@@ -489,7 +617,9 @@ function AlertCard({
       )}
     >
       <div className="min-w-0">
-        <p className={cn("text-[10px] font-bold uppercase tracking-wider", styles.label)}>{title}</p>
+        <p className={cn("text-[10px] font-bold uppercase tracking-wider", styles.label)}>
+          {title}
+        </p>
         <p className={cn("mt-0.5 truncate text-sm font-medium", styles.value)}>{value}</p>
       </div>
       <div className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", styles.iconWrap)}>

@@ -233,7 +233,8 @@ function PagoPendientePage() {
                           <div>
                             <div className="text-sm font-semibold">{b.bank_name}</div>
                             <div className="text-xs text-muted-foreground">
-                              {b.account_holder} · {b.account_type === "savings" ? "Ahorro" : "Corriente"}
+                              {b.account_holder} ·{" "}
+                              {b.account_type === "savings" ? "Ahorro" : "Corriente"}
                             </div>
                           </div>
                         </div>

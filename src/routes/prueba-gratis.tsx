@@ -100,9 +100,8 @@ function TrialRequestPage() {
               Prueba Nica-POS sin pagar nada
             </h1>
             <p className="mt-3 text-lg text-muted-foreground">
-              Envía tu solicitud y el equipo la revisará manualmente. Una vez aprobada,
-              recibirás tus credenciales de acceso y tendrás 7 días completos para usar
-              todas las funciones.
+              Envía tu solicitud y el equipo la revisará manualmente. Una vez aprobada, recibirás
+              tus credenciales de acceso y tendrás 7 días completos para usar todas las funciones.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
               {[
@@ -131,8 +130,8 @@ function TrialRequestPage() {
                 <CheckCircle2 className="h-12 w-12 text-primary" />
                 <h2 className="text-xl font-semibold">¡Solicitud enviada!</h2>
                 <p className="text-sm text-muted-foreground">
-                  Nuestro equipo la revisará y te contactará por correo con tus credenciales
-                  de acceso. Suele tardar pocas horas.
+                  Nuestro equipo la revisará y te contactará por correo con tus credenciales de
+                  acceso. Suele tardar pocas horas.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/">Volver al inicio</Link>
@@ -208,8 +207,7 @@ function TrialRequestPage() {
                   Enviar solicitud
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
-                  Al enviar aceptas que registremos tu IP y agente de navegador para
-                  prevenir abuso.
+                  Al enviar aceptas que registremos tu IP y agente de navegador para prevenir abuso.
                 </p>
               </form>
             )}

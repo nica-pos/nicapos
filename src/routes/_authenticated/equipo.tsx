@@ -10,13 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -81,7 +75,9 @@ function TeamPage() {
           .select("id, email, full_name")
           .in("id", userIds);
         if (pErr) throw pErr;
-        profilesMap = new Map((profs ?? []).map((p) => [p.id, { email: p.email, full_name: p.full_name }]));
+        profilesMap = new Map(
+          (profs ?? []).map((p) => [p.id, { email: p.email, full_name: p.full_name }]),
+        );
       }
       return (data ?? []).map((m) => ({ ...m, profile: profilesMap.get(m.user_id) ?? null }));
     },
@@ -90,7 +86,8 @@ function TeamPage() {
   const invite = useMutation({
     mutationFn: async () => {
       if (!tenant) throw new Error("Sin tienda activa");
-      if (password && password.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres.");
+      if (password && password.length < 6)
+        throw new Error("La contraseña debe tener al menos 6 caracteres.");
       return await addMember({
         data: {
           tenantId: tenant.id,
@@ -109,7 +106,9 @@ function TeamPage() {
       if (res?.created) {
         toast.success("Cuenta creada. Ya puede iniciar sesión con ese correo y contraseña.");
       } else if (res?.invited) {
-        toast.success("Invitación enviada. Se unirá automáticamente al registrarse con ese correo.");
+        toast.success(
+          "Invitación enviada. Se unirá automáticamente al registrarse con ese correo.",
+        );
       } else {
         toast.success("Miembro agregado");
       }
@@ -154,7 +153,9 @@ function TeamPage() {
     <DashboardShell>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Equipo</h1>
-        <p className="text-muted-foreground">Gestiona quién tiene acceso a tu tienda y sus roles.</p>
+        <p className="text-muted-foreground">
+          Gestiona quién tiene acceso a tu tienda y sus roles.
+        </p>
       </div>
 
       {canManage && (
@@ -164,7 +165,9 @@ function TeamPage() {
               <UserPlus className="h-5 w-5 text-primary" /> Agregar miembro
             </CardTitle>
             <CardDescription>
-              Creá la cuenta del miembro con correo y contraseña. Podrá iniciar sesión inmediatamente con el rol asignado. Si dejás la contraseña vacía y el correo aún no existe, se guarda como invitación pendiente.
+              Creá la cuenta del miembro con correo y contraseña. Podrá iniciar sesión
+              inmediatamente con el rol asignado. Si dejás la contraseña vacía y el correo aún no
+              existe, se guarda como invitación pendiente.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -251,10 +254,15 @@ function TeamPage() {
                   return (
                     <TableRow key={m.id}>
                       <TableCell className="font-medium">{m.profile?.full_name ?? "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{m.profile?.email ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {m.profile?.email ?? "—"}
+                      </TableCell>
                       <TableCell>
                         {canManage && !isOwner ? (
-                          <Select value={m.role} onValueChange={(v) => updateRole.mutate({ id: m.id, role: v })}>
+                          <Select
+                            value={m.role}
+                            onValueChange={(v) => updateRole.mutate({ id: m.id, role: v })}
+                          >
                             <SelectTrigger className="w-36">
                               <SelectValue />
                             </SelectTrigger>
@@ -266,7 +274,9 @@ function TeamPage() {
                             </SelectContent>
                           </Select>
                         ) : (
-                          <Badge variant={isOwner ? "default" : "secondary"}>{roleLabels[m.role]}</Badge>
+                          <Badge variant={isOwner ? "default" : "secondary"}>
+                            {roleLabels[m.role]}
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell>

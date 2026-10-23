@@ -49,23 +49,19 @@ export const requestTrialForCurrentUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => requestTrialInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: tenantId, error } = await context.supabase.rpc(
-      "request_trial_for_current_user",
-      {
-        _tenant_name: data.tenantName,
-        _phone: data.phone ?? "",
-        _city: data.city ?? "",
-        _country: data.country ?? "",
-        _ip_address: "",
-        _user_agent: "",
-        _latitude: data.latitude ?? (null as unknown as number),
-        _longitude: data.longitude ?? (null as unknown as number),
-        _location_accuracy: data.locationAccuracy ?? (null as unknown as number),
-        _notes: data.notes ?? "",
-      },
-    );
+    const { data: tenantId, error } = await context.supabase.rpc("request_trial_for_current_user", {
+      _tenant_name: data.tenantName,
+      _phone: data.phone ?? "",
+      _city: data.city ?? "",
+      _country: data.country ?? "",
+      _ip_address: "",
+      _user_agent: "",
+      _latitude: data.latitude ?? (null as unknown as number),
+      _longitude: data.longitude ?? (null as unknown as number),
+      _location_accuracy: data.locationAccuracy ?? (null as unknown as number),
+      _notes: data.notes ?? "",
+    });
     if (error) throw new Error(error.message);
-
 
     // Send confirmation email (fire-and-forget)
     try {

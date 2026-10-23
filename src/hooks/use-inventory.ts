@@ -8,13 +8,10 @@ export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export type Brand = Database["public"]["Tables"]["brands"]["Row"];
 export type ProductModel = Database["public"]["Tables"]["product_models"]["Row"];
 export type Promotion = Database["public"]["Tables"]["promotions"]["Row"];
-export type InventoryMovement =
-  Database["public"]["Tables"]["inventory_movements"]["Row"];
-export type ComboComponent =
-  Database["public"]["Tables"]["combo_components"]["Row"];
+export type InventoryMovement = Database["public"]["Tables"]["inventory_movements"]["Row"];
+export type ComboComponent = Database["public"]["Tables"]["combo_components"]["Row"];
 export type StockAudit = Database["public"]["Tables"]["stock_audits"]["Row"];
-export type StockAuditItem =
-  Database["public"]["Tables"]["stock_audit_items"]["Row"];
+export type StockAuditItem = Database["public"]["Tables"]["stock_audit_items"]["Row"];
 
 // ---------- Simple lookups (categories/brands/models) ----------
 function useLookup<T>(table: "categories" | "brands" | "product_models") {
@@ -38,9 +35,7 @@ export const useCategories = () => useLookup<Category>("categories");
 export const useBrands = () => useLookup<Brand>("brands");
 export const useModels = () => useLookup<ProductModel>("product_models");
 
-export function useCreateLookup(
-  table: "categories" | "brands" | "product_models",
-) {
+export function useCreateLookup(table: "categories" | "brands" | "product_models") {
   const { tenant } = useActiveTenant();
   const qc = useQueryClient();
   return useMutation({
@@ -66,10 +61,7 @@ export function useCreateLookup(
   });
 }
 
-
-export function useDeleteLookup(
-  table: "categories" | "brands" | "product_models",
-) {
+export function useDeleteLookup(table: "categories" | "brands" | "product_models") {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
@@ -87,10 +79,7 @@ export function useKardex(productId?: string) {
     queryKey: ["kardex", productId, scopeKey],
     enabled: !!productId,
     queryFn: async (): Promise<InventoryMovement[]> => {
-      let q = supabase
-        .from("inventory_movements")
-        .select("*")
-        .eq("product_id", productId!);
+      let q = supabase.from("inventory_movements").select("*").eq("product_id", productId!);
       if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
       const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
@@ -99,19 +88,13 @@ export function useKardex(productId?: string) {
   });
 }
 
-
 export function useRecordMovement() {
   const { branchId } = useActiveBranch();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (v: {
       product_id: string;
-      movement_type:
-        | "purchase"
-        | "sale"
-        | "adjustment_in"
-        | "adjustment_out"
-        | "audit";
+      movement_type: "purchase" | "sale" | "adjustment_in" | "adjustment_out" | "audit";
       quantity: number;
       unit_cost?: number;
       reference?: string;
@@ -157,11 +140,7 @@ export function useAddComboComponent() {
   const { tenant } = useActiveTenant();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (v: {
-      combo_id: string;
-      component_id: string;
-      quantity: number;
-    }) => {
+    mutationFn: async (v: { combo_id: string; component_id: string; quantity: number }) => {
       const { error } = await supabase.from("combo_components").insert({
         tenant_id: tenant!.id,
         combo_id: v.combo_id,
@@ -178,10 +157,7 @@ export function useRemoveComboComponent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("combo_components")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("combo_components").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["combo-components"] }),
@@ -247,9 +223,7 @@ export function useCreateAudit() {
         .select("product_id, stock, product:products!inner(id,is_active,tenant_id)")
         .eq("tenant_id", tenant!.id)
         .eq("branch_id", branchId);
-      const rows = (stockRows ?? []).filter(
-        (r: any) => r.product?.is_active !== false,
-      );
+      const rows = (stockRows ?? []).filter((r: any) => r.product?.is_active !== false);
       if (rows.length > 0) {
         await supabase.from("stock_audit_items").insert(
           rows.map((r: any) => ({
@@ -346,9 +320,7 @@ export function useSavePromotion() {
   const { tenant } = useActiveTenant();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (
-      p: Partial<Promotion> & { name: string },
-    ): Promise<Promotion> => {
+    mutationFn: async (p: Partial<Promotion> & { name: string }): Promise<Promotion> => {
       const payload = { ...p, tenant_id: tenant!.id };
       if (p.id) {
         const { data, error } = await supabase
@@ -360,11 +332,7 @@ export function useSavePromotion() {
         if (error) throw error;
         return data;
       }
-      const { data, error } = await supabase
-        .from("promotions")
-        .insert(payload)
-        .select()
-        .single();
+      const { data, error } = await supabase.from("promotions").insert(payload).select().single();
       if (error) throw error;
       return data;
     },
@@ -406,9 +374,7 @@ export function applyPromotions(
   for (const pr of applicable) {
     const val = Number(pr.discount_value);
     const discounted =
-      pr.discount_type === "percent"
-        ? basePrice * (1 - val / 100)
-        : basePrice - val;
+      pr.discount_type === "percent" ? basePrice * (1 - val / 100) : basePrice - val;
     const finalPrice = Math.max(0, Number(discounted.toFixed(2)));
     if (finalPrice < best) {
       best = finalPrice;

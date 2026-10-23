@@ -7,9 +7,7 @@
 /** Firma de la API expuesta desde electron/preload.cjs */
 type DesktopAPI = {
   isDesktop: true;
-  listPrinters: () => Promise<
-    Array<{ name: string; displayName: string; isDefault: boolean }>
-  >;
+  listPrinters: () => Promise<Array<{ name: string; displayName: string; isDefault: boolean }>>;
   print: (opts: {
     deviceName?: string;
     silent?: boolean;
@@ -81,8 +79,7 @@ export function setPrintSettings(next: Partial<PrintSettings>): PrintSettings {
 export async function printDocument(kind: PrintKind): Promise<void> {
   const desktop = window.nicaposDesktop;
   const settings = getPrintSettings();
-  const deviceName =
-    kind === "ticket" ? settings.ticketPrinter : settings.cartaPrinter;
+  const deviceName = kind === "ticket" ? settings.ticketPrinter : settings.cartaPrinter;
 
   if (desktop && deviceName && settings.silent) {
     const res = await desktop.print({

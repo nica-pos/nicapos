@@ -94,9 +94,7 @@ function SalesHistoryPage() {
         )
         .eq("tenant_id", tenant!.id);
       if (scopeBranchId) q = q.eq("branch_id", scopeBranchId);
-      const { data, error } = await q
-        .order("created_at", { ascending: false })
-        .limit(300);
+      const { data, error } = await q.order("created_at", { ascending: false }).limit(300);
 
       if (error) throw error;
       return (data ?? []) as unknown as SaleRow[];
@@ -262,10 +260,10 @@ function SalesHistoryPage() {
       <SaleDetailDialog
         sale={selected}
         onClose={() => setSelected(null)}
-        sellerName={selected ? sellers?.[selected.sold_by ?? ""]?.name ?? "—" : ""}
+        sellerName={selected ? (sellers?.[selected.sold_by ?? ""]?.name ?? "—") : ""}
         tenantName={tenant?.name ?? ""}
         tenantRuc={tenant?.ruc ?? null}
-        logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
+        logoUrl={((fiscal as any)?.show_logo ?? true) ? (tenant?.logo_url ?? null) : null}
         primaryColor={tenant?.primary_color ?? "#f59e0b"}
         settings={fiscal}
         canVoid={canVoid}

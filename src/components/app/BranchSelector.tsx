@@ -45,7 +45,12 @@ export function BranchSelector() {
           <DropdownMenuSeparator />
           {activeBranches.map((b) => (
             <DropdownMenuItem key={b.id} onClick={() => pick(b.id)} className="gap-2">
-              <Check className={cn("h-4 w-4", !isAll && b.id === branch?.id ? "opacity-100" : "opacity-0")} />
+              <Check
+                className={cn(
+                  "h-4 w-4",
+                  !isAll && b.id === branch?.id ? "opacity-100" : "opacity-0",
+                )}
+              />
               <span className="truncate">{b.name}</span>
               {b.is_default && (
                 <span className="ml-auto text-[10px] text-muted-foreground">Principal</span>
@@ -67,4 +72,3 @@ export function BranchSelector() {
     </DropdownMenu>
   );
 }
-

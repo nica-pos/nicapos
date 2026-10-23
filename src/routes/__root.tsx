@@ -97,14 +97,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Nica-POS" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/gDBWrXNyocTl4CHHu485szYPQY82/social-images/social-1784093015684-bf7614ee-2144-4d38-a1c7-3ee7719bd24a.webp" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/gDBWrXNyocTl4CHHu485szYPQY82/social-images/social-1784093015684-bf7614ee-2144-4d38-a1c7-3ee7719bd24a.webp",
+      },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@nicapos" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/gDBWrXNyocTl4CHHu485szYPQY82/social-images/social-1784093015684-bf7614ee-2144-4d38-a1c7-3ee7719bd24a.webp" },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/gDBWrXNyocTl4CHHu485szYPQY82/social-images/social-1784093015684-bf7614ee-2144-4d38-a1c7-3ee7719bd24a.webp",
+      },
       { name: "twitter:title", content: "Nica-POS — Punto de Venta y Contabilidad para Nicaragua" },
-      { name: "twitter:description", content: "Sistema POS y contable SaaS multi-tenant para Nicaragua. Facturación, inventario, Córdobas y Dólares, IVA e IR, cajas e informes financieros." },
+      {
+        name: "twitter:description",
+        content:
+          "Sistema POS y contable SaaS multi-tenant para Nicaragua. Facturación, inventario, Córdobas y Dólares, IVA e IR, cajas e informes financieros.",
+      },
     ],
     links: [
       {

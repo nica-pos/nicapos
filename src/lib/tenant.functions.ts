@@ -57,7 +57,7 @@ export const adminCreateClient = createServerFn({ method: "POST" })
   .handler(async () => {
     throw new Error(
       "La creación automática de clientes está temporalmente deshabilitada. " +
-      "Pide al cliente que se registre en /auth y luego asígnale plan y estado desde esta consola.",
+        "Pide al cliente que se registre en /auth y luego asígnale plan y estado desde esta consola.",
     );
   });
 
@@ -100,7 +100,9 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
       if (createErr) {
         const msg = createErr.message?.toLowerCase() ?? "";
         if (msg.includes("already") || msg.includes("registered") || msg.includes("exist")) {
-          throw new Error("Ya existe una cuenta con ese correo. Pídele que inicie sesión y quítale la contraseña de este formulario.");
+          throw new Error(
+            "Ya existe una cuenta con ese correo. Pídele que inicie sesión y quítale la contraseña de este formulario.",
+          );
         }
         throw new Error(createErr.message);
       }
@@ -116,7 +118,8 @@ export const addTenantMemberByEmail = createServerFn({ method: "POST" })
         invited_by: userId,
       });
       if (invErr) {
-        if (invErr.code === "23505") throw new Error("Ya existe una invitación pendiente para ese correo.");
+        if (invErr.code === "23505")
+          throw new Error("Ya existe una invitación pendiente para ese correo.");
         throw new Error(invErr.message);
       }
       return { ok: true, invited: true, created: false };
@@ -181,7 +184,9 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
-    const ownerIds = Array.from(new Set((data ?? []).map((t) => t.owner_id).filter(Boolean))) as string[];
+    const ownerIds = Array.from(
+      new Set((data ?? []).map((t) => t.owner_id).filter(Boolean)),
+    ) as string[];
     let superOwners = new Set<string>();
     const ownerInfo = new Map<string, { email: string | null; full_name: string | null }>();
     if (ownerIds.length > 0) {
@@ -191,10 +196,7 @@ export const getAdminTenantSummaries = createServerFn({ method: "GET" })
           .select("user_id")
           .eq("role", "superadmin")
           .in("user_id", ownerIds),
-        context.supabase
-          .from("profiles")
-          .select("id, email, full_name")
-          .in("id", ownerIds),
+        context.supabase.from("profiles").select("id, email, full_name").in("id", ownerIds),
       ]);
       if (rolesRes.error) throw new Error(rolesRes.error.message);
       if (profRes.error) throw new Error(profRes.error.message);
@@ -267,10 +269,7 @@ export const adminDeleteTenant = createServerFn({ method: "POST" })
     const storage = await removeTenantStorage(supabaseAdmin, data.tenantId);
 
     // Borrado real de la tienda con cliente administrativo: los datos hijos caen en CASCADE.
-    const { error: delErr } = await supabaseAdmin
-      .from("tenants")
-      .delete()
-      .eq("id", data.tenantId);
+    const { error: delErr } = await supabaseAdmin.from("tenants").delete().eq("id", data.tenantId);
     if (delErr) throw new Error(delErr.message);
 
     const deletedUserIds: string[] = [];
@@ -281,7 +280,8 @@ export const adminDeleteTenant = createServerFn({ method: "POST" })
       for (const userId of candidateUserIds) {
         const result = await deleteAuthUserIfOrphan(supabaseAdmin, userId, context.userId);
         if (result.status === "deleted") deletedUserIds.push(userId);
-        else if (result.status === "failed") failedUserDeletes.push({ userId, reason: result.reason });
+        else if (result.status === "failed")
+          failedUserDeletes.push({ userId, reason: result.reason });
         else skippedUserIds.push(userId);
       }
     }
@@ -309,7 +309,8 @@ export const cleanupOrphanAuthUsers = createServerFn({ method: "POST" })
         const userId = user.id;
         const result = await deleteAuthUserIfOrphan(supabaseAdmin, userId, context.userId);
         if (result.status === "deleted") deletedUserIds.push(userId);
-        else if (result.status === "failed") failedUserDeletes.push({ userId, reason: result.reason });
+        else if (result.status === "failed")
+          failedUserDeletes.push({ userId, reason: result.reason });
         else skippedUserIds.push(userId);
       }
 
@@ -338,8 +339,7 @@ export const removeTenantMember = createServerFn({ method: "POST" })
       _role: "superadmin",
     });
 
-    const canManage =
-      isSuper || (caller && (caller.role === "owner" || caller.role === "admin"));
+    const canManage = isSuper || (caller && (caller.role === "owner" || caller.role === "admin"));
     if (!canManage) {
       throw new Error("No tienes permiso para eliminar miembros de esta tienda.");
     }
@@ -374,11 +374,7 @@ export const removeTenantMember = createServerFn({ method: "POST" })
     if (data.deleteAuthIfOrphan) {
       // Use admin client to fully wipe the auth user if they have no other access.
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const result = await deleteAuthUserIfOrphan(
-        supabaseAdmin,
-        member.user_id,
-        userId,
-      );
+      const result = await deleteAuthUserIfOrphan(supabaseAdmin, member.user_id, userId);
       if (result.status === "deleted") {
         // Also drop the profile row so no residual email lingers.
         await supabaseAdmin.from("profiles").delete().eq("id", member.user_id);
@@ -390,4 +386,3 @@ export const removeTenantMember = createServerFn({ method: "POST" })
 
     return { ok: true, authDeleted, authSkippedReason };
   });
-

@@ -21,8 +21,8 @@ export function CTA() {
                 <span className="text-gradient">hoy mismo.</span>
               </h2>
               <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-                Únete a las tiendas que ya venden más rápido con Nica-POS. Crea tu cuenta y
-                empieza a facturar en minutos.
+                Únete a las tiendas que ya venden más rápido con Nica-POS. Crea tu cuenta y empieza
+                a facturar en minutos.
               </p>
 
               <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">

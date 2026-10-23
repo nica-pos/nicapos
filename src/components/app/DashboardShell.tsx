@@ -22,7 +22,6 @@ import {
   ArrowRightLeft,
   BarChart3,
   Wrench,
-
   ChevronDown,
   Menu,
   X,
@@ -38,11 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  useActiveTenant,
-  useIsSuperadmin,
-  setActiveTenantId,
-} from "@/hooks/use-tenant";
+import { useActiveTenant, useIsSuperadmin, setActiveTenantId } from "@/hooks/use-tenant";
 import { cn } from "@/lib/utils";
 import { ROUTE_ROLES, canAccessRoute, defaultHomeForRole } from "@/lib/roles";
 import type { TenantRole } from "@/hooks/use-tenant";
@@ -81,7 +76,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     label: "Administración",
     items: [
       { to: "/fiscal", label: "Moneda e impuestos", icon: Coins },
-      
+
       { to: "/bitacora", label: "Bitácora", icon: ShieldCheck },
       { to: "/equipo", label: "Equipo", icon: Users },
       { to: "/sucursales", label: "Sucursales", icon: Building2 },
@@ -101,10 +96,7 @@ function filterNavByRole(role: TenantRole | null) {
     .filter((g) => g.items.length > 0);
 }
 
-const statusMeta: Record<
-  string,
-  { label: string; dot: string; text: string }
-> = {
+const statusMeta: Record<string, { label: string; dot: string; text: string }> = {
   trial: { label: "Prueba", dot: "bg-warning", text: "text-warning" },
   active: { label: "Activa", dot: "bg-success", text: "text-success" },
   suspended: { label: "Suspendida", dot: "bg-destructive", text: "text-destructive" },
@@ -169,7 +161,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isSuperadmin) return; // superadmin puede entrar a todo
     if (!role) return;
-    const bypass = ["/onboarding", "/pago-pendiente", "/verificacion-pendiente", "/admin", "/pagos"];
+    const bypass = [
+      "/onboarding",
+      "/pago-pendiente",
+      "/verificacion-pendiente",
+      "/admin",
+      "/pagos",
+    ];
     if (bypass.some((p) => pathname.startsWith(p))) return;
     if (!canAccessRoute(pathname, role)) {
       navigate({ to: defaultHomeForRole(role), replace: true });
@@ -198,7 +196,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     return "";
   }, [pathname]);
 
-  const status = tenant ? statusMeta[tenant.status] ?? null : null;
+  const status = tenant ? (statusMeta[tenant.status] ?? null) : null;
   const initials = initialsOf(tenant?.name, userEmail);
 
   const Sidebar = (
@@ -244,10 +242,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   <DropdownMenuItem
                     key={m.tenant_id}
                     onClick={() => handleSwitchTenant(m.tenant_id)}
-                    className={cn(
-                      "gap-2",
-                      m.tenant_id === tenant.id && "bg-accent",
-                    )}
+                    className={cn("gap-2", m.tenant_id === tenant.id && "bg-accent")}
                   >
                     <Store className="h-4 w-4 text-muted-foreground" />
                     {m.tenant.name}
@@ -287,7 +282,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                     <item.icon
                       className={cn(
                         "h-4 w-4 shrink-0 transition-colors",
-                        active ? "text-primary" : "text-muted-foreground/80 group-hover:text-foreground",
+                        active
+                          ? "text-primary"
+                          : "text-muted-foreground/80 group-hover:text-foreground",
                       )}
                     />
                     <span className="truncate">{item.label}</span>
@@ -396,13 +393,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <span className="text-xs text-muted-foreground">
-                {tenant?.name ?? "Nica-POS"}
-              </span>
+              <span className="text-xs text-muted-foreground">{tenant?.name ?? "Nica-POS"}</span>
               <span className="text-muted-foreground/50">/</span>
-              <span className="truncate text-sm font-medium text-foreground">
-                {currentTitle}
-              </span>
+              <span className="truncate text-sm font-medium text-foreground">{currentTitle}</span>
             </div>
             <BranchSelector />
           </div>

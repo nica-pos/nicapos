@@ -68,18 +68,15 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => submitInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: subId, error } = await context.supabase.rpc(
-      "submit_payment_and_mark_pending",
-      {
-        _tenant_id: data.tenantId,
-        _plan_id: data.planId,
-        _bank_account_id: data.bankAccountId,
-        _amount: data.amount,
-        _currency: data.currency,
-        _reference: data.reference ?? "",
-        _receipt_path: data.receiptPath,
-      },
-    );
+    const { data: subId, error } = await context.supabase.rpc("submit_payment_and_mark_pending", {
+      _tenant_id: data.tenantId,
+      _plan_id: data.planId,
+      _bank_account_id: data.bankAccountId,
+      _amount: data.amount,
+      _currency: data.currency,
+      _reference: data.reference ?? "",
+      _receipt_path: data.receiptPath,
+    });
     if (error) throw new Error(error.message);
     return { ok: true, submissionId: subId };
   });

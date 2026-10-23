@@ -41,8 +41,8 @@ export function Hero() {
             </h1>
 
             <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Factura en segundos, controla inventario por sucursal y mira tu utilidad real —
-              en Córdobas y Dólares, con IVA e IR listos para la DGI.
+              Factura en segundos, controla inventario por sucursal y mira tu utilidad real — en
+              Córdobas y Dólares, con IVA e IR listos para la DGI.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -100,8 +100,7 @@ export function Hero() {
             </div>
 
             <div className="absolute -right-2 top-8 hidden items-center gap-2 rounded-full border border-border/70 bg-card/90 px-3 py-2 text-xs font-medium shadow-xl backdrop-blur-md sm:flex">
-              <Store className="h-4 w-4 text-primary" />
-              3 sucursales sincronizadas
+              <Store className="h-4 w-4 text-primary" />3 sucursales sincronizadas
             </div>
           </div>
         </div>

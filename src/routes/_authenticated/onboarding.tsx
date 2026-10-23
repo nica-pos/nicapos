@@ -9,20 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  usePlans,
-  setActiveTenantId,
-  useMyMemberships,
-} from "@/hooks/use-tenant";
+import { usePlans, setActiveTenantId, useMyMemberships } from "@/hooks/use-tenant";
 import { requestTrialForCurrentUser } from "@/lib/trial-requests.functions";
 import { cn } from "@/lib/utils";
 
 const TRIAL_OPTION_ID = "__trial__";
 
-const PLAN_META: Record<
-  string,
-  { description: string; features: string[]; popular?: boolean }
-> = {
+const PLAN_META: Record<string, { description: string; features: string[]; popular?: boolean }> = {
   basico: {
     description: "Ideal para tiendas de un solo mostrador.",
     features: [
@@ -125,7 +118,9 @@ function OnboardingPage() {
         .single();
       if (error) {
         if ((error as any).code === "23505" || /one_active_tenant_per_owner/i.test(error.message)) {
-          throw new Error("Ya tienes una tienda activa o pendiente. Solo se permite una por usuario.");
+          throw new Error(
+            "Ya tienes una tienda activa o pendiente. Solo se permite una por usuario.",
+          );
         }
         throw error;
       }
@@ -151,14 +146,24 @@ function OnboardingPage() {
   // Bloqueo: 1 sola tienda activa por usuario — redirige vía efecto
   const existingActive = (memberships ?? []).find((m) => {
     const s = m.tenant?.status as string | undefined;
-    return s && ["trial", "active", "pending_payment", "pending_verification", "pending_trial_approval"].includes(s);
+    return (
+      s &&
+      [
+        "trial",
+        "active",
+        "pending_payment",
+        "pending_verification",
+        "pending_trial_approval",
+      ].includes(s)
+    );
   });
   useEffect(() => {
     if (loadingMemberships || !existingActive) return;
     const s = existingActive.tenant.status as string;
     if (s === "pending_trial_approval") navigate({ to: "/prueba-en-revision", replace: true });
     else if (s === "pending_payment") navigate({ to: "/pago-pendiente", replace: true });
-    else if (s === "pending_verification") navigate({ to: "/verificacion-pendiente", replace: true });
+    else if (s === "pending_verification")
+      navigate({ to: "/verificacion-pendiente", replace: true });
     else navigate({ to: "/dashboard", replace: true });
   }, [loadingMemberships, existingActive, navigate]);
   const blocking = !loadingMemberships && !!existingActive;
@@ -196,7 +201,6 @@ function OnboardingPage() {
             ¿No es tu cuenta? Cerrar sesión
           </Button>
         </div>
-
 
         <Card>
           <CardContent className="space-y-5 pt-6">
@@ -300,7 +304,8 @@ function OnboardingPage() {
                         {isTrialOption && <Check className="h-4 w-4 text-primary" />}
                       </div>
                       <div className="mt-0.5 text-xs text-muted-foreground">
-                        Sin tarjeta ni pago. Requiere aprobación del equipo (te avisamos por correo).
+                        Sin tarjeta ni pago. Requiere aprobación del equipo (te avisamos por
+                        correo).
                       </div>
                     </div>
                     <div className="text-right">
@@ -311,7 +316,6 @@ function OnboardingPage() {
                 </button>
               </div>
             </div>
-
 
             <Button
               className="w-full"

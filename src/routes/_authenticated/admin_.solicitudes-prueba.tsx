@@ -98,12 +98,8 @@ function SolicitudesPruebaPage() {
   });
 
   const approveMut = useMutation({
-    mutationFn: (v: {
-      requestId: string;
-      planId: string;
-      trialDays: number;
-      password?: string;
-    }) => approve({ data: v }),
+    mutationFn: (v: { requestId: string; planId: string; trialDays: number; password?: string }) =>
+      approve({ data: v }),
     onSuccess: (result: any) => {
       toast.success("Prueba aprobada");
       if (result?.password) {
@@ -145,9 +141,7 @@ function SolicitudesPruebaPage() {
         <Card className="mx-auto max-w-md p-6 text-center">
           <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
           <h2 className="mt-3 text-lg font-semibold">Acceso restringido</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Necesitas rol de superadmin.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Necesitas rol de superadmin.</p>
         </Card>
       </DashboardShell>
     );
@@ -185,8 +179,8 @@ function SolicitudesPruebaPage() {
           </Link>
           <h1 className="text-2xl font-bold">Solicitudes de prueba</h1>
           <p className="text-sm text-muted-foreground">
-            Aprueba manualmente las pruebas de 7 días. Verifica ubicación e IP para evitar
-            cuentas duplicadas.
+            Aprueba manualmente las pruebas de 7 días. Verifica ubicación e IP para evitar cuentas
+            duplicadas.
           </p>
         </div>
       </div>
@@ -235,8 +229,7 @@ function SolicitudesPruebaPage() {
           <DialogHeader>
             <DialogTitle>Solicitud de prueba</DialogTitle>
             <DialogDescription>
-              Revisa los datos, confirma que no sea una cuenta duplicada y aprueba o
-              rechaza.
+              Revisa los datos, confirma que no sea una cuenta duplicada y aprueba o rechaza.
             </DialogDescription>
           </DialogHeader>
           {viewing && (
@@ -247,9 +240,7 @@ function SolicitudesPruebaPage() {
               <Grid label="Negocio" value={viewing.business_name} />
               <Grid
                 label="Ubicación reportada"
-                value={
-                  [viewing.city, viewing.country].filter(Boolean).join(", ") || "—"
-                }
+                value={[viewing.city, viewing.country].filter(Boolean).join(", ") || "—"}
               />
               <div className="rounded-md border bg-muted/30 p-3">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -273,17 +264,14 @@ function SolicitudesPruebaPage() {
                         rel="noopener noreferrer"
                         href={`https://www.google.com/maps?q=${viewing.latitude},${viewing.longitude}`}
                       >
-                        Ver en mapa ({viewing.latitude.toFixed(4)},{" "}
-                        {viewing.longitude.toFixed(4)}
+                        Ver en mapa ({viewing.latitude.toFixed(4)}, {viewing.longitude.toFixed(4)}
                         {viewing.location_accuracy
                           ? ` ±${Math.round(viewing.location_accuracy)}m`
                           : ""}
                         )
                       </a>
                     ) : (
-                      <span className="text-muted-foreground">
-                        Ubicación no compartida
-                      </span>
+                      <span className="text-muted-foreground">Ubicación no compartida</span>
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
@@ -306,9 +294,7 @@ function SolicitudesPruebaPage() {
               {viewing.status !== "pending" && (
                 <div className="rounded bg-muted/30 p-2 text-xs">
                   Estado: <span className="font-medium">{viewing.status}</span>
-                  {viewing.rejection_reason && (
-                    <> — {viewing.rejection_reason}</>
-                  )}
+                  {viewing.rejection_reason && <> — {viewing.rejection_reason}</>}
                 </div>
               )}
 
@@ -344,10 +330,7 @@ function SolicitudesPruebaPage() {
                       <div>
                         <Label>Contraseña inicial</Label>
                         <div className="flex gap-1">
-                          <Input
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                          />
+                          <Input value={password} onChange={(e) => setPassword(e.target.value)} />
                           <Button
                             type="button"
                             variant="outline"
@@ -364,7 +347,6 @@ function SolicitudesPruebaPage() {
                         El usuario ya se registró. Solo se activará su tienda.
                       </div>
                     )}
-
                   </div>
                 </div>
               )}
@@ -385,10 +367,7 @@ function SolicitudesPruebaPage() {
             {viewing?.status === "pending" ? (
               mode === null ? (
                 <>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setMode("reject")}
-                  >
+                  <Button variant="destructive" onClick={() => setMode("reject")}>
                     <XCircle className="mr-2 h-4 w-4" /> Rechazar
                   </Button>
                   <Button onClick={() => setMode("approve")}>
@@ -415,10 +394,7 @@ function SolicitudesPruebaPage() {
                       })
                     }
                   >
-
-                    {approveMut.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                    {approveMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Confirmar aprobación
                   </Button>
                 </>
@@ -430,13 +406,9 @@ function SolicitudesPruebaPage() {
                   <Button
                     variant="destructive"
                     disabled={!reason || rejectMut.isPending}
-                    onClick={() =>
-                      rejectMut.mutate({ requestId: viewing!.id, reason })
-                    }
+                    onClick={() => rejectMut.mutate({ requestId: viewing!.id, reason })}
                   >
-                    {rejectMut.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                    {rejectMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Confirmar rechazo
                   </Button>
                 </>
@@ -522,24 +494,17 @@ function Section({
         {title} · {rows.length}
       </h2>
       {rows.length === 0 ? (
-        <p className="rounded border border-dashed p-4 text-sm text-muted-foreground">
-          {emptyMsg}
-        </p>
+        <p className="rounded border border-dashed p-4 text-sm text-muted-foreground">{emptyMsg}</p>
       ) : (
         <div className="space-y-2">
           {rows.map((r) => {
             const dup = duplicateFlag(r);
             return (
-              <Card
-                key={r.id}
-                className="flex items-center justify-between gap-3 p-3"
-              >
+              <Card key={r.id} className="flex items-center justify-between gap-3 p-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{r.business_name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      · {r.full_name}
-                    </span>
+                    <span className="text-xs text-muted-foreground">· {r.full_name}</span>
                     <StatusPill status={r.status} />
                     {dup && (
                       <span className="rounded bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
@@ -571,9 +536,7 @@ function StatusPill({ status }: { status: string }) {
     rejected: "bg-destructive/10 text-destructive",
   };
   return (
-    <span
-      className={`rounded px-2 py-0.5 text-[10px] font-medium ${map[status] ?? "bg-muted"}`}
-    >
+    <span className={`rounded px-2 py-0.5 text-[10px] font-medium ${map[status] ?? "bg-muted"}`}>
       {status}
     </span>
   );

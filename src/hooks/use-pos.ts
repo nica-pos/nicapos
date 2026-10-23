@@ -39,9 +39,7 @@ export function useProducts() {
         .eq("branch_id", scopeBranchId);
       if (stockErr) throw stockErr;
 
-      const byProduct = new Map(
-        (stockRows ?? []).map((r) => [r.product_id, r]),
-      );
+      const byProduct = new Map((stockRows ?? []).map((r) => [r.product_id, r]));
       return list.map((p) => {
         const row = byProduct.get(p.id);
         return {
@@ -54,14 +52,11 @@ export function useProducts() {
   });
 }
 
-
 export function useSaveProduct() {
   const { tenant } = useActiveTenant();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (
-      p: Partial<Product> & { name: string },
-    ): Promise<Product> => {
+    mutationFn: async (p: Partial<Product> & { name: string }): Promise<Product> => {
       const payload = { ...p, tenant_id: tenant!.id };
       if (p.id) {
         const { data, error } = await supabase
@@ -73,11 +68,7 @@ export function useSaveProduct() {
         if (error) throw error;
         return data;
       }
-      const { data, error } = await supabase
-        .from("products")
-        .insert(payload)
-        .select()
-        .single();
+      const { data, error } = await supabase.from("products").insert(payload).select().single();
       if (error) throw error;
       return data;
     },
@@ -262,11 +253,8 @@ export function useCreateSale() {
       // duplicate-key collisions when several cashiers sell at once
       // (there is a UNIQUE index on tenant_id + sale_number).
 
-
       // fetch current costs for COGS capture
-      const productIds = v.lines
-        .map((l) => l.product_id)
-        .filter((id): id is string => !!id);
+      const productIds = v.lines.map((l) => l.product_id).filter((id): id is string => !!id);
       const costMap = new Map<string, number>();
       if (productIds.length) {
         const { data: costRows } = await supabase
@@ -280,8 +268,7 @@ export function useCreateSale() {
       let tax = 0;
       const itemsPayload = v.lines.map((l) => {
         const lineSubtotal = l.unit_price_usd * l.quantity;
-        const lineTax =
-          v.ivaEnabled && !l.is_tax_exempt ? lineSubtotal * v.ivaRate : 0;
+        const lineTax = v.ivaEnabled && !l.is_tax_exempt ? lineSubtotal * v.ivaRate : 0;
         subtotal += lineSubtotal;
         tax += lineTax;
         return {
@@ -296,7 +283,6 @@ export function useCreateSale() {
         };
       });
       const total = subtotal + tax;
-
 
       // Assign the sale number and insert, retrying on unique-key collision.
       let sale: Sale | null = null;
@@ -335,15 +321,12 @@ export function useCreateSale() {
         if (saleErr && saleErr.code !== "23505") throw saleErr;
       }
       if (!sale) {
-        throw new Error(
-          "No se pudo asignar el número de venta, intenta de nuevo.",
-        );
+        throw new Error("No se pudo asignar el número de venta, intenta de nuevo.");
       }
 
-
-      const { error: itemsErr } = await supabase.from("sale_items").insert(
-        itemsPayload.map((i) => ({ ...i, sale_id: sale.id })),
-      );
+      const { error: itemsErr } = await supabase
+        .from("sale_items")
+        .insert(itemsPayload.map((i) => ({ ...i, sale_id: sale.id })));
       if (itemsErr) throw itemsErr;
 
       const { error: payErr } = await supabase.from("sale_payments").insert(
@@ -405,7 +388,6 @@ export function useCreateSale() {
         });
         if (mvErr) throw new Error(mvErr.message || "No se pudo descontar el stock");
       }
-
 
       return { sale, saleNumber, total };
     },

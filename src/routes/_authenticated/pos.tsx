@@ -105,7 +105,6 @@ function PosPage() {
     customerName: string | null;
   } | null>(null);
 
-
   const searchRef = useRef<HTMLInputElement>(null);
 
   const ivaRate = fiscal ? Number(fiscal.iva_rate) / 100 : 0.15;
@@ -144,8 +143,7 @@ function PosPage() {
   const categoryProducts = useMemo(() => {
     const list = (products ?? []).filter((p) => p.is_active);
     if (activeCategory === "__all__") return list.slice(0, 60);
-    if (activeCategory === "__uncat__")
-      return list.filter((p) => !(p.category ?? "").trim());
+    if (activeCategory === "__uncat__") return list.filter((p) => !(p.category ?? "").trim());
     return list.filter((p) => (p.category ?? "").trim() === activeCategory);
   }, [products, activeCategory]);
 
@@ -163,7 +161,6 @@ function PosPage() {
 
   const effectiveRate = rateOverride ?? rate;
   const totalNio = totals.total * effectiveRate;
-
 
   function addProduct(p: Product) {
     setCart((prev) => {
@@ -236,9 +233,7 @@ function PosPage() {
         { method: "cash_usd", amount: Number(totals.total.toFixed(2)), currency: "USD" },
       ]);
     } else {
-      setPayments([
-        { method: "cash_nio", amount: Number(totalNio.toFixed(2)), currency: "NIO" },
-      ]);
+      setPayments([{ method: "cash_nio", amount: Number(totalNio.toFixed(2)), currency: "NIO" }]);
     }
     setPayOpen(true);
   }
@@ -303,12 +298,8 @@ function PosPage() {
   const creditLimit = selectedCustomer ? Number(selectedCustomer.credit_limit_usd ?? 0) : 0;
   const creditAvailable = !!selectedCustomer;
 
-
   function addPaymentLine() {
-    setPayments((prev) => [
-      ...prev,
-      { method: "card", amount: 0, currency: "USD" },
-    ]);
+    setPayments((prev) => [...prev, { method: "card", amount: 0, currency: "USD" }]);
   }
 
   function updatePayment(i: number, patch: Partial<PaymentLine>) {
@@ -399,7 +390,6 @@ function PosPage() {
       setCustomerId("__general__");
       setIsCredit(false);
       setPayOpen(false);
-
     } catch (e) {
       toast.error("No se pudo completar la venta", {
         description: getFriendlyErrorMessage(e),
@@ -500,18 +490,14 @@ function PosPage() {
                               </span>
                             </p>
                           ) : (
-                            <p className="font-semibold">
-                              {formatUSD(Number(p.price_usd))}
-                            </p>
+                            <p className="font-semibold">{formatUSD(Number(p.price_usd))}</p>
                           )}
                           {rate > 0 && (
                             <p className="text-xs text-muted-foreground">
                               {formatNIO(price * rate)}
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground">
-                            Stock: {Number(p.stock)}
-                          </p>
+                          <p className="text-xs text-muted-foreground">Stock: {Number(p.stock)}</p>
                         </div>
                       );
                     })()}
@@ -594,7 +580,9 @@ function PosPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold">Venta actual</h2>
-                <Badge variant="secondary">{cart.length} ítem{cart.length === 1 ? "" : "s"}</Badge>
+                <Badge variant="secondary">
+                  {cart.length} ítem{cart.length === 1 ? "" : "s"}
+                </Badge>
               </div>
               {cart.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
@@ -608,20 +596,37 @@ function PosPage() {
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{l.name}</p>
                           {l.is_tax_exempt && (
-                            <Badge variant="secondary" className="mt-1">Exento</Badge>
+                            <Badge variant="secondary" className="mt-1">
+                              Exento
+                            </Badge>
                           )}
                         </div>
-                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeLine(i)}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => removeLine(i)}
+                        >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                       <div className="mt-3 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1">
-                          <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, -1)}>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8"
+                            onClick={() => updateQty(i, -1)}
+                          >
                             <Minus className="h-3 w-3" />
                           </Button>
                           <span className="w-8 text-center font-semibold">{l.quantity}</span>
-                          <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQty(i, 1)}>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8"
+                            onClick={() => updateQty(i, 1)}
+                          >
                             <Plus className="h-3 w-3" />
                           </Button>
                         </div>
@@ -658,22 +663,17 @@ function PosPage() {
               <span>{formatUSD(totals.subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">
-                IVA ({(ivaRate * 100).toFixed(0)}%)
-              </span>
+              <span className="text-muted-foreground">IVA ({(ivaRate * 100).toFixed(0)}%)</span>
               <span>{formatUSD(totals.tax)}</span>
             </div>
             <div className="border-t border-border/60 pt-3">
               <div className="flex items-baseline justify-between">
                 <span className="text-lg font-bold">Total</span>
-                <span className="text-2xl font-bold text-primary">
-                  {formatUSD(totals.total)}
-                </span>
+                <span className="text-2xl font-bold text-primary">{formatUSD(totals.total)}</span>
               </div>
               <div className="mt-1 text-right text-lg font-semibold text-muted-foreground">
                 {effectiveRate > 0 ? formatNIO(totalNio) : "—"}
               </div>
-
             </div>
           </div>
 
@@ -708,9 +708,7 @@ function PosPage() {
             </Button>
             <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
               <Keyboard className="h-4 w-4 shrink-0" />
-              <span>
-                F1 Buscar · ↑↓ Navegar · Enter Agregar · F4 Cobrar · F12 Limpiar
-              </span>
+              <span>F1 Buscar · ↑↓ Navegar · Enter Agregar · F4 Cobrar · F12 Limpiar</span>
             </div>
           </div>
         </div>
@@ -728,7 +726,8 @@ function PosPage() {
                 Total a cobrar
               </div>
               <div className="mt-1 text-3xl font-bold">
-                {formatUSD(totals.total)} <span className="text-base font-medium text-muted-foreground">USD</span>
+                {formatUSD(totals.total)}{" "}
+                <span className="text-base font-medium text-muted-foreground">USD</span>
               </div>
               <div className="text-lg font-semibold text-muted-foreground">
                 {formatNIO(totalNio)} <span className="text-sm font-medium">NIO</span>
@@ -792,9 +791,13 @@ function PosPage() {
               <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs">
                 Esta venta se registrará como <strong>cuenta por cobrar</strong> a{" "}
                 <strong>{selectedCustomer.name}</strong>.{" "}
-                {creditLimit > 0
-                  ? <>Límite de crédito: <strong>{formatUSD(creditLimit)}</strong>.</>
-                  : <>Este cliente no tiene límite de crédito configurado.</>}
+                {creditLimit > 0 ? (
+                  <>
+                    Límite de crédito: <strong>{formatUSD(creditLimit)}</strong>.
+                  </>
+                ) : (
+                  <>Este cliente no tiene límite de crédito configurado.</>
+                )}
               </div>
             )}
 
@@ -806,7 +809,6 @@ function PosPage() {
                 </span>
               </div>
             )}
-
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
@@ -842,11 +844,7 @@ function PosPage() {
                     className="h-9"
                   />
                   {rateOverride != null && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setRateOverride(null)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => setRateOverride(null)}>
                       <X className="h-3 w-3" />
                     </Button>
                   )}
@@ -869,125 +867,128 @@ function PosPage() {
               </div>
             </div>
 
-
             {!isCredit && (
-            <>
-            <div className="space-y-2">
-              <Label>Métodos de pago (pago mixto)</Label>
-              {payments.map((p, i) => {
-                const equivUsd = p.currency === "NIO"
-                  ? (effectiveRate > 0 ? p.amount / effectiveRate : 0)
-                  : p.amount;
-                const equivNio = p.currency === "USD"
-                  ? p.amount * effectiveRate
-                  : p.amount;
-                return (
-                  <div key={i} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={p.method}
-                        onValueChange={(v) => updatePayment(i, { method: v as PaymentMethod })}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map((m) => (
-                            <SelectItem key={m} value={m}>
-                              {PAYMENT_LABELS[m]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {p.method === "card" || p.method === "transfer" ? (
-                        <Select
-                          value={p.currency}
-                          onValueChange={(v) =>
-                            updatePayment(i, { currency: v as "NIO" | "USD" })
-                          }
-                        >
-                          <SelectTrigger className="w-20">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="USD">$</SelectItem>
-                            <SelectItem value="NIO">C$</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <span className="w-10 text-sm text-muted-foreground">
-                          {p.currency === "NIO" ? "C$" : "$"}
-                        </span>
-                      )}
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={p.amount || ""}
-                        onChange={(e) =>
-                          updatePayment(i, { amount: Number(e.target.value) })
-                        }
-                        className="flex-1"
-                      />
-                      {payments.length > 1 && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() =>
-                            setPayments((prev) => prev.filter((_, idx) => idx !== i))
-                          }
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                    {effectiveRate > 0 ? (
-                      <div className="pl-40 text-xs text-muted-foreground">
-                        {p.currency === "NIO" ? (
-                          <>Equivale a <span className="font-semibold">{formatUSD(equivUsd)}</span></>
+              <>
+                <div className="space-y-2">
+                  <Label>Métodos de pago (pago mixto)</Label>
+                  {payments.map((p, i) => {
+                    const equivUsd =
+                      p.currency === "NIO"
+                        ? effectiveRate > 0
+                          ? p.amount / effectiveRate
+                          : 0
+                        : p.amount;
+                    const equivNio = p.currency === "USD" ? p.amount * effectiveRate : p.amount;
+                    return (
+                      <div key={i} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={p.method}
+                            onValueChange={(v) => updatePayment(i, { method: v as PaymentMethod })}
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(Object.keys(PAYMENT_LABELS) as PaymentMethod[]).map((m) => (
+                                <SelectItem key={m} value={m}>
+                                  {PAYMENT_LABELS[m]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {p.method === "card" || p.method === "transfer" ? (
+                            <Select
+                              value={p.currency}
+                              onValueChange={(v) =>
+                                updatePayment(i, { currency: v as "NIO" | "USD" })
+                              }
+                            >
+                              <SelectTrigger className="w-20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="USD">$</SelectItem>
+                                <SelectItem value="NIO">C$</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="w-10 text-sm text-muted-foreground">
+                              {p.currency === "NIO" ? "C$" : "$"}
+                            </span>
+                          )}
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={p.amount || ""}
+                            onChange={(e) => updatePayment(i, { amount: Number(e.target.value) })}
+                            className="flex-1"
+                          />
+                          {payments.length > 1 && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                setPayments((prev) => prev.filter((_, idx) => idx !== i))
+                              }
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                        {effectiveRate > 0 ? (
+                          <div className="pl-40 text-xs text-muted-foreground">
+                            {p.currency === "NIO" ? (
+                              <>
+                                Equivale a{" "}
+                                <span className="font-semibold">{formatUSD(equivUsd)}</span>
+                              </>
+                            ) : (
+                              <>
+                                Equivale a{" "}
+                                <span className="font-semibold">{formatNIO(equivNio)}</span>
+                              </>
+                            )}
+                          </div>
                         ) : (
-                          <>Equivale a <span className="font-semibold">{formatNIO(equivNio)}</span></>
+                          <div className="pl-40 text-xs text-destructive">
+                            Sin tipo de cambio — no se puede convertir
+                          </div>
                         )}
                       </div>
-                    ) : (
-                      <div className="pl-40 text-xs text-destructive">
-                        Sin tipo de cambio — no se puede convertir
-                      </div>
-                    )}
+                    );
+                  })}
 
+                  <Button variant="outline" size="sm" onClick={addPaymentLine}>
+                    <Plus className="mr-1 h-4 w-4" /> Agregar método
+                  </Button>
+                </div>
+
+                <div className="space-y-1 rounded-lg border border-border/60 p-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Pagado</span>
+                    <span>
+                      {changePreferNio
+                        ? formatNIO(paidNioRaw)
+                        : changePreferUsd
+                          ? formatUSD(paidUsdRaw)
+                          : `${formatNIO(paidNioRaw)} · ${formatUSD(paidUsdRaw)}`}
+                    </span>
                   </div>
-                );
-              })}
-
-              <Button variant="outline" size="sm" onClick={addPaymentLine}>
-                <Plus className="mr-1 h-4 w-4" /> Agregar método
-              </Button>
-            </div>
-
-            <div className="space-y-1 rounded-lg border border-border/60 p-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Pagado</span>
-                <span>
-                  {changePreferNio
-                    ? formatNIO(paidNioRaw)
-                    : changePreferUsd
-                      ? formatUSD(paidUsdRaw)
-                      : `${formatNIO(paidNioRaw)} · ${formatUSD(paidUsdRaw)}`}
-                </span>
-              </div>
-              <div className="flex justify-between text-base font-semibold">
-                <span>Vuelto</span>
-                <span className={changeUsd < 0 ? "text-destructive" : "text-primary"}>
-                  {changeUsd < 0
-                    ? `Falta ${formatUSD(-changeUsd)}`
-                    : changePreferNio
-                      ? formatNIO(changeNio)
-                      : changePreferUsd
-                        ? formatUSD(changeUsd)
-                        : `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`}
-                </span>
-              </div>
-            </div>
-            </>
+                  <div className="flex justify-between text-base font-semibold">
+                    <span>Vuelto</span>
+                    <span className={changeUsd < 0 ? "text-destructive" : "text-primary"}>
+                      {changeUsd < 0
+                        ? `Falta ${formatUSD(-changeUsd)}`
+                        : changePreferNio
+                          ? formatNIO(changeNio)
+                          : changePreferUsd
+                            ? formatUSD(changeUsd)
+                            : `${formatNIO(changeNio)} · ${formatUSD(changeUsd)}`}
+                    </span>
+                  </div>
+                </div>
+              </>
             )}
           </div>
           <DialogFooter>
@@ -1014,7 +1015,7 @@ function PosPage() {
         onClose={() => setLastSale(null)}
         tenantName={tenant?.name ?? ""}
         tenantRuc={tenant?.ruc ?? null}
-        logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
+        logoUrl={((fiscal as any)?.show_logo ?? true) ? (tenant?.logo_url ?? null) : null}
         primaryColor={tenant?.primary_color ?? "#f59e0b"}
         settings={fiscal}
       />
@@ -1033,7 +1034,7 @@ function PosPage() {
         setCustomerRuc={setProformaRuc}
         tenantName={tenant?.name ?? ""}
         tenantRuc={tenant?.ruc ?? null}
-        logoUrl={(fiscal as any)?.show_logo ?? true ? tenant?.logo_url ?? null : null}
+        logoUrl={((fiscal as any)?.show_logo ?? true) ? (tenant?.logo_url ?? null) : null}
         primaryColor={tenant?.primary_color ?? "#f59e0b"}
         settings={fiscal}
       />
@@ -1109,7 +1110,6 @@ function ReceiptDialog({
 
   return (
     <Dialog open={!!sale} onOpenChange={(v) => !v && onClose()}>
-
       <DialogContent className={isCarta ? "max-w-3xl" : "max-w-md"}>
         <style>{`
           @media print {
@@ -1132,11 +1132,7 @@ function ReceiptDialog({
           >
             <div className="text-center">
               {logoUrl && (
-                <img
-                  src={logoUrl}
-                  alt="Logo"
-                  className="mx-auto mb-1 max-h-16 object-contain"
-                />
+                <img src={logoUrl} alt="Logo" className="mx-auto mb-1 max-h-16 object-contain" />
               )}
               <div className="text-sm font-bold uppercase" style={{ color: primaryColor }}>
                 {legalName}
@@ -1164,13 +1160,9 @@ function ReceiptDialog({
               const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
               const onlyNio = hasNio && !hasUsd;
               const onlyUsd = hasUsd && !hasNio;
-              const displayMode = (sale.isCredit
-                ? "BOTH"
-                : onlyNio && sale.rate > 0
-                  ? "NIO"
-                  : onlyUsd
-                    ? "USD"
-                    : "BOTH") as "USD" | "NIO" | "BOTH";
+              const displayMode = (
+                sale.isCredit ? "BOTH" : onlyNio && sale.rate > 0 ? "NIO" : onlyUsd ? "USD" : "BOTH"
+              ) as "USD" | "NIO" | "BOTH";
               const fmtLine = (usd: number) => {
                 if (displayMode === "USD") return formatUSD(usd);
                 if (displayMode === "NIO") return formatNIO(usd * sale.rate);
@@ -1183,7 +1175,9 @@ function ReceiptDialog({
                   {sale.lines.map((l, i) => (
                     <div key={i}>
                       <div className="flex justify-between">
-                        <span className="pr-2">{l.quantity} x {l.name}</span>
+                        <span className="pr-2">
+                          {l.quantity} x {l.name}
+                        </span>
                         <span>{fmtLine(l.unit_price_usd * l.quantity)}</span>
                       </div>
                       {showAlt && (
@@ -1253,9 +1247,7 @@ function ReceiptDialog({
               );
             })()}
             {sale.rate > 0 && (
-              <div className="mt-1 text-center">
-                Tasa: C$ {sale.rate.toFixed(4)} / US$1
-              </div>
+              <div className="mt-1 text-center">Tasa: C$ {sale.rate.toFixed(4)} / US$1</div>
             )}
             <div className="mt-2 whitespace-pre-line text-center">{thankYou}</div>
           </div>
@@ -1268,9 +1260,7 @@ function ReceiptDialog({
           >
             <div className="flex items-start justify-between border-b border-black/20 pb-4">
               <div className="flex items-center gap-3">
-                {logoUrl && (
-                  <img src={logoUrl} alt="Logo" className="max-h-20 object-contain" />
-                )}
+                {logoUrl && <img src={logoUrl} alt="Logo" className="max-h-20 object-contain" />}
                 <div>
                   <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>
                     {legalName}
@@ -1290,9 +1280,7 @@ function ReceiptDialog({
                 <div className="mt-1 text-xs font-semibold">
                   Condición: {sale.isCredit ? "CRÉDITO" : "CONTADO"}
                 </div>
-                {sale.customerName && (
-                  <div className="text-xs">Cliente: {sale.customerName}</div>
-                )}
+                {sale.customerName && <div className="text-xs">Cliente: {sale.customerName}</div>}
               </div>
             </div>
 
@@ -1311,9 +1299,7 @@ function ReceiptDialog({
                     <td className="py-2">{l.quantity}</td>
                     <td className="py-2">{l.name}</td>
                     <td className="py-2 text-right">{formatUSD(l.unit_price_usd)}</td>
-                    <td className="py-2 text-right">
-                      {formatUSD(l.unit_price_usd * l.quantity)}
-                    </td>
+                    <td className="py-2 text-right">{formatUSD(l.unit_price_usd * l.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1364,23 +1350,24 @@ function ReceiptDialog({
                       </span>
                     </div>
                   ))}
-                  {sale.changeUsd > 0 && (() => {
-                    const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
-                    const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
-                    const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
-                    return (
-                      <div className="flex justify-between font-semibold">
-                        <span>Vuelto</span>
-                        <span>
-                          {sale.rate > 0
-                            ? showNioFirst
-                              ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
-                              : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
-                            : formatUSD(sale.changeUsd)}
-                        </span>
-                      </div>
-                    );
-                  })()}
+                  {sale.changeUsd > 0 &&
+                    (() => {
+                      const hasNio = sale.payments.some((pp) => pp.currency === "NIO");
+                      const hasUsd = sale.payments.some((pp) => pp.currency === "USD");
+                      const showNioFirst = sale.rate > 0 && (hasNio || !hasUsd);
+                      return (
+                        <div className="flex justify-between font-semibold">
+                          <span>Vuelto</span>
+                          <span>
+                            {sale.rate > 0
+                              ? showNioFirst
+                                ? `${formatNIO(sale.changeNio)} · ${formatUSD(sale.changeUsd)}`
+                                : `${formatUSD(sale.changeUsd)} · ${formatNIO(sale.changeNio)}`
+                              : formatUSD(sale.changeUsd)}
+                          </span>
+                        </div>
+                      );
+                    })()}
                 </>
               )}
               {sale.rate > 0 && (
@@ -1388,18 +1375,12 @@ function ReceiptDialog({
               )}
             </div>
 
-            <div className="mt-6 whitespace-pre-line text-center text-sm italic">
-              {thankYou}
-            </div>
+            <div className="mt-6 whitespace-pre-line text-center text-sm italic">{thankYou}</div>
           </div>
         )}
 
         <DialogFooter className="no-print gap-2 sm:justify-between">
-          <Button
-            variant="destructive"
-            onClick={handleVoid}
-            disabled={voidSale.isPending}
-          >
+          <Button variant="destructive" onClick={handleVoid} disabled={voidSale.isPending}>
             {voidSale.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -1469,8 +1450,6 @@ function ProductGridCard({
   );
 }
 
-
-
 function ProformaDialog({
   open,
   onClose,
@@ -1532,27 +1511,49 @@ function ProformaDialog({
         <div className="grid gap-3 sm:grid-cols-2 no-print">
           <div className="space-y-1">
             <Label className="text-xs">Cliente</Label>
-            <Input value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Nombre del cliente" />
+            <Input
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              placeholder="Nombre del cliente"
+            />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">RUC / Cédula</Label>
-            <Input value={customerRuc} onChange={(e) => setCustomerRuc(e.target.value)} placeholder="Opcional" />
+            <Input
+              value={customerRuc}
+              onChange={(e) => setCustomerRuc(e.target.value)}
+              placeholder="Opcional"
+            />
           </div>
         </div>
 
         <div id="proforma-print" className="bg-white p-6 text-black shadow-sm rounded-md">
-          <div className="flex items-start justify-between border-b-4 pb-3" style={{ borderColor: primaryColor }}>
+          <div
+            className="flex items-start justify-between border-b-4 pb-3"
+            style={{ borderColor: primaryColor }}
+          >
             <div className="flex items-start gap-4">
-              {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 w-16 rounded object-contain" crossOrigin="anonymous" />}
+              {logoUrl && (
+                <img
+                  src={logoUrl}
+                  alt="Logo"
+                  className="h-16 w-16 rounded object-contain"
+                  crossOrigin="anonymous"
+                />
+              )}
               <div>
-                <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>{legalName}</div>
+                <div className="text-xl font-bold uppercase" style={{ color: primaryColor }}>
+                  {legalName}
+                </div>
                 {tenantRuc && <div className="text-sm">RUC: {tenantRuc}</div>}
                 {s?.address && <div className="text-sm">{s.address}</div>}
                 {s?.phone && <div className="text-sm">Tel: {s.phone}</div>}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-lg font-bold" style={{ color: primaryColor }}>PROFORMA / COTIZACIÓN</div>
+              <div className="text-lg font-bold" style={{ color: primaryColor }}>
+                PROFORMA / COTIZACIÓN
+              </div>
               <div className="text-sm font-semibold">N° {docNumber}</div>
               <div className="text-sm">Fecha: {new Date().toLocaleDateString("es-NI")}</div>
               {rate > 0 && <div className="text-sm">Tasa: C$ {rate.toFixed(4)}/US$1</div>}
@@ -1560,8 +1561,12 @@ function ProformaDialog({
           </div>
 
           <div className="border-t pt-2 text-sm mt-3">
-            <div><span className="font-semibold">Cliente:</span> {customer || "—"}</div>
-            <div><span className="font-semibold">RUC/Cédula:</span> {customerRuc || "—"}</div>
+            <div>
+              <span className="font-semibold">Cliente:</span> {customer || "—"}
+            </div>
+            <div>
+              <span className="font-semibold">RUC/Cédula:</span> {customerRuc || "—"}
+            </div>
           </div>
 
           <table className="w-full text-sm mt-3">
@@ -1576,27 +1581,56 @@ function ProformaDialog({
             <tbody>
               {cart.map((l, i) => (
                 <tr key={i} className="border-b">
-                  <td className="py-1">{l.name}{l.is_tax_exempt && <span className="text-xs opacity-60"> (exento)</span>}</td>
+                  <td className="py-1">
+                    {l.name}
+                    {l.is_tax_exempt && <span className="text-xs opacity-60"> (exento)</span>}
+                  </td>
                   <td className="py-1 text-center">{l.quantity}</td>
                   <td className="py-1 text-right">{formatNIO(nio(l.unit_price_usd))}</td>
-                  <td className="py-1 text-right">{formatNIO(nio(l.unit_price_usd * l.quantity))}</td>
+                  <td className="py-1 text-right">
+                    {formatNIO(nio(l.unit_price_usd * l.quantity))}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
           <div className="ml-auto w-64 space-y-1 text-sm mt-3">
-            <div className="flex justify-between"><span>Subtotal</span><span>{formatNIO(nio(subtotal))} <span className="opacity-60 ml-1">{formatUSD(subtotal)}</span></span></div>
-            {tax > 0 && <div className="flex justify-between"><span>IVA</span><span>{formatNIO(nio(tax))} <span className="opacity-60 ml-1">{formatUSD(tax)}</span></span></div>}
-            <div className="flex justify-between border-t pt-1 font-bold"><span>TOTAL</span><span>{formatNIO(nio(total))} <span className="opacity-60 ml-1">{formatUSD(total)}</span></span></div>
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>
+                {formatNIO(nio(subtotal))}{" "}
+                <span className="opacity-60 ml-1">{formatUSD(subtotal)}</span>
+              </span>
+            </div>
+            {tax > 0 && (
+              <div className="flex justify-between">
+                <span>IVA</span>
+                <span>
+                  {formatNIO(nio(tax))} <span className="opacity-60 ml-1">{formatUSD(tax)}</span>
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between border-t pt-1 font-bold">
+              <span>TOTAL</span>
+              <span>
+                {formatNIO(nio(total))} <span className="opacity-60 ml-1">{formatUSD(total)}</span>
+              </span>
+            </div>
           </div>
 
-          <div className="mt-4 text-sm italic">Este documento es una cotización y no tiene validez fiscal. Precios sujetos a cambio.</div>
-          {s?.invoice_footer && <div className="border-t pt-2 text-xs mt-3">{s.invoice_footer}</div>}
+          <div className="mt-4 text-sm italic">
+            Este documento es una cotización y no tiene validez fiscal. Precios sujetos a cambio.
+          </div>
+          {s?.invoice_footer && (
+            <div className="border-t pt-2 text-xs mt-3">{s.invoice_footer}</div>
+          )}
         </div>
 
         <DialogFooter className="no-print">
-          <Button variant="outline" onClick={onClose}>Cerrar y seguir editando</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cerrar y seguir editando
+          </Button>
           <Button onClick={() => void printDocument("carta")}>Imprimir proforma</Button>
         </DialogFooter>
       </DialogContent>

@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Store,
-
   Loader2,
   ShieldCheck,
   Zap,
@@ -129,7 +128,6 @@ function AuthPage() {
     }
   }
 
-
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Panel de marca */}
@@ -159,12 +157,11 @@ function AuthPage() {
               14 días gratis · Sin tarjeta
             </span>
             <h2 className="text-3xl font-bold tracking-tight text-foreground xl:text-4xl">
-              El punto de venta hecho para{" "}
-              <span className="text-gradient">Nicaragua</span>.
+              El punto de venta hecho para <span className="text-gradient">Nicaragua</span>.
             </h2>
             <p className="max-w-md text-base text-muted-foreground">
-              Factura, controla inventario y cierra caja desde cualquier dispositivo.
-              Todo en Córdobas, Dólares y en la nube.
+              Factura, controla inventario y cierra caja desde cualquier dispositivo. Todo en
+              Córdobas, Dólares y en la nube.
             </p>
           </div>
 
@@ -319,7 +316,6 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
-
 
           {error && (
             <div className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">

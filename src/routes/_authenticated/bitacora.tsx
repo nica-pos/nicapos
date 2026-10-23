@@ -1,13 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -90,9 +84,7 @@ function BitacoraPage() {
                 Solo los administradores pueden ver la bitácora.
               </p>
             ) : !logs?.length ? (
-              <p className="text-sm text-muted-foreground">
-                Aún no hay eventos registrados.
-              </p>
+              <p className="text-sm text-muted-foreground">Aún no hay eventos registrados.</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -114,9 +106,7 @@ function BitacoraPage() {
                           {actionLabels[log.action] ?? log.action}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {entityLabels[log.entity] ?? log.entity}
-                      </TableCell>
+                      <TableCell>{entityLabels[log.entity] ?? log.entity}</TableCell>
                       <TableCell className="text-sm">{describe(log)}</TableCell>
                     </TableRow>
                   ))}

@@ -11,7 +11,6 @@ const ACTIVE_BRANCH_KEY = "nicapos.active_branch";
 /** Valor especial guardado cuando el usuario elige el modo consolidado. */
 export const ALL_BRANCHES = "__all__";
 
-
 function keyFor(tenantId: string) {
   return `${ACTIVE_BRANCH_KEY}.${tenantId}`;
 }
@@ -72,7 +71,6 @@ export function useBranches() {
   });
 }
 
-
 export function useActiveBranch() {
   const { tenant, role } = useActiveTenant();
   const branches = useBranches();
@@ -93,7 +91,8 @@ export function useActiveBranch() {
     (role === "owner" || role === "admin" || role === "accountant") && activeList.length > 1;
   const isAll = canSeeAll && savedId === ALL_BRANCHES;
 
-  const saved = savedId && savedId !== ALL_BRANCHES ? activeList.find((b) => b.id === savedId) : null;
+  const saved =
+    savedId && savedId !== ALL_BRANCHES ? activeList.find((b) => b.id === savedId) : null;
   const active = saved ?? activeList.find((b) => b.is_default) ?? activeList[0] ?? null;
 
   // void tick for re-render dependency
@@ -115,7 +114,6 @@ export function useActiveBranch() {
   };
 }
 
-
 export function useCanCreateBranch() {
   const { tenant } = useActiveTenant();
   return useQuery({
@@ -134,11 +132,22 @@ export function useSaveBranch() {
   const { tenant } = useActiveTenant();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (b: { id?: string; name: string; address?: string | null; phone?: string | null; is_active?: boolean }): Promise<Branch> => {
+    mutationFn: async (b: {
+      id?: string;
+      name: string;
+      address?: string | null;
+      phone?: string | null;
+      is_active?: boolean;
+    }): Promise<Branch> => {
       if (b.id) {
         const { data, error } = await supabase
           .from("branches")
-          .update({ name: b.name, address: b.address ?? null, phone: b.phone ?? null, is_active: b.is_active ?? true })
+          .update({
+            name: b.name,
+            address: b.address ?? null,
+            phone: b.phone ?? null,
+            is_active: b.is_active ?? true,
+          })
           .eq("id", b.id)
           .select()
           .single();
@@ -147,7 +156,14 @@ export function useSaveBranch() {
       }
       const { data, error } = await supabase
         .from("branches")
-        .insert({ tenant_id: tenant!.id, name: b.name, address: b.address ?? null, phone: b.phone ?? null, is_active: true, is_default: false })
+        .insert({
+          tenant_id: tenant!.id,
+          name: b.name,
+          address: b.address ?? null,
+          phone: b.phone ?? null,
+          is_active: true,
+          is_default: false,
+        })
         .select()
         .single();
       if (error) throw error;

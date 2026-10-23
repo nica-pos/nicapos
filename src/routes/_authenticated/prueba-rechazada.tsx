@@ -63,9 +63,7 @@ Gracias.`;
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
             <XCircle className="h-7 w-7 text-destructive" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Tu solicitud fue rechazada
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Tu solicitud fue rechazada</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Revisa el motivo y elige una opción a continuación.
           </p>
@@ -77,16 +75,13 @@ Gracias.`;
               <div className="text-xs font-medium uppercase tracking-wide text-destructive">
                 Motivo del rechazo
               </div>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
-                {reason}
-              </p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{reason}</p>
             </div>
 
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>
-                <b className="text-foreground">¿Ya habías pagado?</b> Si tu pago
-                no fue visible o crees que hubo un error, puedes apelar o pedir
-                el reembolso al superadmin.
+                <b className="text-foreground">¿Ya habías pagado?</b> Si tu pago no fue visible o
+                crees que hubo un error, puedes apelar o pedir el reembolso al superadmin.
               </p>
             </div>
 

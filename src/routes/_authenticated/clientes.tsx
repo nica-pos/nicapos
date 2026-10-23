@@ -7,13 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -196,17 +190,13 @@ function CustomersTab() {
                 <Input
                   type="number"
                   value={form.credit_limit_usd}
-                  onChange={(e) =>
-                    setForm({ ...form, credit_limit_usd: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, credit_limit_usd: e.target.value })}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button onClick={save} disabled={upsert.isPending}>
-                {upsert.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {upsert.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Guardar
               </Button>
             </DialogFooter>
@@ -230,17 +220,11 @@ function CustomersTab() {
             </TableHeader>
             <TableBody>
               {customers.map((c) => (
-                <TableRow
-                  key={c.id}
-                  className="cursor-pointer"
-                  onClick={() => openEdit(c)}
-                >
+                <TableRow key={c.id} className="cursor-pointer" onClick={() => openEdit(c)}>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.ruc ?? "—"}</TableCell>
                   <TableCell>{c.phone ?? "—"}</TableCell>
-                  <TableCell className="text-right">
-                    {money(c.credit_limit_usd)}
-                  </TableCell>
+                  <TableCell className="text-right">{money(c.credit_limit_usd)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -340,9 +324,7 @@ function ReceivablesTab() {
                   <Input
                     type="number"
                     value={form.total_usd}
-                    onChange={(e) =>
-                      setForm({ ...form, total_usd: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, total_usd: e.target.value })}
                   />
                 </div>
                 <div className="grid gap-1.5">
@@ -350,9 +332,7 @@ function ReceivablesTab() {
                   <Input
                     type="date"
                     value={form.due_date}
-                    onChange={(e) =>
-                      setForm({ ...form, due_date: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, due_date: e.target.value })}
                   />
                 </div>
               </div>
@@ -360,17 +340,13 @@ function ReceivablesTab() {
                 <Label>Descripción</Label>
                 <Input
                   value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button onClick={save} disabled={create.isPending}>
-                {create.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Guardar
               </Button>
             </DialogFooter>
@@ -399,28 +375,18 @@ function ReceivablesTab() {
                 const saldo = Number(r.total_usd) - Number(r.paid_usd);
                 return (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">
-                      {r.customer?.name ?? "—"}
-                    </TableCell>
+                    <TableCell className="font-medium">{r.customer?.name ?? "—"}</TableCell>
                     <TableCell>{r.due_date ?? "—"}</TableCell>
-                    <TableCell className="text-right">
-                      {money(r.total_usd)}
-                    </TableCell>
+                    <TableCell className="text-right">{money(r.total_usd)}</TableCell>
                     <TableCell className="text-right">{money(saldo)}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={r.status === "paid" ? "secondary" : "default"}
-                      >
+                      <Badge variant={r.status === "paid" ? "secondary" : "default"}>
                         {r.status === "paid" ? "Pagado" : "Abierto"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       {r.status !== "paid" && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => abonar(r.id, saldo)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => abonar(r.id, saldo)}>
                           <HandCoins className="mr-1 h-4 w-4" /> Abonar
                         </Button>
                       )}
@@ -446,9 +412,7 @@ function LayawaysTab() {
   const [customerId, setCustomerId] = useState("");
   const [expires, setExpires] = useState("");
   const [deposit, setDeposit] = useState("");
-  const [items, setItems] = useState([
-    { name: "", quantity: "1", unit_price_usd: "" },
-  ]);
+  const [items, setItems] = useState([{ name: "", quantity: "1", unit_price_usd: "" }]);
 
   const total = items.reduce(
     (s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price_usd) || 0),
@@ -461,9 +425,7 @@ function LayawaysTab() {
 
   async function save() {
     if (!customerId) return toast.error("Selecciona un cliente");
-    const valid = items.filter(
-      (i) => i.name.trim() && Number(i.quantity) > 0,
-    );
+    const valid = items.filter((i) => i.name.trim() && Number(i.quantity) > 0);
     if (!valid.length) return toast.error("Agrega al menos un artículo");
     try {
       await create.mutateAsync({
@@ -516,9 +478,7 @@ function LayawaysTab() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Nuevo apartado</DialogTitle>
-              <DialogDescription>
-                Reserva productos con un abono inicial.
-              </DialogDescription>
+              <DialogDescription>Reserva productos con un abono inicial.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-3">
               <div className="grid grid-cols-2 gap-3">
@@ -539,11 +499,7 @@ function LayawaysTab() {
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Expira</Label>
-                  <Input
-                    type="date"
-                    value={expires}
-                    onChange={(e) => setExpires(e.target.value)}
-                  />
+                  <Input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -604,9 +560,7 @@ function LayawaysTab() {
             </div>
             <DialogFooter>
               <Button onClick={save} disabled={create.isPending}>
-                {create.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Crear apartado
               </Button>
             </DialogFooter>
@@ -635,30 +589,18 @@ function LayawaysTab() {
                 const saldo = Number(l.total_usd) - Number(l.paid_usd);
                 return (
                   <TableRow key={l.id}>
-                    <TableCell className="font-medium">
-                      {l.customer?.name ?? "—"}
-                    </TableCell>
+                    <TableCell className="font-medium">{l.customer?.name ?? "—"}</TableCell>
                     <TableCell>{l.expires_at ?? "—"}</TableCell>
-                    <TableCell className="text-right">
-                      {money(l.total_usd)}
-                    </TableCell>
+                    <TableCell className="text-right">{money(l.total_usd)}</TableCell>
                     <TableCell className="text-right">{money(saldo)}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          l.status === "completed" ? "secondary" : "default"
-                        }
-                      >
+                      <Badge variant={l.status === "completed" ? "secondary" : "default"}>
                         {l.status === "completed" ? "Completado" : "Activo"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       {l.status !== "completed" && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => abonar(l.id, saldo)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => abonar(l.id, saldo)}>
                           <Bookmark className="mr-1 h-4 w-4" /> Abonar
                         </Button>
                       )}

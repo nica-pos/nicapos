@@ -18,13 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -32,12 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -66,11 +55,9 @@ import {
   useComboComponents,
   useAddComboComponent,
   useRemoveComboComponent,
-
 } from "@/hooks/use-inventory";
 import { formatUSD } from "@/hooks/use-fiscal";
 import { useActiveBranch } from "@/hooks/use-branch";
-
 
 export const Route = createFileRoute("/_authenticated/inventario")({
   component: InventoryPage,
@@ -91,7 +78,6 @@ function InventoryPage() {
   const [purchaseFor, setPurchaseFor] = useState<Product | null>(null);
   const [kardexFor, setKardexFor] = useState<Product | null>(null);
 
-
   const lowStock = useMemo(
     () =>
       (products ?? []).filter(
@@ -109,8 +95,7 @@ function InventoryPage() {
               <Warehouse className="h-6 w-6 text-primary" /> Inventario contable
             </h1>
             <p className="text-muted-foreground">
-              Existencias, Kardex con Costo Promedio Ponderado y estructura del
-              catálogo.
+              Existencias, Kardex con Costo Promedio Ponderado y estructura del catálogo.
             </p>
           </div>
           <div className="flex gap-2">
@@ -131,8 +116,7 @@ function InventoryPage() {
           <Card className="border-destructive/40">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-5 w-5" /> {lowStock.length} producto(s)
-                bajo el mínimo
+                <AlertTriangle className="h-5 w-5" /> {lowStock.length} producto(s) bajo el mínimo
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
@@ -150,7 +134,6 @@ function InventoryPage() {
             <TabsTrigger value="stock">Existencias</TabsTrigger>
             <TabsTrigger value="catalog">Catálogo</TabsTrigger>
             <TabsTrigger value="combos">Combos</TabsTrigger>
-
           </TabsList>
 
           <TabsContent value="stock">
@@ -197,8 +180,7 @@ function InventoryPage() {
                     <TableBody>
                       {(products ?? []).map((p) => {
                         const low =
-                          Number(p.min_stock) > 0 &&
-                          Number(p.stock) <= Number(p.min_stock);
+                          Number(p.min_stock) > 0 && Number(p.stock) <= Number(p.min_stock);
                         return (
                           <TableRow key={p.id}>
                             <TableCell className="font-medium">
@@ -224,18 +206,10 @@ function InventoryPage() {
                               {formatUSD(Number(p.cost_usd) * Number(p.stock))}
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setPurchaseFor(p)}
-                              >
+                              <Button size="sm" variant="outline" onClick={() => setPurchaseFor(p)}>
                                 <ArrowDownToLine className="mr-1 h-4 w-4" /> Entrada
                               </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => setKardexFor(p)}
-                              >
+                              <Button size="icon" variant="ghost" onClick={() => setKardexFor(p)}>
                                 <ScrollText className="h-4 w-4" />
                               </Button>
                             </TableCell>
@@ -261,15 +235,10 @@ function InventoryPage() {
             <CombosManager products={products ?? []} />
           </TabsContent>
         </Tabs>
-
       </div>
 
-      {purchaseFor && (
-        <PurchaseDialog product={purchaseFor} onClose={() => setPurchaseFor(null)} />
-      )}
-      {kardexFor && (
-        <KardexDialog product={kardexFor} onClose={() => setKardexFor(null)} />
-      )}
+      {purchaseFor && <PurchaseDialog product={purchaseFor} onClose={() => setPurchaseFor(null)} />}
+      {kardexFor && <KardexDialog product={kardexFor} onClose={() => setKardexFor(null)} />}
     </DashboardShell>
   );
 }
@@ -282,11 +251,7 @@ function LookupCard({
   title: string;
 }) {
   const query =
-    table === "categories"
-      ? useCategories()
-      : table === "brands"
-        ? useBrands()
-        : useModels();
+    table === "categories" ? useCategories() : table === "brands" ? useBrands() : useModels();
   const create = useCreateLookup(table);
   const remove = useDeleteLookup(table);
   const [name, setName] = useState("");
@@ -338,9 +303,7 @@ function LookupCard({
             </div>
           ))}
           {(query.data?.length ?? 0) === 0 && (
-            <p className="py-2 text-center text-xs text-muted-foreground">
-              Sin registros
-            </p>
+            <p className="py-2 text-center text-xs text-muted-foreground">Sin registros</p>
           )}
         </div>
       </CardContent>
@@ -348,13 +311,7 @@ function LookupCard({
   );
 }
 
-function PurchaseDialog({
-  product,
-  onClose,
-}: {
-  product: Product;
-  onClose: () => void;
-}) {
+function PurchaseDialog({ product, onClose }: { product: Product; onClose: () => void }) {
   const record = useRecordMovement();
   const [qty, setQty] = useState("");
   const [cost, setCost] = useState(String(product.cost_usd));
@@ -413,8 +370,7 @@ function PurchaseDialog({
             <Input value={ref} onChange={(e) => setRef(e.target.value)} />
           </div>
           <p className="text-xs text-muted-foreground">
-            Stock actual: {Number(product.stock)} · CPP actual{" "}
-            {formatUSD(Number(product.cost_usd))}
+            Stock actual: {Number(product.stock)} · CPP actual {formatUSD(Number(product.cost_usd))}
           </p>
         </div>
         <DialogFooter>
@@ -431,13 +387,7 @@ function PurchaseDialog({
   );
 }
 
-function KardexDialog({
-  product,
-  onClose,
-}: {
-  product: Product;
-  onClose: () => void;
-}) {
+function KardexDialog({ product, onClose }: { product: Product; onClose: () => void }) {
   const { data: movements, isLoading } = useKardex(product.id);
 
   return (
@@ -451,9 +401,7 @@ function KardexDialog({
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (movements?.length ?? 0) === 0 ? (
-          <p className="py-8 text-center text-muted-foreground">
-            Sin movimientos registrados.
-          </p>
+          <p className="py-8 text-center text-muted-foreground">Sin movimientos registrados.</p>
         ) : (
           <div className="max-h-[60vh] overflow-auto">
             <Table>
@@ -474,9 +422,7 @@ function KardexDialog({
                       {new Date(m.created_at).toLocaleString("es-NI")}
                     </TableCell>
                     <TableCell>{MOVEMENT_LABELS[m.movement_type]}</TableCell>
-                    <TableCell className="text-right">
-                      {Number(m.quantity)}
-                    </TableCell>
+                    <TableCell className="text-right">{Number(m.quantity)}</TableCell>
                     <TableCell className="text-right">
                       {formatUSD(Number(m.unit_cost_usd))}
                     </TableCell>
@@ -507,15 +453,11 @@ function CombosManager({ products }: { products: Product[] }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Combos / paquetes</CardTitle>
-          <CardDescription>
-            Marca un producto como combo en Productos.
-          </CardDescription>
+          <CardDescription>Marca un producto como combo en Productos.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-1">
           {combos.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              No hay combos.
-            </p>
+            <p className="py-4 text-center text-sm text-muted-foreground">No hay combos.</p>
           ) : (
             combos.map((c) => (
               <button
@@ -545,13 +487,7 @@ function CombosManager({ products }: { products: Product[] }) {
   );
 }
 
-function ComboEditor({
-  combo,
-  products,
-}: {
-  combo: Product;
-  products: Product[];
-}) {
+function ComboEditor({ combo, products }: { combo: Product; products: Product[] }) {
   const { data: components, isLoading } = useComboComponents(combo.id);
   const add = useAddComboComponent();
   const remove = useRemoveComboComponent();
@@ -605,12 +541,7 @@ function ComboEditor({
           </div>
           <div className="w-24">
             <Label className="mb-1 block text-xs">Cantidad</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={qty}
-              onChange={(e) => setQty(e.target.value)}
-            />
+            <Input type="number" step="0.01" value={qty} onChange={(e) => setQty(e.target.value)} />
           </div>
           <Button onClick={handleAdd} disabled={add.isPending}>
             <Plus className="mr-1 h-4 w-4" /> Agregar
@@ -622,9 +553,7 @@ function ComboEditor({
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : (components?.length ?? 0) === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            Sin componentes.
-          </p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Sin componentes.</p>
         ) : (
           <Table>
             <TableHeader>
@@ -638,12 +567,9 @@ function ComboEditor({
               {(components ?? []).map((c) => (
                 <TableRow key={c.id}>
                   <TableCell>
-                    {(c as { component?: { name?: string } }).component?.name ??
-                      "—"}
+                    {(c as { component?: { name?: string } }).component?.name ?? "—"}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {Number(c.quantity)}
-                  </TableCell>
+                  <TableCell className="text-right">{Number(c.quantity)}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       size="icon"

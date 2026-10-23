@@ -55,7 +55,9 @@ function CajeroPage() {
       if (error) throw error;
       const rows = data ?? [];
       const todayISO = new Date().toISOString().slice(0, 10);
-      let todayUsd = 0, todayCount = 0, totalUsd = 0;
+      let todayUsd = 0,
+        todayCount = 0,
+        totalUsd = 0;
       for (const s of rows) {
         totalUsd += Number(s.total_usd ?? 0);
         if (s.created_at.slice(0, 10) === todayISO) {
@@ -114,7 +116,8 @@ function CajeroPage() {
               {nio(salesStats.data?.todayUsd ?? 0)}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-              {usd(salesStats.data?.todayUsd ?? 0)} · {salesStats.data?.todayCount ?? 0} ventas hoy · {usd(salesStats.data?.totalUsd ?? 0)} en 14 días
+              {usd(salesStats.data?.todayUsd ?? 0)} · {salesStats.data?.todayCount ?? 0} ventas hoy
+              · {usd(salesStats.data?.totalUsd ?? 0)} en 14 días
             </p>
           </div>
           <Link
@@ -153,7 +156,10 @@ function CajeroPage() {
           ) : (
             <div className="space-y-3">
               {salesStats.data!.rows.slice(0, 8).map((s) => (
-                <div key={s.id} className="flex items-center justify-between border-b border-white/5 pb-2 last:border-0">
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between border-b border-white/5 pb-2 last:border-0"
+                >
                   <div className="min-w-0">
                     <p className="truncate text-xs font-medium text-white">
                       Venta #{s.sale_number ?? s.id.slice(0, 6)}
@@ -182,7 +188,9 @@ function CajeroPage() {
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             </div>
           ) : (sessions.data?.length ?? 0) === 0 ? (
-            <p className="py-8 text-center text-xs text-muted-foreground">Sin aperturas registradas.</p>
+            <p className="py-8 text-center text-xs text-muted-foreground">
+              Sin aperturas registradas.
+            </p>
           ) : (
             <div className="space-y-3">
               {sessions.data!.map((s) => (
@@ -206,7 +214,8 @@ function CajeroPage() {
                     <div>
                       <p className="text-muted-foreground">Apertura</p>
                       <p className="text-white tabular-nums">
-                        C$ {Number(s.opening_nio ?? 0).toFixed(2)} · $ {Number(s.opening_usd ?? 0).toFixed(2)}
+                        C$ {Number(s.opening_nio ?? 0).toFixed(2)} · ${" "}
+                        {Number(s.opening_usd ?? 0).toFixed(2)}
                       </p>
                     </div>
                     <div>

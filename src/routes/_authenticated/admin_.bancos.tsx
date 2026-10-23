@@ -58,10 +58,7 @@ function BancosPage() {
     queryKey: ["bank-accounts", "all"],
     enabled: !!isSuper,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bank_accounts")
-        .select("*")
-        .order("sort_order");
+      const { data, error } = await supabase.from("bank_accounts").select("*").order("sort_order");
       if (error) throw error;
       return (data ?? []) as Bank[];
     },
@@ -286,10 +283,7 @@ function BankDialog({
             </div>
             <div className="space-y-1.5">
               <Label>Moneda</Label>
-              <Select
-                value={form.currency ?? "NIO"}
-                onValueChange={(v) => upd("currency", v)}
-              >
+              <Select value={form.currency ?? "NIO"} onValueChange={(v) => upd("currency", v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -316,10 +310,7 @@ function BankDialog({
                 Solo las cuentas activas se muestran a los clientes.
               </div>
             </div>
-            <Switch
-              checked={form.is_active ?? true}
-              onCheckedChange={(v) => upd("is_active", v)}
-            />
+            <Switch checked={form.is_active ?? true} onCheckedChange={(v) => upd("is_active", v)} />
           </div>
         </div>
         <DialogFooter>

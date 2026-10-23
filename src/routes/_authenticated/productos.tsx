@@ -8,13 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -32,12 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DashboardShell } from "@/components/app/DashboardShell";
-import {
-  useProducts,
-  useSaveProduct,
-  useDeleteProduct,
-  type Product,
-} from "@/hooks/use-pos";
+import { useProducts, useSaveProduct, useDeleteProduct, type Product } from "@/hooks/use-pos";
 import { useCategories, useCreateLookup } from "@/hooks/use-inventory";
 import {
   Select,
@@ -47,11 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatUSD, formatNIO, useLatestRate } from "@/hooks/use-fiscal";
-import {
-  useProductImage,
-  uploadProductImage,
-  deleteProductImage,
-} from "@/hooks/use-product-image";
+import { useProductImage, uploadProductImage, deleteProductImage } from "@/hooks/use-product-image";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { ImagePlus, X } from "lucide-react";
 
@@ -125,9 +110,7 @@ function ProductsPage() {
   function openEdit(p: Product) {
     const cur = ((p as any).price_currency === "NIO" ? "NIO" : "USD") as "USD" | "NIO";
     const displayPrice =
-      cur === "NIO" && rate > 0
-        ? (Number(p.price_usd) * rate).toFixed(2)
-        : String(p.price_usd);
+      cur === "NIO" && rate > 0 ? (Number(p.price_usd) * rate).toFixed(2) : String(p.price_usd);
     setForm({
       id: p.id,
       name: p.name,
@@ -183,8 +166,6 @@ function ProductsPage() {
     }
   }
 
-
-
   async function handleDelete(id: string) {
     try {
       await deleteProduct.mutateAsync(id);
@@ -202,9 +183,7 @@ function ProductsPage() {
             <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
               <Package className="h-6 w-6 text-primary" /> Productos
             </h1>
-            <p className="text-muted-foreground">
-              Catálogo base para el Punto de Venta.
-            </p>
+            <p className="text-muted-foreground">Catálogo base para el Punto de Venta.</p>
           </div>
           <Button onClick={openNew}>
             <Plus className="mr-2 h-4 w-4" /> Nuevo producto
@@ -253,18 +232,12 @@ function ProductsPage() {
                   {filtered.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {p.barcode ?? "—"}
-                      </TableCell>
+                      <TableCell className="text-muted-foreground">{p.barcode ?? "—"}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {[p.category, p.brand].filter(Boolean).join(" · ") || "—"}
                       </TableCell>
-                      <TableCell className="text-right">
-                        {formatUSD(Number(p.price_usd))}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {Number(p.stock)}
-                      </TableCell>
+                      <TableCell className="text-right">{formatUSD(Number(p.price_usd))}</TableCell>
+                      <TableCell className="text-right">{Number(p.stock)}</TableCell>
                       <TableCell>
                         {p.is_tax_exempt ? (
                           <Badge variant="secondary">Exento</Badge>
@@ -273,18 +246,10 @@ function ProductsPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => openEdit(p)}
-                        >
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(p)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleDelete(p.id)}
-                        >
+                        <Button size="icon" variant="ghost" onClick={() => handleDelete(p.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </TableCell>
@@ -300,9 +265,7 @@ function ProductsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {form.id ? "Editar producto" : "Nuevo producto"}
-            </DialogTitle>
+            <DialogTitle>{form.id ? "Editar producto" : "Nuevo producto"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <ProductImageField
@@ -436,18 +399,14 @@ function ProductsPage() {
                     type="number"
                     step="0.01"
                     value={form.price_usd}
-                    onChange={(e) =>
-                      setForm({ ...form, price_usd: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, price_usd: e.target.value })}
                     className="flex-1"
                   />
                 </div>
                 {(() => {
                   const v = Number(form.price_usd) || 0;
                   if (v <= 0 || rate <= 0) return null;
-                  const equiv = priceCurrency === "USD"
-                    ? formatNIO(v * rate)
-                    : formatUSD(v / rate);
+                  const equiv = priceCurrency === "USD" ? formatNIO(v * rate) : formatUSD(v / rate);
                   return (
                     <p className="text-xs text-muted-foreground">
                       Equivale a {equiv} (T/C C${rate.toFixed(2)})
@@ -471,18 +430,14 @@ function ProductsPage() {
                   type="number"
                   step="1"
                   value={form.min_stock}
-                  onChange={(e) =>
-                    setForm({ ...form, min_stock: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, min_stock: e.target.value })}
                 />
               </div>
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <Label>Exento de IVA</Label>
-                <p className="text-sm text-muted-foreground">
-                  No se le aplica el 15% en la venta.
-                </p>
+                <p className="text-sm text-muted-foreground">No se le aplica el 15% en la venta.</p>
               </div>
               <Switch
                 checked={form.is_tax_exempt}
@@ -501,16 +456,13 @@ function ProductsPage() {
                 onCheckedChange={(v) => setForm({ ...form, is_combo: v })}
               />
             </div>
-
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button onClick={handleSave} disabled={saveProduct.isPending}>
-              {saveProduct.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {saveProduct.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Guardar
             </Button>
           </DialogFooter>
@@ -594,12 +546,7 @@ function ProductImageField({
             />
           </label>
           {path && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleRemove}
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={handleRemove}>
               <X className="mr-1 h-4 w-4" /> Quitar
             </Button>
           )}
@@ -609,4 +556,3 @@ function ProductImageField({
     </div>
   );
 }
-

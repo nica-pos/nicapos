@@ -50,10 +50,11 @@ export const Route = createFileRoute("/api/public/trial-requests")({
         const data = parsed.data;
 
         // Extract IP from common proxy headers
-        const fwd = request.headers.get("cf-connecting-ip")
-          ?? request.headers.get("x-real-ip")
-          ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-          ?? null;
+        const fwd =
+          request.headers.get("cf-connecting-ip") ??
+          request.headers.get("x-real-ip") ??
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+          null;
         const ua = request.headers.get("user-agent")?.slice(0, 500) ?? null;
 
         const url = process.env.SUPABASE_URL!;

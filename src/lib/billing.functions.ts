@@ -32,9 +32,7 @@ async function decryptStoredSecret(row: any): Promise<string | null> {
 }
 
 async function paypalBaseUrl(mode: string) {
-  return mode === "live"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
+  return mode === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
 }
 
 async function paypalAccessToken(clientId: string, clientSecret: string, mode: string) {

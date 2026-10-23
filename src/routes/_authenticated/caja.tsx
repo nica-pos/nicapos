@@ -2,26 +2,13 @@ import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Wallet,
-  Lock,
-  Unlock,
-  ArrowDownCircle,
-  ArrowUpCircle,
-} from "lucide-react";
+import { Loader2, Wallet, Lock, Unlock, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -132,9 +119,7 @@ function CajaPage() {
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
             <Wallet className="h-6 w-6 text-primary" /> Control de caja
           </h1>
-          <p className="text-muted-foreground">
-            Apertura, arqueo ciego, ingresos y egresos.
-          </p>
+          <p className="text-muted-foreground">Apertura, arqueo ciego, ingresos y egresos.</p>
         </div>
 
         {isLoading ? (
@@ -147,9 +132,7 @@ function CajaPage() {
               <CardTitle className="flex items-center gap-2">
                 <Unlock className="h-5 w-5 text-primary" /> Abrir caja
               </CardTitle>
-              <CardDescription>
-                Registra el fondo inicial del cajón monedero.
-              </CardDescription>
+              <CardDescription>Registra el fondo inicial del cajón monedero.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -173,9 +156,7 @@ function CajaPage() {
                 </div>
               </div>
               <Button onClick={handleOpen} disabled={openSession.isPending}>
-                {openSession.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {openSession.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Abrir caja
               </Button>
             </CardContent>
@@ -191,22 +172,17 @@ function CajaPage() {
                   <Badge variant="secondary">Activa</Badge>
                 </div>
                 <CardDescription>
-                  Abierta el{" "}
-                  {new Date(session.opened_at).toLocaleString("es-NI")}
+                  Abierta el {new Date(session.opened_at).toLocaleString("es-NI")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div className="rounded-lg border p-3">
                   <p className="text-sm text-muted-foreground">Fondo C$</p>
-                  <p className="text-xl font-bold">
-                    {formatNIO(Number(session.opening_nio))}
-                  </p>
+                  <p className="text-xl font-bold">{formatNIO(Number(session.opening_nio))}</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <p className="text-sm text-muted-foreground">Fondo $</p>
-                  <p className="text-xl font-bold">
-                    {formatUSD(Number(session.opening_usd))}
-                  </p>
+                  <p className="text-xl font-bold">{formatUSD(Number(session.opening_usd))}</p>
                 </div>
               </CardContent>
             </Card>
@@ -214,9 +190,7 @@ function CajaPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Ingresos / Egresos</CardTitle>
-                <CardDescription>
-                  Registra entradas o salidas de dinero de la caja.
-                </CardDescription>
+                <CardDescription>Registra entradas o salidas de dinero de la caja.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-4">
@@ -224,9 +198,7 @@ function CajaPage() {
                     <Label>Tipo</Label>
                     <Select
                       value={movType}
-                      onValueChange={(v) =>
-                        setMovType(v as "income" | "expense")
-                      }
+                      onValueChange={(v) => setMovType(v as "income" | "expense")}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -250,9 +222,7 @@ function CajaPage() {
                     <Label>Moneda</Label>
                     <Select
                       value={movCurrency}
-                      onValueChange={(v) =>
-                        setMovCurrency(v as "NIO" | "USD")
-                      }
+                      onValueChange={(v) => setMovCurrency(v as "NIO" | "USD")}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -265,10 +235,7 @@ function CajaPage() {
                   </div>
                   <div className="grid gap-2">
                     <Label>Motivo</Label>
-                    <Input
-                      value={movReason}
-                      onChange={(e) => setMovReason(e.target.value)}
-                    />
+                    <Input value={movReason} onChange={(e) => setMovReason(e.target.value)} />
                   </div>
                 </div>
                 <Button
@@ -323,12 +290,10 @@ function CajaPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5 text-destructive" /> Cerrar caja
-                  (arqueo ciego)
+                  <Lock className="h-5 w-5 text-destructive" /> Cerrar caja (arqueo ciego)
                 </CardTitle>
                 <CardDescription>
-                  Cuenta el efectivo físico sin ver el esperado y registra el
-                  cierre.
+                  Cuenta el efectivo físico sin ver el esperado y registra el cierre.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -365,9 +330,7 @@ function CajaPage() {
                   onClick={handleClose}
                   disabled={closeSession.isPending}
                 >
-                  {closeSession.isPending && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {closeSession.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Cerrar caja
                 </Button>
               </CardContent>
