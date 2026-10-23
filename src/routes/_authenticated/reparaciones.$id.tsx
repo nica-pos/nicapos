@@ -101,6 +101,10 @@ export const Route = createFileRoute("/_authenticated/reparaciones/$id")({
         name: "description",
         content: "Detalle de orden de reparación de celulares y control por estaciones.",
       },
+      { property: "og:title", content: "Detalle de Reparación — Nica-POS" },
+      { property: "og:description", content: "Detalle de orden de reparación de celulares y control por estaciones." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: RepairDetail,
@@ -131,8 +135,8 @@ function RepairDetail() {
   const { branch } = useActiveBranch();
 
   const { data: openCashSession } = useOpenCashSession();
-  const { data: rateObj } = useLatestRate();
-  const rate = rateObj?.rate ? Number(rateObj.rate) : 36.6243;
+  const latestRate = useLatestRate();
+  const rate = latestRate ?? 36.6243;
 
   const [labor, setLabor] = useState(0);
   const [parts, setParts] = useState<PartRow[]>([]);
@@ -819,7 +823,7 @@ function RepairDetail() {
                       {p.kind === "advance" ? "Anticipo" : "Pago Final"}
                     </span>
                     <span className="text-muted-foreground block text-[11px]">
-                      {new Date(p.created_at).toLocaleDateString()} · Método: {p.payment_method}
+                      {new Date(p.created_at).toLocaleDateString()} · Método: {p.method}
                     </span>
                   </div>
                   <div className="font-mono font-bold text-foreground">
