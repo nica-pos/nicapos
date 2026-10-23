@@ -44,7 +44,7 @@ export function Header() {
 
         <div className="hidden items-center gap-3 md:flex">
           <Button variant="outline" size="sm" asChild className="gap-2">
-            <Link to="/descargar">
+            <Link to="/descargar" search={{ auto: "true" } as any}>
               <Download className="h-4 w-4" />
               Descargar PC
             </Link>
@@ -98,7 +98,7 @@ export function Header() {
               className="w-full gap-2"
               onClick={() => setOpen(false)}
             >
-              <Link to="/descargar">
+              <Link to="/descargar" search={{ auto: "true" } as any}>
                 <Download className="h-4 w-4" />
                 Descargar PC
               </Link>

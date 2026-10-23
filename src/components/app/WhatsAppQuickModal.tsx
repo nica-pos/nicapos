@@ -117,22 +117,34 @@ export function WhatsAppQuickModal({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          {/* Banner informativo de modo escritorio */}
-          <div className="flex items-start gap-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-foreground">
-            {isDesktop ? (
-              <Laptop className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
-            ) : (
-              <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
-            )}
-            <div className="space-y-1">
-              <span className="font-semibold text-emerald-400">
-                {isDesktop ? "Modo Escritorio Activo" : "WhatsApp Web Oficial"}
-              </span>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">
-                {isDesktop
-                  ? "La sesión queda guardada en tu PC. El cajero solo escanea el QR una vez y queda iniciada para siempre."
-                  : "Abre directamente WhatsApp Web oficial sin costo de API y sin riesgo de baneo de número."}
-              </p>
+          {/* Banner informativo de modo escritorio y cómo vincular QR */}
+          <div className="flex flex-col gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-foreground">
+            <div className="flex items-start gap-2.5">
+              {isDesktop ? (
+                <Laptop className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
+              ) : (
+                <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
+              )}
+              <div className="space-y-1">
+                <span className="font-semibold text-emerald-400">
+                  {isDesktop ? "Modo Escritorio Activo (Sesión Permanente)" : "Integración con WhatsApp Web"}
+                </span>
+                <p className="text-muted-foreground text-[11px] leading-relaxed">
+                  {isDesktop
+                    ? "La sesión queda guardada en tu PC. Solo vinculas el código QR una sola vez."
+                    : "Abre WhatsApp Web oficial con el mensaje pre-cargado listo para enviar."}
+                </p>
+              </div>
+            </div>
+
+            {/* Guía rápida de escaneo del código QR */}
+            <div className="mt-1 rounded border border-emerald-500/20 bg-background/50 p-2 text-[11px] space-y-1 text-muted-foreground">
+              <p className="font-semibold text-emerald-400">¿Dónde y cómo escanear el QR?</p>
+              <ol className="list-decimal pl-4 space-y-0.5">
+                <li>Haz clic abajo en <strong className="text-foreground">«Abrir WhatsApp Web»</strong>.</li>
+                <li>En tu teléfono celular abre WhatsApp y toca los 3 puntos (o Ajustes) → <strong className="text-foreground">Dispositivos vinculados</strong>.</li>
+                <li>Toca <strong className="text-foreground">«Vincular un dispositivo»</strong> y apunta la cámara al QR que aparece en la ventana.</li>
+              </ol>
             </div>
           </div>
 
