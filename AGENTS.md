@@ -10,3 +10,5 @@
 > the editor, so keep the branch in a working state.
 
 <!-- LOVABLE:END -->
+
+- Repairs retain their saved currency, original customer amounts and exchange rate; use shared currency helpers at display/input boundaries while preserving USD accounting columns.
