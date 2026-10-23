@@ -1,3 +1,4 @@
+import { formatRepairMoney } from "@/lib/repair-currency";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -80,6 +81,10 @@ export function buildRepairWhatsAppMessage({
   > & {
     observations?: string | null;
     estimated_delivery?: string | null;
+    currency?: string;
+    exchange_rate?: number;
+    total_amount?: number;
+    paid_amount?: number;
     total_usd?: number | null;
     paid_usd?: number | null;
   };
@@ -112,7 +117,7 @@ export function buildRepairWhatsAppMessage({
     const bal = balanceUsd !== undefined ? balanceUsd : 0;
     const balanceText =
       bal > 0
-        ? `💰 *Saldo pendiente a cancelar:* $${bal.toFixed(2)} USD (aprox. C$ ${(bal * rate).toFixed(2)})\n`
+        ? `💰 *Saldo pendiente a cancelar:* ${formatRepairMoney(order, bal)}\n`
         : `✅ *Saldo:* Cancelado en su totalidad.\n`;
 
     return (
@@ -167,10 +172,10 @@ export function buildRepairWhatsAppMessage({
   const bal = Math.max(0, total - paid);
   const priceInfo =
     total > 0
-      ? `💵 *Presupuesto pactado:* $${total.toFixed(2)} USD (aprox. C$ ${(total * rate).toFixed(2)})\n` +
-        (paid > 0 ? `🔹 *Anticipo abonado:* $${paid.toFixed(2)} USD\n` : "") +
+      ? `💵 *Presupuesto pactado:* ${formatRepairMoney(order, total)}\n` +
+        (paid > 0 ? `🔹 *Anticipo abonado:* ${formatRepairMoney(order, paid)}\n` : "") +
         (bal > 0
-          ? `💰 *Saldo al retirar:* $${bal.toFixed(2)} USD (aprox. C$ ${(bal * rate).toFixed(2)})\n`
+          ? `💰 *Saldo al retirar:* ${formatRepairMoney(order, bal)}\n`
           : "")
       : "";
 

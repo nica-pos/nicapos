@@ -1572,18 +1572,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -1594,6 +1597,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -1607,18 +1611,21 @@ export type Database = {
           color?: string | null
           created_at?: string
           created_by: string
+          currency?: string
           customer_id: string
           delivered_at?: string | null
           delivered_by?: string | null
           delivery_exception_reason?: string | null
           diagnosis?: string | null
           estimated_delivery?: string | null
+          exchange_rate?: number
           id?: string
           imei?: string | null
           labor_usd?: number
           model: string
           observations?: string | null
           order_number: number
+          paid_amount?: number
           paid_usd?: number
           parts_cost_usd?: number
           parts_usd?: number
@@ -1629,6 +1636,7 @@ export type Database = {
           status?: string
           technician_id?: string | null
           tenant_id: string
+          total_amount?: number
           total_usd?: number
           updated_at?: string
           work_to_do?: string | null
@@ -1642,18 +1650,21 @@ export type Database = {
           color?: string | null
           created_at?: string
           created_by?: string
+          currency?: string
           customer_id?: string
           delivered_at?: string | null
           delivered_by?: string | null
           delivery_exception_reason?: string | null
           diagnosis?: string | null
           estimated_delivery?: string | null
+          exchange_rate?: number
           id?: string
           imei?: string | null
           labor_usd?: number
           model?: string
           observations?: string | null
           order_number?: number
+          paid_amount?: number
           paid_usd?: number
           parts_cost_usd?: number
           parts_usd?: number
@@ -1664,6 +1675,7 @@ export type Database = {
           status?: string
           technician_id?: string | null
           tenant_id?: string
+          total_amount?: number
           total_usd?: number
           updated_at?: string
           work_to_do?: string | null
@@ -2777,18 +2789,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -2799,6 +2814,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -2848,18 +2864,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -2870,6 +2889,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -2922,18 +2942,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -2944,6 +2967,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -2999,18 +3023,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -3021,6 +3048,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -3043,18 +3071,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -3065,6 +3096,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -3280,18 +3312,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -3302,6 +3337,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -3349,18 +3385,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -3371,6 +3410,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null
@@ -3456,18 +3496,21 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string
+          currency: string
           customer_id: string
           delivered_at: string | null
           delivered_by: string | null
           delivery_exception_reason: string | null
           diagnosis: string | null
           estimated_delivery: string | null
+          exchange_rate: number
           id: string
           imei: string | null
           labor_usd: number
           model: string
           observations: string | null
           order_number: number
+          paid_amount: number
           paid_usd: number
           parts_cost_usd: number
           parts_usd: number
@@ -3478,6 +3521,7 @@ export type Database = {
           status: string
           technician_id: string | null
           tenant_id: string
+          total_amount: number
           total_usd: number
           updated_at: string
           work_to_do: string | null

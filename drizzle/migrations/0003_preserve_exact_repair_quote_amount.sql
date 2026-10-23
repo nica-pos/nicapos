@@ -1,0 +1,1 @@
+DO $$ DECLARE def text; BEGIN def:=pg_get_functiondef('public.save_repair_quote(uuid,numeric,jsonb,boolean,text)'::regprocedure); def:=replace(def,'total_usd = _total,','total_usd = _total, total_amount = CASE WHEN _o.currency = ''NIO'' THEN round((coalesce(_labor,0) + _parts_total) * _o.exchange_rate,2) ELSE _total END,'); EXECUTE def; END $$;

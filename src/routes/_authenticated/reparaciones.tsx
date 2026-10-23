@@ -1,3 +1,4 @@
+import { formatRepairMoney, repairCurrency, repairRate, repairDisplayAmount } from "@/lib/repair-currency";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -84,6 +85,10 @@ export const Route = createFileRoute("/_authenticated/reparaciones")({
         name: "description",
         content: "Flujo por estaciones de reparación de celulares y cálculo de ganancia neta.",
       },
+      { property: "og:title", content: "Reparaciones — Nica-POS" },
+      { property: "og:description", content: "Reparaciones, anticipos y ganancias en la moneda elegida para cada orden." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: RepairsLayout,
@@ -434,6 +439,7 @@ function RepairsPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredOrders.map((o) => {
+              const formatMoney = (value: number) => formatRepairMoney(o, value);
               const cust = custMap.get(o.customer_id);
               const station = getOrderStation(o.status);
               const balanceUsd = repairBalance(o);
@@ -730,7 +736,7 @@ function RepairsPage() {
       {completingOrder && (
         <CompleteRepairDialog
           order={completingOrder}
-          rate={rate}
+          rate={repairRate(completingOrder, rate)}
           open={!!completingOrder}
           onOpenChange={(v) => !v && setCompletingOrder(null)}
         />
@@ -740,7 +746,7 @@ function RepairsPage() {
       {deliveringOrder && (
         <DeliverRepairDialog
           order={deliveringOrder}
-          rate={rate}
+          rate={repairRate(deliveringOrder, rate)}
           open={!!deliveringOrder}
           onOpenChange={(v) => !v && setDeliveringOrder(null)}
         />
@@ -1154,9 +1160,9 @@ function CompleteRepairDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const [currency, setCurrency] = useState<"USD" | "NIO">("USD");
+  const currency = repairCurrency(order);
   const [totalChargedInput, setTotalChargedInput] = useState<string>(
-    order.total_usd ? String(order.total_usd) : "0",
+    String(repairDisplayAmount(order, Number(order.total_usd))),
   );
   const [partName, setPartName] = useState("");
   const [partCostInput, setPartCostInput] = useState<string>("0");
@@ -1321,7 +1327,7 @@ function CompleteRepairDialog({
                 size="sm"
                 variant={currency === "USD" ? "default" : "outline"}
                 className="h-7 text-xs px-2.5"
-                onClick={() => setCurrency("USD")}
+                disabled={currency !== "USD"}
               >
                 $ USD
               </Button>
@@ -1330,7 +1336,7 @@ function CompleteRepairDialog({
                 size="sm"
                 variant={currency === "NIO" ? "default" : "outline"}
                 className="h-7 text-xs px-2.5"
-                onClick={() => setCurrency("NIO")}
+                disabled={currency !== "NIO"}
               >
                 C$ NIO
               </Button>
@@ -1544,7 +1550,7 @@ function DeliverRepairDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const balanceUsd = repairBalance(order);
-  const [payMethod, setPayMethod] = useState("cash_usd");
+  const [payMethod, setPayMethod] = useState(repairCurrency(order) === "NIO" ? "cash_nio" : "cash_usd");
   const [busy, setBusy] = useState(false);
   const action = useRepairAction();
   const { data: openCashSession } = useOpenCashSession();
@@ -1555,9 +1561,9 @@ function DeliverRepairDialog({
       // 1. Si hay saldo pendiente, registrar el cobro
       if (balanceUsd > 0) {
         const isCash = payMethod === "cash_usd" || payMethod === "cash_nio";
-        const cur = payMethod === "cash_nio" ? "NIO" : "USD";
+        const cur = payMethod === "cash_nio" ? "NIO" : payMethod === "cash_usd" ? "USD" : repairCurrency(order);
         const amt =
-          payMethod === "cash_nio" ? Math.round(balanceUsd * rate * 100) / 100 : balanceUsd;
+          cur === "NIO" ? (repairCurrency(order) === "NIO" ? repairDisplayAmount(order, balanceUsd) : Math.round(balanceUsd * rate * 100) / 100) : balanceUsd;
         // Si no hay sesión de caja POS abierta y el método es efectivo, usar 'transfer' para no disparar la restricción de caja POS
         const effectiveMethod = !openCashSession && isCash ? "transfer" : payMethod;
 
@@ -1642,17 +1648,17 @@ function DeliverRepairDialog({
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total de la reparación:</span>
               <span className="font-semibold">
-                {usd(Number(order.total_usd))} / {formatNIO(Number(order.total_usd) * rate)}
+                {formatRepairMoney(order, Number(order.total_usd))}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Anticipo ya pagado:</span>
-              <span className="font-semibold text-emerald-600">{usd(Number(order.paid_usd))}</span>
+              <span className="font-semibold text-emerald-600">{formatRepairMoney(order, Number(order.paid_usd))}</span>
             </div>
             <div className="border-t pt-2 flex justify-between text-base font-bold">
               <span>Saldo a pagar ahora:</span>
               <span className={balanceUsd > 0 ? "text-amber-500" : "text-emerald-500"}>
-                {usd(balanceUsd)} ({formatNIO(balanceUsd * rate)})
+                {formatRepairMoney(order, balanceUsd)}
               </span>
             </div>
           </div>
@@ -1667,7 +1673,7 @@ function DeliverRepairDialog({
                 <SelectContent>
                   <SelectItem value="cash_usd">Efectivo USD (${balanceUsd.toFixed(2)})</SelectItem>
                   <SelectItem value="cash_nio">
-                    Efectivo Córdobas (C$ {(balanceUsd * rate).toFixed(2)})
+                    Efectivo Córdobas (C$ {(repairCurrency(order) === "NIO" ? repairDisplayAmount(order, balanceUsd) : balanceUsd * rate).toFixed(2)})
                   </SelectItem>
                   <SelectItem value="card">Tarjeta de débito/crédito</SelectItem>
                   <SelectItem value="transfer">Transferencia bancaria</SelectItem>
@@ -1841,13 +1847,13 @@ function NewRepairDialog({
           ? orderCurrency === "NIO"
             ? formatNIO(rawAdvance)
             : usd(advanceUsd)
-          : "$0.00",
+          : orderCurrency === "NIO" ? "C$ 0.00" : "$0.00",
       balanceFormatted:
         rawCost - rawAdvance > 0
           ? orderCurrency === "NIO"
             ? formatNIO(rawCost - rawAdvance)
             : usd(Math.max(0, costUsd - advanceUsd))
-          : "$0.00",
+          : orderCurrency === "NIO" ? "C$ 0.00" : "$0.00",
       currency: orderCurrency,
       isPreliminary: true,
     }),
@@ -1918,6 +1924,9 @@ function NewRepairDialog({
             accessories: f.accessories,
             observations: f.details,
             estimated_delivery: f.delivery,
+            currency: orderCurrency,
+            exchange_rate: rate,
+            total_amount: rawCost,
           },
         },
       })) as RepairOrder;
@@ -1927,7 +1936,7 @@ function NewRepairDialog({
           fn: "save_repair_quote",
           args: {
             _order_id: o.id,
-            _labor: Math.round(costUsd * 100) / 100,
+            _labor: costUsd,
             _parts: [],
             _skip_approval: true,
             _note: `Pactado al ingreso en ${orderCurrency}: ${orderCurrency === "NIO" ? formatNIO(rawCost) : usd(rawCost)}`,
@@ -1998,13 +2007,13 @@ function NewRepairDialog({
             ? orderCurrency === "NIO"
               ? formatNIO(rawAdvance)
               : usd(advanceUsd)
-            : "$0.00",
+            : orderCurrency === "NIO" ? "C$ 0.00" : "$0.00",
         balanceFormatted:
           rawCost - rawAdvance > 0
             ? orderCurrency === "NIO"
               ? formatNIO(rawCost - rawAdvance)
               : usd(Math.max(0, costUsd - advanceUsd))
-            : "$0.00",
+            : orderCurrency === "NIO" ? "C$ 0.00" : "$0.00",
         currency: orderCurrency,
         isPreliminary: false,
       };
@@ -2016,6 +2025,9 @@ function NewRepairDialog({
           model: f.model.trim(),
           reported_issue: i,
           estimated_delivery: f.delivery,
+            currency: orderCurrency,
+            exchange_rate: rate,
+            total_amount: rawCost,
           total_usd: costUsd,
           paid_usd: advanceUsd,
         },
