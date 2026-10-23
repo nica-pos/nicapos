@@ -222,9 +222,10 @@ function RepairDetail() {
   }
 
   function printReceipt() {
+    if (!o || !data) return;
     const w = window.open("", "_blank", "width=420,height=680");
     if (!w) return;
-    const warrantyNum = extractWarrantyDays(o!.observations);
+    const warrantyNum = extractWarrantyDays(o.observations);
     const storeTitle = (tenant?.name || "NICA-POS").toUpperCase();
     const branchTitle = branch?.name ? `Sucursal: ${branch.name}` : "";
     w.document.write(`
