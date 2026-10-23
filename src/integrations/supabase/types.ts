@@ -3031,9 +3031,6 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
-      delete_repair_order: {
-        Args: { _order_id: string }
-        Returns: boolean
       }
       deliver_repair: {
         Args: { _exception_reason?: string; _order_id: string }
