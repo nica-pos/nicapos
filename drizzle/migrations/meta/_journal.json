@@ -15,6 +15,13 @@
       "when": 1791438549250,
       "tag": "0001_repairs_module",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792723644100,
+      "tag": "0002_persist_repair_currency",
+      "breakpoints": true
     }
   ]
 }
