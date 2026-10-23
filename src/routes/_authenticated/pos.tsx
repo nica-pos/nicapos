@@ -14,7 +14,9 @@ import {
   Keyboard,
   AlertTriangle,
   Loader2,
+  MessageSquare,
 } from "lucide-react";
+import { openWhatsAppWeb, buildSaleWhatsAppMessage } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -103,6 +105,7 @@ function PosPage() {
     docFormat: "ticket" | "carta";
     isCredit: boolean;
     customerName: string | null;
+    customerPhone: string | null;
   } | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
@@ -384,6 +387,7 @@ function PosPage() {
         docFormat,
         isCredit,
         customerName: selectedCustomer?.name ?? null,
+        customerPhone: selectedCustomer?.phone ?? null,
       });
       clearCart();
       setRateOverride(null);
@@ -1066,6 +1070,7 @@ function ReceiptDialog({
     docFormat: "ticket" | "carta";
     isCredit: boolean;
     customerName: string | null;
+    customerPhone?: string | null;
   } | null;
 
   onClose: () => void;
@@ -1104,6 +1109,27 @@ function ReceiptDialog({
   function doPrint() {
     // Usa impresora configurada (silenciosa) en escritorio, o diálogo del navegador.
     void printDocument(sale?.docFormat === "carta" ? "carta" : "ticket");
+  }
+
+  async function handleWhatsApp() {
+    if (!sale) return;
+    const phone =
+      sale.customerPhone ||
+      window.prompt("Ingresa el número de WhatsApp del cliente (ej. 88881234):");
+    if (!phone) return;
+    const msg = buildSaleWhatsAppMessage({
+      saleNumber: sale.saleNumber,
+      customerName: sale.customerName,
+      storeName: legalName,
+      items: sale.lines.map((l) => ({
+        name: l.productName,
+        quantity: l.quantity,
+        total: l.price * l.quantity,
+      })),
+      totalNio: sale.total,
+      totalUsd: sale.rate > 0 ? sale.total / sale.rate : sale.total,
+    });
+    await openWhatsAppWeb({ phone, text: msg });
   }
 
   const isCarta = sale?.docFormat === "carta";
@@ -1389,6 +1415,15 @@ function ReceiptDialog({
             Anular venta
           </Button>
           <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleWhatsApp}
+              className="border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/20"
+              title="Enviar comprobante de venta por WhatsApp"
+            >
+              <MessageSquare className="mr-1.5 h-4 w-4" /> WhatsApp
+            </Button>
             <Button variant="outline" onClick={onClose}>
               Cerrar
             </Button>

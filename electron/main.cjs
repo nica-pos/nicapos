@@ -143,6 +143,69 @@ ipcMain.handle("nicapos:open-drawer", async (_evt, opts = {}) => {
   }
 });
 
+// ------------------------------------------------------------------
+// WhatsApp Web Integrado (Ventana persistente en escritorio)
+// ------------------------------------------------------------------
+let whatsappWindow = null;
+
+function getOrCreateWhatsAppWindow() {
+  if (whatsappWindow && !whatsappWindow.isDestroyed()) {
+    if (whatsappWindow.isMinimized()) whatsappWindow.restore();
+    whatsappWindow.show();
+    whatsappWindow.focus();
+    return whatsappWindow;
+  }
+
+  whatsappWindow = new BrowserWindow({
+    width: 1100,
+    height: 800,
+    minWidth: 420,
+    minHeight: 520,
+    title: "Nica-POS — WhatsApp Web",
+    icon: path.join(__dirname, "icon.png"),
+    backgroundColor: "#111b21",
+    autoHideMenuBar: true,
+    webPreferences: {
+      partition: "persist:whatsapp", // Mantiene la sesión iniciada en la PC sin volver a escanear QR
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  // User-Agent de Chrome de escritorio moderno para compatibilidad con WhatsApp Web
+  const chromeUserAgent =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+  whatsappWindow.webContents.setUserAgent(chromeUserAgent);
+
+  whatsappWindow.loadURL("https://web.whatsapp.com");
+
+  whatsappWindow.on("closed", () => {
+    whatsappWindow = null;
+  });
+
+  return whatsappWindow;
+}
+
+ipcMain.handle("nicapos:whatsapp-open", async (_evt, opts = {}) => {
+  try {
+    const win = getOrCreateWhatsAppWindow();
+    const { phone, text } = opts || {};
+    if (phone) {
+      const cleanPhone = String(phone).replace(/\D/g, "");
+      const encodedText = encodeURIComponent(text || "");
+      const url = `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
+      win.loadURL(url);
+    }
+    win.show();
+    win.focus();
+    return { ok: true };
+  } catch (err) {
+    console.error("[whatsapp] error opening window", err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+});
+
+
 app.whenReady().then(createWindow);
 
 app.on("window-all-closed", () => {

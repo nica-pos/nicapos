@@ -25,8 +25,10 @@ import {
   ChevronDown,
   Menu,
   X,
+  MessageSquare,
 } from "lucide-react";
 import { BranchSelector } from "@/components/app/BranchSelector";
+import { WhatsAppQuickModal } from "@/components/app/WhatsAppQuickModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -120,6 +122,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const { tenant, memberships, role } = useActiveTenant();
   const { data: isSuperadmin } = useIsSuperadmin();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [waOpen, setWaOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -397,6 +400,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <span className="text-muted-foreground/50">/</span>
               <span className="truncate text-sm font-medium text-foreground">{currentTitle}</span>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setWaOpen(true)}
+              className="inline-flex items-center gap-1.5 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400 text-xs font-medium h-9 px-2.5 sm:px-3"
+              title="WhatsApp Web — Abrir sesión y enviar mensajes a clientes"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </Button>
             <BranchSelector />
           </div>
         </header>
@@ -405,6 +418,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
+
+      <WhatsAppQuickModal open={waOpen} onOpenChange={setWaOpen} />
     </div>
   );
 }

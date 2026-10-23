@@ -210,7 +210,9 @@ function markLocallyDeleted(id: string) {
     const current = getLocallyDeletedIds();
     current.add(id);
     localStorage.setItem(DELETED_ORDERS_STORAGE_KEY, JSON.stringify(Array.from(current)));
-  } catch {}
+  } catch {
+    // Ignorar si localStorage está deshabilitado o bloqueado
+  }
 }
 
 export function useRepairOrders() {

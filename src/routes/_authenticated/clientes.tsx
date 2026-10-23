@@ -2,7 +2,8 @@ import { getFriendlyErrorMessage } from "@/lib/errors";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Users, Plus, HandCoins, Bookmark, Loader2 } from "lucide-react";
+import { Users, Plus, HandCoins, Bookmark, Loader2, MessageSquare } from "lucide-react";
+import { openWhatsAppWeb } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -223,7 +224,29 @@ function CustomersTab() {
                 <TableRow key={c.id} className="cursor-pointer" onClick={() => openEdit(c)}>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.ruc ?? "—"}</TableCell>
-                  <TableCell>{c.phone ?? "—"}</TableCell>
+                  <TableCell>
+                    {c.phone ? (
+                      <div className="flex items-center gap-1.5">
+                        <span>{c.phone}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void openWhatsAppWeb({
+                              phone: c.phone || "",
+                              text: `Hola ${c.name}, le saludamos cordialmente de Nica-POS.`,
+                            });
+                          }}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
+                          title="Enviar WhatsApp"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">{money(c.credit_limit_usd)}</TableCell>
                 </TableRow>
               ))}

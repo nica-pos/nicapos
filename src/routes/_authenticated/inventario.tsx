@@ -45,9 +45,7 @@ import {
 import { DashboardShell } from "@/components/app/DashboardShell";
 import { useProducts, type Product } from "@/hooks/use-pos";
 import {
-  useCategories,
-  useBrands,
-  useModels,
+  useLookup,
   useCreateLookup,
   useDeleteLookup,
   useKardex,
@@ -250,8 +248,7 @@ function LookupCard({
   table: "categories" | "brands" | "product_models";
   title: string;
 }) {
-  const query =
-    table === "categories" ? useCategories() : table === "brands" ? useBrands() : useModels();
+  const query = useLookup<{ id: string; name: string }>(table);
   const create = useCreateLookup(table);
   const remove = useDeleteLookup(table);
   const [name, setName] = useState("");

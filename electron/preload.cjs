@@ -27,4 +27,12 @@ contextBridge.exposeInMainWorld("nicaposDesktop", {
    * @returns {Promise<{ok: boolean, error?: string}>}
    */
   openCashDrawer: (opts) => ipcRenderer.invoke("nicapos:open-drawer", opts ?? {}),
+
+  /**
+   * Abre o enfoca la ventana persistente de WhatsApp Web.
+   * Si se pasa phone y/o text, abre directamente el chat con el cliente.
+   * @param {{ phone?: string, text?: string }} opts
+   * @returns {Promise<{ok: boolean, error?: string}>}
+   */
+  openWhatsApp: (opts) => ipcRenderer.invoke("nicapos:whatsapp-open", opts ?? {}),
 });

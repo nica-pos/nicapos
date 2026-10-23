@@ -62,6 +62,7 @@ import {
 import { getOrderStation } from "@/routes/_authenticated/reparaciones";
 import { decodeLock, PatternReplay } from "@/components/app/PatternLock";
 import { supabase } from "@/integrations/supabase/client";
+import { openWhatsAppWeb } from "@/lib/whatsapp";
 
 function RepairPhotos({ paths }: { paths: string[] }) {
   const [urls, setUrls] = useState<string[]>([]);
@@ -285,7 +286,9 @@ function RepairDetail() {
     setTimeout(() => {
       try {
         w.print();
-      } catch {}
+      } catch {
+        // Ignorar si el navegador cancela o bloquea el diálogo de impresión
+      }
     }, 250);
   }
 
@@ -323,25 +326,20 @@ function RepairDetail() {
             <Button
               variant="outline"
               size="sm"
-              asChild
+              onClick={() => {
+                const text = buildRepairWhatsAppMessage({
+                  order: o,
+                  customerName: data.customer.name,
+                  storeName: tenant?.name,
+                  balanceUsd: balance,
+                  rate: rate,
+                });
+                void openWhatsAppWeb({ phone: data.customer.phone, text });
+              }}
               className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+              title="Avisar al cliente por WhatsApp (Mensaje profesional)"
             >
-              <a
-                href={`https://wa.me/${data.customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                  buildRepairWhatsAppMessage({
-                    order: o,
-                    customerName: data.customer.name,
-                    storeName: tenant?.name,
-                    balanceUsd: balance,
-                    rate: rate,
-                  }),
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-                title="Avisar al cliente por WhatsApp (Mensaje profesional)"
-              >
-                <MessageSquare className="mr-1.5 h-4 w-4" /> WhatsApp
-              </a>
+              <MessageSquare className="mr-1.5 h-4 w-4" /> WhatsApp
             </Button>
           )}
 

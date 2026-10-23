@@ -14,7 +14,7 @@ export type StockAudit = Database["public"]["Tables"]["stock_audits"]["Row"];
 export type StockAuditItem = Database["public"]["Tables"]["stock_audit_items"]["Row"];
 
 // ---------- Simple lookups (categories/brands/models) ----------
-function useLookup<T>(table: "categories" | "brands" | "product_models") {
+export function useLookup<T>(table: "categories" | "brands" | "product_models") {
   const { tenant } = useActiveTenant();
   return useQuery({
     queryKey: [table, tenant?.id],

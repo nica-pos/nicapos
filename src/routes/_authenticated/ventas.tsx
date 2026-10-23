@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Printer, Eye, Trash2, Ban, Search } from "lucide-react";
+import { Printer, Eye, Trash2, Ban, Search, MessageSquare } from "lucide-react";
+import { openWhatsAppWeb, buildSaleWhatsAppMessage } from "@/lib/whatsapp";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -333,6 +334,25 @@ function SaleDetailDialog({
     void printDocument("carta");
   }
 
+  async function handleWhatsApp() {
+    if (!sale) return;
+    const phone = window.prompt("Ingresa el número de WhatsApp del cliente (ej. 88881234):");
+    if (!phone) return;
+    const msg = buildSaleWhatsAppMessage({
+      saleNumber: sale.sale_number,
+      customerName: sale.customer_name,
+      storeName: legalName,
+      items: (sale.sale_items ?? []).map((l) => ({
+        name: l.product_name,
+        quantity: Number(l.quantity),
+        total: Number(l.total_price_nio ?? l.unit_price_nio * l.quantity),
+      })),
+      totalNio: Number(sale.total_nio),
+      totalUsd: Number(sale.total_usd),
+    });
+    await openWhatsAppWeb({ phone, text: msg });
+  }
+
   if (!sale) return null;
   const isCredit = (sale.sale_payments?.length ?? 0) === 0;
   const isVoided = !!sale.voided_at;
@@ -485,6 +505,15 @@ function SaleDetailDialog({
             )}
           </div>
           <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleWhatsApp}
+              className="border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/20"
+              title="Enviar comprobante por WhatsApp"
+            >
+              <MessageSquare className="mr-1.5 h-4 w-4" /> WhatsApp
+            </Button>
             <Button variant="outline" onClick={onClose}>
               Cerrar
             </Button>
