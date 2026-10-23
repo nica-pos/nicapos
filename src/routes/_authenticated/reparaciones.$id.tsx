@@ -1,3 +1,4 @@
+import { formatRepairMoney, repairCurrency, repairRate, repairDisplayAmount } from "@/lib/repair-currency";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -136,7 +137,7 @@ function RepairDetail() {
 
   const { data: openCashSession } = useOpenCashSession();
   const latestRate = useLatestRate();
-  const rate = latestRate ?? 36.6243;
+  const rate = repairRate(data?.order ?? {}, latestRate ?? 36.6243);
 
   const [labor, setLabor] = useState(0);
   const [parts, setParts] = useState<PartRow[]>([]);
@@ -159,7 +160,8 @@ function RepairDetail() {
 
   useEffect(() => {
     if (!data?.order) return;
-    setLabor(Number(data.order.labor_usd || 0));
+    setLabor(Number(data.order.total_usd || 0));
+    setDeliverMethod(repairCurrency(data.order) === "NIO" ? "cash_nio" : "cash_usd");
     setParts(
       data.parts.map((p) => ({
         id: p.id,
@@ -198,6 +200,11 @@ function RepairDetail() {
       </div>
     );
   }
+
+  const money = (value: number) => formatRepairMoney(o, value);
+  const currency = repairCurrency(o);
+  const inputAmount = (value: number) => Math.round(value * (currency === "NIO" ? rate : 1) * 100) / 100;
+  const inputUsd = (value: number) => value / (currency === "NIO" ? rate : 1);
 
   const closed = o.status === "delivered" || o.status === "cancelled";
   const balance = repairBalance(o);
@@ -257,9 +264,9 @@ function RepairDetail() {
           ${warrantyNum ? `<div class="bold" style="color: #047857; margin-top: 2px;">🛡️ Garantía otorgada: ${warrantyNum} días</div>` : ""}
           <div><span class="bold">Estado actual:</span> ${statusLabel(o!.status)}</div>
           <div class="double-sep"></div>
-          <div class="row"><span class="bold">Total presupuestado:</span> <span>${usd(Number(o!.total_usd))} (C$ ${formatNIO(Number(o!.total_usd) * rate)})</span></div>
-          <div class="row"><span>Anticipo / Pagado:</span> <span>${usd(Number(o!.paid_usd))}</span></div>
-          <div class="row bold" style="font-size: 13px; margin-top: 4px;"><span>Saldo Pendiente:</span> <span>${usd(balance)} (C$ ${formatNIO(balance * rate)})</span></div>
+          <div class="row"><span class="bold">Total presupuestado:</span> <span>${money(Number(o.total_usd))}</span></div>
+          <div class="row"><span>Anticipo / Pagado:</span> <span>${money(Number(o.paid_usd))}</span></div>
+          <div class="row bold" style="font-size: 13px; margin-top: 4px;"><span>Saldo Pendiente:</span> <span>${money(balance)}</span></div>
           <div class="sep"></div>
           <div class="terms">
             • Presente este comprobante para retirar su equipo al estar listo o en caso de reclamo.<br/>
@@ -551,7 +558,7 @@ function RepairDetail() {
         <Card>
           <CardContent className="p-4">
             <div className="text-xs text-muted-foreground">Total al cliente</div>
-            <div className="text-2xl font-bold">{usd(Number(o.total_usd))}</div>
+            <div className="text-2xl font-bold">{money(Number(o.total_usd))}</div>
             <p className="text-[11px] text-muted-foreground mt-0.5">Precio pactado</p>
           </CardContent>
         </Card>
@@ -560,7 +567,7 @@ function RepairDetail() {
           <CardContent className="p-4">
             <div className="text-xs text-muted-foreground">Costo de refacciones</div>
             <div className="text-2xl font-bold text-rose-500">
-              {usd(Number(o.parts_cost_usd || 0))}
+              {money(Number(o.parts_cost_usd || 0))}
             </div>
             <p className="text-[11px] text-muted-foreground mt-0.5">Repuestos utilizados</p>
           </CardContent>
@@ -572,7 +579,7 @@ function RepairDetail() {
               <TrendingUp className="h-3.5 w-3.5" /> Ganancia Neta
             </div>
             <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
-              +{usd(profit)}
+              +{money(profit)}
             </div>
             <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80">
               {Number(o.total_usd) > 0
@@ -588,10 +595,10 @@ function RepairDetail() {
             <div
               className={`text-2xl font-bold ${balance > 0 ? "text-amber-500" : "text-foreground"}`}
             >
-              {usd(balance)}
+              {money(balance)}
             </div>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Pagado: {usd(Number(o.paid_usd))}
+              Pagado: {money(Number(o.paid_usd))}
             </p>
           </CardContent>
         </Card>
@@ -827,7 +834,7 @@ function RepairDetail() {
                     </span>
                   </div>
                   <div className="font-mono font-bold text-foreground">
-                    {p.amount} {p.currency} ({usd(Number(p.amount_usd))})
+                    {money(Number(p.amount_usd))}
                   </div>
                 </div>
               ))
@@ -969,13 +976,13 @@ function RepairDetail() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-semibold">Total cobrado al cliente ($ USD) *</Label>
+              <Label className="text-sm font-semibold">Total cobrado al cliente ({currency === "NIO" ? "C$" : "$ USD"}) *</Label>
               <Input
                 type="number"
                 min="0"
                 step="any"
-                value={labor}
-                onChange={(e) => setLabor(Number(e.target.value) || 0)}
+                value={labor === Number(o.total_usd) ? repairDisplayAmount(o, labor) : inputAmount(labor)}
+                onChange={(e) => setLabor(inputUsd(Number(e.target.value) || 0))}
                 className="text-base font-semibold"
                 placeholder="0.00"
               />
@@ -1011,16 +1018,16 @@ function RepairDetail() {
 
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">
-                    Costo de compra de la refacción ($ USD)
+                    Costo de compra de la refacción ({currency === "NIO" ? "C$" : "$ USD"})
                   </Label>
                   <Input
                     type="number"
                     min="0"
                     step="any"
                     placeholder="0.00 si no compraste refacción"
-                    value={parts[0]?.unit_price_usd || ""}
+                    value={inputAmount(parts[0]?.unit_price_usd || 0) || ""}
                     onChange={(e) => {
-                      const cost = Number(e.target.value) || 0;
+                      const cost = inputUsd(Number(e.target.value) || 0);
                       if (parts.length === 0) {
                         setParts([
                           { name: "Refacción comprada", quantity: 1, unit_price_usd: cost },
@@ -1120,16 +1127,16 @@ function RepairDetail() {
                 <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs space-y-1">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Cobro al cliente:</span>
-                    <span className="font-semibold text-foreground">{usd(labor)}</span>
+                    <span className="font-semibold text-foreground">{money(labor)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Costo de refacción:</span>
-                    <span className="font-semibold text-rose-500">-{usd(partCost)}</span>
+                    <span className="font-semibold text-rose-500">-{money(partCost)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-sm text-emerald-600 dark:text-emerald-400 pt-1 border-t border-emerald-500/20">
                     <span>Ganancia Neta:</span>
                     <span>
-                      +{usd(netProfit)} ({margin}% margen)
+                      +{money(netProfit)} ({margin}% margen)
                     </span>
                   </div>
                 </div>
@@ -1239,17 +1246,17 @@ function RepairDetail() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total orden:</span>
                 <span className="font-semibold">
-                  {usd(Number(o.total_usd))} / {formatNIO(Number(o.total_usd) * rate)}
+                  {money(Number(o.total_usd))}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Anticipo pagado:</span>
-                <span className="font-semibold text-emerald-600">{usd(Number(o.paid_usd))}</span>
+                <span className="font-semibold text-emerald-600">{money(Number(o.paid_usd))}</span>
               </div>
               <div className="flex justify-between font-bold text-sm pt-1.5 border-t">
                 <span>Saldo por cobrar:</span>
                 <span className={balance > 0 ? "text-amber-500" : "text-emerald-500"}>
-                  {usd(balance)} ({formatNIO(balance * rate)})
+                  {money(balance)}
                 </span>
               </div>
             </div>
@@ -1264,7 +1271,7 @@ function RepairDetail() {
                   <SelectContent>
                     <SelectItem value="cash_usd">Efectivo USD (${balance.toFixed(2)})</SelectItem>
                     <SelectItem value="cash_nio">
-                      Efectivo Córdobas (C$ {(balance * rate).toFixed(2)})
+                      Efectivo Córdobas (C$ {(currency === "NIO" ? repairDisplayAmount(o, balance) : balance * rate).toFixed(2)})
                     </SelectItem>
                     <SelectItem value="card">Tarjeta de débito/crédito</SelectItem>
                     <SelectItem value="transfer">Transferencia bancaria</SelectItem>
@@ -1294,9 +1301,9 @@ function RepairDetail() {
               onClick={async () => {
                 if (balance > 0) {
                   const isCash = deliverMethod === "cash_usd" || deliverMethod === "cash_nio";
-                  const cur = deliverMethod === "cash_nio" ? "NIO" : "USD";
+                  const cur = deliverMethod === "cash_nio" ? "NIO" : deliverMethod === "cash_usd" ? "USD" : currency;
                   const amt =
-                    deliverMethod === "cash_nio" ? Math.round(balance * rate * 100) / 100 : balance;
+                    cur === "NIO" ? (currency === "NIO" ? repairDisplayAmount(o, balance) : Math.round(balance * rate * 100) / 100) : balance;
                   const effectiveMethod = !openCashSession && isCash ? "transfer" : deliverMethod;
 
                   try {
