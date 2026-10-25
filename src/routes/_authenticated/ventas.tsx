@@ -340,14 +340,13 @@ function SaleDetailDialog({
     if (!phone) return;
     const msg = buildSaleWhatsAppMessage({
       saleNumber: sale.sale_number,
-      customerName: sale.customer_name,
       storeName: legalName,
       items: (sale.sale_items ?? []).map((l) => ({
-        name: l.product_name,
+        name: l.name,
         quantity: Number(l.quantity),
-        total: Number(l.total_price_nio ?? l.unit_price_nio * l.quantity),
+        total: Number(l.line_total_usd) * Number(sale.exchange_rate || 1),
       })),
-      totalNio: Number(sale.total_nio),
+      totalNio: Number(sale.total_usd) * Number(sale.exchange_rate || 1),
       totalUsd: Number(sale.total_usd),
     });
     await openWhatsAppWeb({ phone, text: msg });

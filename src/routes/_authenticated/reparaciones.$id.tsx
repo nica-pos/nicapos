@@ -329,12 +329,12 @@ function RepairDetail() {
               onClick={() => {
                 const text = buildRepairWhatsAppMessage({
                   order: o,
-                  customerName: data.customer.name,
+                  customerName: data.customer?.name ?? "",
                   storeName: tenant?.name,
                   balanceUsd: balance,
                   rate: rate,
                 });
-                void openWhatsAppWeb({ phone: data.customer.phone, text });
+                void openWhatsAppWeb({ phone: data.customer?.phone ?? undefined, text });
               }}
               className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
               title="Avisar al cliente por WhatsApp (Mensaje profesional)"
