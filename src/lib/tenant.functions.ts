@@ -269,7 +269,9 @@ export const adminDeleteTenant = createServerFn({ method: "POST" })
     const storage = await removeTenantStorage(supabaseAdmin, data.tenantId);
 
     // Borrado real de la tienda con cliente administrativo: los datos hijos caen en CASCADE.
-    const { error: delErr } = await supabaseAdmin.from("tenants").delete().eq("id", data.tenantId);
+    const { error: delErr } = await (supabaseAdmin as any).rpc("admin_purge_tenant", {
+      _tenant_id: data.tenantId,
+    });
     if (delErr) throw new Error(delErr.message);
 
     const deletedUserIds: string[] = [];
