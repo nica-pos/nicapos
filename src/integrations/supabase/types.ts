@@ -2759,6 +2759,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_purge_tenant: { Args: { _tenant_id: string }; Returns: undefined }
       approve_trial_request: {
         Args: {
           _owner_user_id: string
