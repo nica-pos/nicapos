@@ -1122,9 +1122,9 @@ function ReceiptDialog({
       customerName: sale.customerName,
       storeName: legalName,
       items: sale.lines.map((l) => ({
-        name: l.productName,
+        name: l.name,
         quantity: l.quantity,
-        total: l.price * l.quantity,
+        total: l.unit_price_usd * l.quantity * (sale.rate > 0 ? sale.rate : 1),
       })),
       totalNio: sale.total,
       totalUsd: sale.rate > 0 ? sale.total / sale.rate : sale.total,

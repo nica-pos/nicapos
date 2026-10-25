@@ -17,6 +17,7 @@ type DesktopAPI = {
     ok: boolean;
     error?: string;
   }>;
+  openWhatsApp?: (opts?: { phone?: string; text?: string }) => Promise<{ ok: boolean; error?: string }>;
 };
 
 declare global {

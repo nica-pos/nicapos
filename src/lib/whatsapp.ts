@@ -5,18 +5,6 @@
 
 import { isDesktopApp } from "@/lib/desktop-print";
 
-declare global {
-  interface Window {
-    nicaposDesktop?: {
-      isDesktop: true;
-      listPrinters?: () => Promise<Array<{ name: string; displayName: string; isDefault: boolean }>>;
-      print?: (opts: { deviceName?: string; silent?: boolean; copies?: number }) => Promise<{ ok: boolean; error?: string }>;
-      openCashDrawer?: (opts: { deviceName: string }) => Promise<{ ok: boolean; error?: string }>;
-      openWhatsApp?: (opts?: { phone?: string; text?: string }) => Promise<{ ok: boolean; error?: string }>;
-    };
-  }
-}
-
 /**
  * Normaliza un número telefónico para WhatsApp.
  * Si es un número nicaragüense de 8 dígitos (ej. 8888-1234), agrega el código 505.
