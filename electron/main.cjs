@@ -10,6 +10,62 @@ const path = require("path");
 // (por ejemplo https://nicapos.com) o define APP_URL antes de empaquetar.
 const APP_URL = process.env.APP_URL || "https://nicapos.lovable.app";
 
+/**
+ * Detecta si una URL corresponde a WhatsApp Web o API de WhatsApp (wa.me)
+ */
+function isWhatsAppUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== "string") return false;
+  try {
+    const u = new URL(rawUrl);
+    const host = u.hostname.toLowerCase();
+    return (
+      host === "wa.me" ||
+      host.endsWith(".wa.me") ||
+      host === "whatsapp.com" ||
+      host.endsWith(".whatsapp.com") ||
+      host === "api.whatsapp.com" ||
+      host === "web.whatsapp.com"
+    );
+  } catch {
+    return rawUrl.includes("wa.me") || rawUrl.includes("whatsapp.com");
+  }
+}
+
+/**
+ * Abre o enfoca la ventana dedicada de WhatsApp dentro de la app
+ * Convierte enlaces wa.me a la URL de envío de WhatsApp Web
+ */
+function openWhatsAppInApp(rawUrl, opts = {}) {
+  const win = getOrCreateWhatsAppWindow();
+  let targetUrl = "https://web.whatsapp.com";
+
+  if (opts.phone) {
+    const cleanPhone = String(opts.phone).replace(/\D/g, "");
+    const encodedText = encodeURIComponent(opts.text || "");
+    targetUrl = `https://web.whatsapp.com/send?phone=${cleanPhone}${encodedText ? `&text=${encodedText}` : ""}`;
+  } else if (rawUrl) {
+    try {
+      const u = new URL(rawUrl);
+      const host = u.hostname.toLowerCase();
+      if (host === "wa.me" || host.endsWith(".wa.me")) {
+        const phone = u.pathname.replace(/^\//, "").replace(/\D/g, "");
+        const text = u.searchParams.get("text") || "";
+        targetUrl = `https://web.whatsapp.com/send?phone=${phone}${text ? `&text=${encodeURIComponent(text)}` : ""}`;
+      } else {
+        targetUrl = rawUrl;
+      }
+    } catch {
+      targetUrl = rawUrl;
+    }
+  }
+
+  win.loadURL(targetUrl);
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+  return win;
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -32,10 +88,23 @@ function createWindow() {
   // Si el usuario ya tiene sesión, /auth lo redirige a su panel.
   win.loadURL(`${APP_URL.replace(/\/$/, "")}/auth`);
 
-  // Abrir enlaces externos (target=_blank) en el navegador del sistema
+  // Interceptar apertura de ventanas (target=_blank o window.open)
+  // CRÍTICO: Si es WhatsApp, se abre DENTRO de la app en la ventana persistente dedicada
   win.webContents.setWindowOpenHandler(({ url }) => {
+    if (isWhatsAppUrl(url)) {
+      openWhatsAppInApp(url);
+      return { action: "deny" };
+    }
     shell.openExternal(url);
     return { action: "deny" };
+  });
+
+  // Prevenir que un clic navegue la ventana principal a WhatsApp
+  win.webContents.on("will-navigate", (event, url) => {
+    if (isWhatsAppUrl(url)) {
+      event.preventDefault();
+      openWhatsAppInApp(url);
+    }
   });
 
   // Menú minimalista con recargar / salir / devtools
@@ -177,6 +246,16 @@ function getOrCreateWhatsAppWindow() {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
   whatsappWindow.webContents.setUserAgent(chromeUserAgent);
 
+  // Manejar apertura de ventanas desde WhatsApp Web para que no abra el navegador externo en chats
+  whatsappWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (isWhatsAppUrl(url)) {
+      whatsappWindow.loadURL(url);
+      return { action: "deny" };
+    }
+    shell.openExternal(url);
+    return { action: "deny" };
+  });
+
   whatsappWindow.loadURL("https://web.whatsapp.com");
 
   whatsappWindow.on("closed", () => {
@@ -188,23 +267,13 @@ function getOrCreateWhatsAppWindow() {
 
 ipcMain.handle("nicapos:whatsapp-open", async (_evt, opts = {}) => {
   try {
-    const win = getOrCreateWhatsAppWindow();
-    const { phone, text } = opts || {};
-    if (phone) {
-      const cleanPhone = String(phone).replace(/\D/g, "");
-      const encodedText = encodeURIComponent(text || "");
-      const url = `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
-      win.loadURL(url);
-    }
-    win.show();
-    win.focus();
+    openWhatsAppInApp(null, opts);
     return { ok: true };
   } catch (err) {
     console.error("[whatsapp] error opening window", err);
     return { ok: false, error: err?.message || String(err) };
   }
 });
-
 
 app.whenReady().then(createWindow);
 

@@ -29,34 +29,45 @@ export async function openWhatsAppWeb(opts?: { phone?: string; text?: string }):
   const cleanPhone = opts?.phone ? formatWhatsAppPhone(opts.phone) : "";
   const text = opts?.text ?? "";
 
-  // 1. Si corre en Electron nativo
+  // 1. Si corre en Electron nativo (instalador de escritorio)
   if (isDesktopApp() && window.nicaposDesktop?.openWhatsApp) {
     try {
-      await window.nicaposDesktop.openWhatsApp({
+      const res = await window.nicaposDesktop.openWhatsApp({
         phone: cleanPhone,
         text,
       });
-      return;
+      if (res && res.ok !== false) return;
     } catch (e) {
       console.warn("[whatsapp] Error abriendo ventana en Electron, usando respaldo:", e);
     }
   }
 
-  // 2. Si corre en navegador web tradicional
+  // 2. Si corre en navegador web tradicional o PWA instalada
   let url = "https://web.whatsapp.com";
   if (cleanPhone) {
     const encoded = encodeURIComponent(text);
     url = `https://web.whatsapp.com/send?phone=${cleanPhone}${encoded ? `&text=${encoded}` : ""}`;
   }
 
-  // Intentamos abrir en ventana auxiliar tipo popup o pestaña
-  const w = window.open(url, "nicapos_whatsapp_web", "noopener,noreferrer");
-  if (w) {
-    w.focus();
-  } else {
-    // Si el bloqueador de popups lo detiene, redirigir enlace
-    window.open(url, "_blank");
+  // Dimensiones tipo ventana de aplicación para que no navegue ni abra una pestaña completa
+  const width = Math.min(1150, Math.round(window.screen.width * 0.9));
+  const height = Math.min(850, Math.round(window.screen.height * 0.88));
+  const left = Math.max(0, Math.round((window.screen.width - width) / 2));
+  const top = Math.max(0, Math.round((window.screen.height - height) / 2));
+  const windowFeatures = `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes,status=no,toolbar=no,menubar=no,location=no`;
+
+  try {
+    const w = window.open(url, "nicapos_whatsapp_web", windowFeatures);
+    if (w) {
+      w.focus();
+      return;
+    }
+  } catch (err) {
+    console.warn("[whatsapp] Fallo al abrir popup:", err);
   }
+
+  // Respaldo si los popups están bloqueados
+  window.open(url, "_blank");
 }
 
 /**

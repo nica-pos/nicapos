@@ -76,6 +76,7 @@ import {
   printRepairClaimTicket,
   type RepairTicketData,
 } from "@/components/app/RepairClaimTicket";
+import { openWhatsAppWeb } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/_authenticated/reparaciones")({
   head: () => ({
@@ -534,23 +535,24 @@ function RepairsPage() {
                       </div>
                       {cust?.phone && (
                         <div className="flex items-center gap-1">
-                          <a
-                            href={`https://wa.me/${cust.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                              buildRepairWhatsAppMessage({
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const text = buildRepairWhatsAppMessage({
                                 order: o,
                                 customerName: cust.name,
                                 storeName: tenant?.name,
                                 balanceUsd: balanceUsd,
                                 rate: rate,
-                              }),
-                            )}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1 rounded hover:bg-muted text-emerald-600 dark:text-emerald-400"
+                              });
+                              void openWhatsAppWeb({ phone: cust.phone, text });
+                            }}
+                            className="p-1 rounded hover:bg-muted text-emerald-600 dark:text-emerald-400 cursor-pointer"
                             title="Avisar al cliente por WhatsApp (Mensaje profesional)"
                           >
                             <MessageSquare className="h-4 w-4" />
-                          </a>
+                          </button>
                           <a
                             href={`tel:${cust.phone}`}
                             className="p-1 rounded hover:bg-muted text-primary"
@@ -677,27 +679,24 @@ function RepairsPage() {
                           </Button>
                           {cust?.phone && (
                             <Button
+                              type="button"
                               variant="outline"
                               size="sm"
                               className="text-xs text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 shrink-0 px-2.5"
-                              asChild
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const text = buildRepairWhatsAppMessage({
+                                  order: o,
+                                  customerName: cust.name,
+                                  storeName: tenant?.name,
+                                  balanceUsd: balanceUsd,
+                                  rate: rate,
+                                });
+                                void openWhatsAppWeb({ phone: cust.phone, text });
+                              }}
                               title="Avisar al cliente por WhatsApp"
                             >
-                              <a
-                                href={`https://wa.me/${cust.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                                  buildRepairWhatsAppMessage({
-                                    order: o,
-                                    customerName: cust.name,
-                                    storeName: tenant?.name,
-                                    balanceUsd: balanceUsd,
-                                    rate: rate,
-                                  }),
-                                )}`}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                <MessageSquare className="h-3.5 w-3.5 mr-1" /> WhatsApp
-                              </a>
+                              <MessageSquare className="h-3.5 w-3.5 mr-1" /> WhatsApp
                             </Button>
                           )}
                           {isAdmin && (
@@ -992,18 +991,23 @@ function FailRepairDialog({
                 </div>
               </div>
               <Button
+                type="button"
                 size="sm"
                 variant="outline"
-                asChild
                 className="text-emerald-700 dark:text-emerald-300 border-emerald-500/30 shrink-0"
+                onClick={() => {
+                  const text = buildRepairWhatsAppMessage({
+                    order: { ...order, cancel_reason: reason.trim() },
+                    customerName: customer?.name,
+                    storeName: storeName,
+                  });
+                  void openWhatsAppWeb({
+                    phone: customer.phone,
+                    text,
+                  });
+                }}
               >
-                <a
-                  href={`https://wa.me/${customer.phone.replace(/\D/g, "")}?text=${whatsappText}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Enviar WhatsApp
-                </a>
+                Enviar WhatsApp
               </Button>
             </div>
           )}

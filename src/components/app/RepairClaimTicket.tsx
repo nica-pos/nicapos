@@ -17,6 +17,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { repairNumber } from "@/hooks/use-repairs";
+import { openWhatsAppWeb } from "@/lib/whatsapp";
 
 export interface RepairTicketData {
   storeName: string;
@@ -445,10 +446,6 @@ export function OrderCreatedSuccessDialog({
   if (!ticketData) return null;
 
   const cleanPhone = phone?.replace(/\D/g, "");
-  const waUrl =
-    cleanPhone && whatsappMessage
-      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessage)}`
-      : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -489,17 +486,17 @@ export function OrderCreatedSuccessDialog({
               <Printer className="h-5 w-5" /> Imprimir Ticket / Factura de Reclamo
             </Button>
 
-            {waUrl ? (
+            {cleanPhone && whatsappMessage ? (
               <Button
                 type="button"
                 size="lg"
                 variant="outline"
                 className="w-full gap-2 border-emerald-500/50 hover:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold"
-                asChild
+                onClick={() => {
+                  void openWhatsAppWeb({ phone: cleanPhone, text: whatsappMessage });
+                }}
               >
-                <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                  <MessageSquare className="h-5 w-5 text-emerald-500" /> Enviar Ticket por WhatsApp
-                </a>
+                <MessageSquare className="h-5 w-5 text-emerald-500" /> Enviar Ticket por WhatsApp
               </Button>
             ) : (
               <div className="text-[11px] text-center text-muted-foreground">

@@ -526,26 +526,22 @@ function RepairDetail() {
 
             {data.customer?.phone && (
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 className="text-xs text-emerald-700 dark:text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 shrink-0"
-                asChild
+                onClick={() => {
+                  const text = buildRepairWhatsAppMessage({
+                    order: o,
+                    customerName: data.customer?.name,
+                    storeName: tenant?.name,
+                    balanceUsd: balance,
+                    rate: rate,
+                  });
+                  void openWhatsAppWeb({ phone: data.customer?.phone, text });
+                }}
               >
-                <a
-                  href={`https://wa.me/${data.customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                    buildRepairWhatsAppMessage({
-                      order: o,
-                      customerName: data.customer.name,
-                      storeName: tenant?.name,
-                      balanceUsd: balance,
-                      rate: rate,
-                    }),
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Enviar explicación por WhatsApp
-                </a>
+                <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Enviar explicación por WhatsApp
               </Button>
             )}
           </CardContent>
@@ -1444,26 +1440,22 @@ function RepairDetail() {
                   </div>
                 </div>
                 <Button
+                  type="button"
                   size="sm"
                   variant="outline"
-                  asChild
                   className="text-emerald-700 dark:text-emerald-300 border-emerald-500/30 shrink-0"
+                  onClick={() => {
+                    const text = buildRepairWhatsAppMessage({
+                      order: { ...o, cancel_reason: cancelReason.trim() },
+                      customerName: data.customer?.name,
+                      storeName: tenant?.name,
+                      balanceUsd: balance,
+                      rate: rate,
+                    });
+                    void openWhatsAppWeb({ phone: data.customer?.phone, text });
+                  }}
                 >
-                  <a
-                    href={`https://wa.me/${data.customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                      buildRepairWhatsAppMessage({
-                        order: { ...o, cancel_reason: cancelReason.trim() },
-                        customerName: data.customer.name,
-                        storeName: tenant?.name,
-                        balanceUsd: balance,
-                        rate: rate,
-                      }),
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Enviar WhatsApp
-                  </a>
+                  Enviar WhatsApp
                 </Button>
               </div>
             )}
