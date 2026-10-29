@@ -25,7 +25,7 @@ export function formatWhatsAppPhone(rawPhone: string): string {
  *   con sesión persistente.
  * - En el navegador web: abre una pestaña o ventana con web.whatsapp.com.
  */
-export async function openWhatsAppWeb(opts?: { phone?: string; text?: string }): Promise<void> {
+export async function openWhatsAppWeb(opts?: { phone?: string | null; text?: string }): Promise<void> {
   const cleanPhone = opts?.phone ? formatWhatsAppPhone(opts.phone) : "";
   const text = opts?.text ?? "";
 
