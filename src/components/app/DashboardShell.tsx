@@ -28,7 +28,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { BranchSelector } from "@/components/app/BranchSelector";
-import { WhatsAppQuickModal } from "@/components/app/WhatsAppQuickModal";
+import { WhatsAppSidePanel } from "@/components/app/WhatsAppSidePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -419,7 +419,21 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <WhatsAppQuickModal open={waOpen} onOpenChange={setWaOpen} />
+      {/* Pestaña flotante lateral derecha de WhatsApp */}
+      <button
+        type="button"
+        onClick={() => setWaOpen(true)}
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-40 hidden sm:flex items-center gap-1 rounded-l-xl border-y border-l border-emerald-500/40 bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-3 shadow-xl transition-all duration-200 hover:-translate-x-1 cursor-pointer group"
+        title="Abrir pestaña lateral de WhatsApp"
+        aria-label="Abrir pestaña lateral de WhatsApp"
+      >
+        <MessageSquare className="h-4 w-4 shrink-0" />
+        <span className="text-[10px] font-bold tracking-wider uppercase [writing-mode:vertical-lr] rotate-180">
+          WhatsApp
+        </span>
+      </button>
+
+      <WhatsAppSidePanel open={waOpen} onOpenChange={setWaOpen} />
     </div>
   );
 }
