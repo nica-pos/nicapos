@@ -35,6 +35,10 @@ const MESSAGE_MAP: Array<[RegExp, string]> = [
     "Sin conexión. Revisa tu internet e inténtalo de nuevo.",
   ],
   [/jwt|token/i, "Tu sesión expiró. Vuelve a iniciar sesión."],
+  [
+    /auth session or user missing|auth session missing|session missing|invalid token/i,
+    "Tu sesión ha expirado o no es válida. Por favor, vuelve a iniciar sesión.",
+  ],
 ];
 
 const GENERIC = "Ocurrió un error inesperado. Inténtalo de nuevo.";
