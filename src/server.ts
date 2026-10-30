@@ -44,9 +44,31 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+const PUBLIC_SUPABASE_URL = "https://hhbcetordirxhkrzybjv.supabase.co";
+const PUBLIC_SUPABASE_PUBLISHABLE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoYmNldG9yZGlyeGhrcnp5Ymp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5OTM2MzAsImV4cCI6MjA5OTU2OTYzMH0.NC8R6UUD0rLfEYlEKz7PmJPkIKocGzwI0F3IH3VK-jo";
+
+function hydrateServerEnv(env: unknown) {
+  if (typeof process === "undefined" || !process.env) return;
+  if (env && typeof env === "object") {
+    for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+      if (typeof value === "string" && value && !process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  }
+  process.env.SUPABASE_URL ||= PUBLIC_SUPABASE_URL;
+  process.env.VITE_SUPABASE_URL ||= PUBLIC_SUPABASE_URL;
+  process.env.SUPABASE_PUBLISHABLE_KEY ||= PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||= PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+}
+
+hydrateServerEnv(undefined);
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      hydrateServerEnv(env);
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
@@ -59,3 +81,4 @@ export default {
     }
   },
 };
+

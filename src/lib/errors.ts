@@ -37,7 +37,7 @@ const MESSAGE_MAP: Array<[RegExp, string]> = [
   [/jwt|token/i, "Tu sesión expiró. Vuelve a iniciar sesión."],
   [
     /auth session or user missing|auth session missing|invalid token response/i,
-    "No se pudo conectar con el servidor de autenticación de Supabase. Revisa las variables de entorno en Cloudflare/Lovable.",
+    "Error al intentar iniciar sesión. Inténtalo de nuevo.",
   ],
 ];
 
