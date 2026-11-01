@@ -13,8 +13,6 @@ import { usePlans, setActiveTenantId, useMyMemberships } from "@/hooks/use-tenan
 import { requestTrialForCurrentUser } from "@/lib/trial-requests.functions";
 import { cn } from "@/lib/utils";
 
-const TRIAL_OPTION_ID = "__trial__";
-
 const PLAN_META: Record<string, { description: string; features: string[]; popular?: boolean }> = {
   basico: {
     description: "Ideal para tiendas de un solo mostrador.",
@@ -336,7 +334,7 @@ function OnboardingPage() {
               onClick={() => createTenant.mutate()}
             >
               {createTenant.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Crear tienda
+              {isTrialOption ? "Solicitar prueba gratis" : "Crear tienda"}
             </Button>
           </CardContent>
         </Card>
