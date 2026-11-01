@@ -60,7 +60,7 @@ function VerificacionPendientePage() {
               className="flex-1"
               onClick={async () => {
                 await supabase.auth.signOut();
-                navigate({ to: "/auth" });
+                navigate({ to: "/auth", replace: true });
               }}
             >
               <LogOut className="mr-2 h-4 w-4" /> Salir
