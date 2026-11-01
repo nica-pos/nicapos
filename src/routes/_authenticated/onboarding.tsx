@@ -79,10 +79,13 @@ function OnboardingPage() {
   const [name, setName] = useState("");
   const [ruc, setRuc] = useState("");
   const [planId, setPlanId] = useState<string | null>(null);
+  const [basicoMode, setBasicoMode] = useState<"trial" | "paid">("trial");
 
-  const isTrialOption = planId === TRIAL_OPTION_ID;
   const selectedPlan = (plans ?? []).find((p) => p.id === planId);
-  const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0;
+  const isBasicoPlan = selectedPlan?.slug === "basico";
+  // La prueba gratis de 7 días aplica solo al plan Básico; el resto siempre cobra.
+  const isTrialOption = isBasicoPlan && basicoMode === "trial";
+  const isPaidPlan = !!selectedPlan && Number(selectedPlan.price_usd) > 0 && !isTrialOption;
 
   const requestTrial = useServerFn(requestTrialForCurrentUser);
 
