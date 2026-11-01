@@ -30,10 +30,20 @@ function TenantStatusGate() {
   const { tenant, isLoading } = useActiveTenant();
   const { data: isSuper } = useIsSuperadmin();
 
+  const path = location.pathname;
+  const exempt = EXEMPT_PATHS.some((p) => path === p || path.startsWith(p + "/"));
+  const blockedStatus = (() => {
+    if (isLoading || !tenant || isSuper || exempt) return false;
+    const st = tenant.status as string;
+    const te = tenant.trial_ends_at ? new Date(tenant.trial_ends_at).getTime() : null;
+    return (
+      ["pending_trial_approval", "pending_payment", "pending_verification", "cancelled", "suspended"].includes(st) ||
+      (st === "trial" && te !== null && te < Date.now())
+    );
+  })();
+
   useEffect(() => {
-    if (isLoading || !tenant || isSuper) return;
-    const path = location.pathname;
-    if (EXEMPT_PATHS.some((p) => path === p || path.startsWith(p + "/"))) return;
+    if (isLoading || !tenant || isSuper || exempt) return;
 
     const status = tenant.status as string;
     const trialEnds = tenant.trial_ends_at ? new Date(tenant.trial_ends_at).getTime() : null;
@@ -48,8 +58,10 @@ function TenantStatusGate() {
     } else if (status === "cancelled" || status === "suspended") {
       navigate({ to: "/prueba-rechazada", replace: true });
     }
-  }, [tenant, isLoading, isSuper, location.pathname, navigate]);
+  }, [tenant, isLoading, isSuper, exempt, navigate]);
 
+  // No renderizar el panel mientras se redirige (evita cargas y bucles).
+  if (blockedStatus) return null;
   return <Outlet />;
 }
 

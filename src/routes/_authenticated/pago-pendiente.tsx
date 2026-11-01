@@ -153,7 +153,7 @@ function PagoPendientePage() {
             size="sm"
             onClick={async () => {
               await supabase.auth.signOut();
-              navigate({ to: "/auth" });
+              navigate({ to: "/auth", replace: true });
             }}
           >
             <LogOut className="mr-2 h-4 w-4" /> Cerrar sesión

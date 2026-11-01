@@ -77,7 +77,7 @@ function AuthPage() {
     // Si ya tiene sesión activa, redirigir al panel
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user) {
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/dashboard", replace: true });
       }
     });
 
@@ -85,7 +85,7 @@ function AuthPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") {
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/dashboard", replace: true });
       }
     });
 
@@ -116,7 +116,7 @@ function AuthPage() {
         password,
       });
       if (error) return setError(getFriendlyErrorMessage(error));
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/dashboard", replace: true });
     } catch (err) {
       setError(getFriendlyErrorMessage(err));
     } finally {
@@ -140,7 +140,7 @@ function AuthPage() {
       if (error) return setError(getFriendlyErrorMessage(error));
       if (data?.session) {
         // Confirmación de email automática en Supabase -> entra directamente al panel
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/dashboard", replace: true });
       } else {
         setMessage(
           "¡Cuenta creada con éxito! Revisa tu correo electrónico para confirmar tu cuenta y poder iniciar sesión.",
