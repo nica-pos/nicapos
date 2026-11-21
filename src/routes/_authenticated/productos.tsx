@@ -39,10 +39,18 @@ import { formatUSD, formatNIO, useLatestRate } from "@/hooks/use-fiscal";
 import { useProductImage, uploadProductImage, deleteProductImage } from "@/hooks/use-product-image";
 import { useActiveTenant } from "@/hooks/use-tenant";
 import { ImagePlus, X } from "lucide-react";
+import { formatProductPrice, productCurrency, productPriceAmount, productPriceFields } from "@/lib/product-currency";
 
 export const Route = createFileRoute("/_authenticated/productos")({
   component: ProductsPage,
-  head: () => ({ meta: [{ title: "Productos — Nica-POS" }] }),
+  head: () => ({ meta: [
+    { title: "Productos — Nica-POS" },
+    { name: "description", content: "Catálogo de productos, existencias y precios en córdobas o dólares de Nica-POS." },
+    { property: "og:title", content: "Productos — Nica-POS" },
+    { property: "og:description", content: "Gestiona productos y sus precios en la moneda original." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 const emptyForm = {
@@ -72,6 +80,8 @@ function ProductsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [priceCurrency, setPriceCurrency] = useState<"USD" | "NIO">("USD");
+  const [savedPriceRate, setSavedPriceRate] = useState<number | null>(null);
+  const priceRate = savedPriceRate ?? rate;
   const [newCategory, setNewCategory] = useState("");
 
   const [addingCategory, setAddingCategory] = useState(false);
@@ -104,13 +114,14 @@ function ProductsPage() {
   function openNew() {
     setForm(emptyForm);
     setPriceCurrency("USD");
+    setSavedPriceRate(null);
     setOpen(true);
   }
 
   function openEdit(p: Product) {
-    const cur = ((p as any).price_currency === "NIO" ? "NIO" : "USD") as "USD" | "NIO";
-    const displayPrice =
-      cur === "NIO" && rate > 0 ? (Number(p.price_usd) * rate).toFixed(2) : String(p.price_usd);
+    const cur = productCurrency(p);
+    const displayPrice = String(productPriceAmount(p, rate));
+    setSavedPriceRate(cur === "NIO" ? p.price_exchange_rate : null);
     setForm({
       id: p.id,
       name: p.name,
@@ -123,7 +134,7 @@ function ProductsPage() {
       min_stock: String(p.min_stock),
       is_tax_exempt: p.is_tax_exempt,
       is_combo: p.is_combo,
-      image_url: (p as any).image_url ?? "",
+      image_url: p.image_url ?? "",
     });
     setPriceCurrency(cur);
     setOpen(true);
@@ -135,30 +146,21 @@ function ProductsPage() {
       return;
     }
     const rawPrice = Number(form.price_usd) || 0;
-    let priceInUsd = rawPrice;
-    if (priceCurrency === "NIO") {
-      if (rate <= 0) {
-        toast.error("Ingresá el tipo de cambio antes de guardar precios en córdobas");
-        return;
-      }
-      priceInUsd = rawPrice / rate;
-    }
     try {
       await saveProduct.mutateAsync({
-        id: form.id || undefined,
+        ...(form.id ? { id: form.id } : {}),
         name: form.name.trim(),
         barcode: form.barcode.trim() || null,
         category: form.category.trim() || null,
         brand: form.brand.trim() || null,
         model: form.model.trim() || null,
-        price_usd: Number(priceInUsd.toFixed(4)),
-        price_currency: priceCurrency,
+        ...productPriceFields(rawPrice, priceCurrency, priceRate),
         stock: Number(form.stock) || 0,
         min_stock: Number(form.min_stock) || 0,
         is_tax_exempt: form.is_tax_exempt,
         is_combo: form.is_combo,
         image_url: form.image_url || null,
-      } as any);
+      });
       toast.success("Producto guardado");
       setOpen(false);
     } catch (e) {
@@ -194,7 +196,7 @@ function ProductsPage() {
           <CardHeader>
             <CardTitle>Inventario ({filtered.length})</CardTitle>
             <CardDescription>
-              Precios en dólares (base). El IVA se calcula en la venta.
+              El IVA se calcula en la venta.
             </CardDescription>
             <div className="relative pt-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -236,7 +238,7 @@ function ProductsPage() {
                       <TableCell className="text-muted-foreground">
                         {[p.category, p.brand].filter(Boolean).join(" · ") || "—"}
                       </TableCell>
-                      <TableCell className="text-right">{formatUSD(Number(p.price_usd))}</TableCell>
+                      <TableCell className="text-right">{formatProductPrice(p, rate)}</TableCell>
                       <TableCell className="text-right">{Number(p.stock)}</TableCell>
                       <TableCell>
                         {p.is_tax_exempt ? (
@@ -379,8 +381,8 @@ function ProductsPage() {
                     onValueChange={(v) => {
                       const next = v as "USD" | "NIO";
                       const cur = Number(form.price_usd) || 0;
-                      if (cur > 0 && rate > 0 && next !== priceCurrency) {
-                        const converted = next === "NIO" ? cur * rate : cur / rate;
+                      if (cur > 0 && priceRate > 0 && next !== priceCurrency) {
+                        const converted = next === "NIO" ? cur * priceRate : cur / priceRate;
                         setForm({ ...form, price_usd: converted.toFixed(2) });
                       }
                       setPriceCurrency(next);
@@ -405,11 +407,11 @@ function ProductsPage() {
                 </div>
                 {(() => {
                   const v = Number(form.price_usd) || 0;
-                  if (v <= 0 || rate <= 0) return null;
-                  const equiv = priceCurrency === "USD" ? formatNIO(v * rate) : formatUSD(v / rate);
+                  if (v <= 0 || priceRate <= 0) return null;
+                  const equiv = priceCurrency === "USD" ? formatNIO(v * priceRate) : formatUSD(v / priceRate);
                   return (
                     <p className="text-xs text-muted-foreground">
-                      Equivale a {equiv} (T/C C${rate.toFixed(2)})
+                      Equivale a {equiv} (T/C C${priceRate.toFixed(2)})
                     </p>
                   );
                 })()}

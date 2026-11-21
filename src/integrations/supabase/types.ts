@@ -1107,7 +1107,9 @@ export type Database = {
           model: string | null
           model_id: string | null
           name: string
+          price_amount: number | null
           price_currency: string
+          price_exchange_rate: number | null
           price_usd: number
           sku: string | null
           stock: number
@@ -1131,7 +1133,9 @@ export type Database = {
           model?: string | null
           model_id?: string | null
           name: string
+          price_amount?: number | null
           price_currency?: string
+          price_exchange_rate?: number | null
           price_usd?: number
           sku?: string | null
           stock?: number
@@ -1155,7 +1159,9 @@ export type Database = {
           model?: string | null
           model_id?: string | null
           name?: string
+          price_amount?: number | null
           price_currency?: string
+          price_exchange_rate?: number | null
           price_usd?: number
           sku?: string | null
           stock?: number

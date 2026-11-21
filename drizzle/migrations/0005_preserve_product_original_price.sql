@@ -1,0 +1,5 @@
+ALTER TABLE public.products ADD COLUMN price_amount numeric, ADD COLUMN price_exchange_rate numeric CHECK (price_exchange_rate > 0);
+UPDATE public.products p SET price_exchange_rate = r.rate, price_amount = round(p.price_usd * r.rate, 2) FROM LATERAL (SELECT 1) dummy, public.exchange_rates r WHERE p.price_currency = 'NIO' AND r.tenant_id = p.tenant_id AND r.id = (SELECT e.id FROM public.exchange_rates e WHERE e.tenant_id = p.tenant_id AND e.rate > 0 ORDER BY (e.created_at <= p.updated_at) DESC, e.effective_date DESC, e.created_at DESC LIMIT 1);
+UPDATE public.products SET price_amount = price_usd, price_exchange_rate = 1 WHERE price_currency = 'USD';
+COMMENT ON COLUMN public.products.price_amount IS 'Original price in price_currency; never recomputed using a newer exchange rate.';
+COMMENT ON COLUMN public.products.price_exchange_rate IS 'NIO per USD used when saving this product price.';

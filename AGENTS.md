@@ -12,3 +12,4 @@
 <!-- LOVABLE:END -->
 
 - Repairs retain their saved currency, original customer amounts and exchange rate; use shared currency helpers at display/input boundaries while preserving USD accounting columns.
+- Product catalog prices use shared currency helpers and persist their original amount and saved exchange rate alongside the USD accounting price, so listing and editing never reprice them at a newer rate.

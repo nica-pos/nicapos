@@ -36,6 +36,13 @@
       "when": 1792967888607,
       "tag": "0004_allow_superadmin_tenant_purge",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795238637497,
+      "tag": "0005_preserve_product_original_price",
+      "breakpoints": true
     }
   ]
 }
